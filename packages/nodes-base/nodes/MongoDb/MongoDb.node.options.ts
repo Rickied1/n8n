@@ -1,6 +1,4 @@
-import {
-	INodeTypeDescription,
-} from 'n8n-workflow';
+import { INodeTypeDescription } from 'n8n-workflow';
 
 /**
  * Options to be displayed
@@ -21,6 +19,7 @@ export const nodeDescription: INodeTypeDescription = {
 		{
 			name: 'mongoDb',
 			required: true,
+			testedBy: 'mongoDBConnectionTest',
 		},
 	],
 	properties: [
@@ -28,16 +27,22 @@ export const nodeDescription: INodeTypeDescription = {
 			displayName: 'Operation',
 			name: 'operation',
 			type: 'options',
+			noDataExpression: true,
 			options: [
 				{
 					name: 'Aggregate',
 					value: 'aggregate',
-					description: 'Aggregate documents.',
+					description: 'Aggregate documents',
+				},
+				{
+					name: 'Bulk Update',
+					value: 'bulkUpdate',
+					description: 'Bulk update documents',
 				},
 				{
 					name: 'Delete',
 					value: 'delete',
-					description: 'Delete documents.',
+					description: 'Delete documents',
 				},
 				{
 					name: 'Find',
@@ -47,16 +52,15 @@ export const nodeDescription: INodeTypeDescription = {
 				{
 					name: 'Insert',
 					value: 'insert',
-					description: 'Insert documents.',
+					description: 'Insert documents',
 				},
 				{
 					name: 'Update',
 					value: 'update',
-					description: 'Update documents.',
+					description: 'Update documents',
 				},
 			],
 			default: 'find',
-			description: 'The operation to perform.',
 		},
 
 		{
@@ -104,15 +108,13 @@ export const nodeDescription: INodeTypeDescription = {
 			},
 			displayOptions: {
 				show: {
-					operation: [
-						'delete',
-					],
+					operation: ['delete'],
 				},
 			},
 			default: '{}',
 			placeholder: `{ "birth": { "$gt": "1950-01-01" } }`,
 			required: true,
-			description: 'MongoDB Delete query.',
+			description: 'MongoDB Delete query',
 		},
 
 		// ----------------------------------
@@ -136,14 +138,15 @@ export const nodeDescription: INodeTypeDescription = {
 					name: 'limit',
 					type: 'number',
 					default: 0,
-					description: 'Use limit to specify the maximum number of documents or 0 for unlimited documents.',
+					description:
+						'Use limit to specify the maximum number of documents or 0 for unlimited documents',
 				},
 				{
 					displayName: 'Skip',
 					name: 'skip',
 					type: 'number',
 					default: 0,
-					description: 'The number of documents to skip in the results set.',
+					description: 'The number of documents to skip in the results set',
 				},
 				{
 					displayName: 'Sort (JSON format)',
@@ -155,7 +158,22 @@ export const nodeDescription: INodeTypeDescription = {
 					default: '{}',
 					placeholder: '{ "field": -1 }',
 					required: true,
-					description: 'A json that defines the sort order of the result set.',
+					description: 'A JSON that defines the sort order of the result set',
+				},
+				{
+					displayName: 'Projection',
+					name: 'projection',
+					type: 'json',
+					default: '{}',
+					placeholder: '{ "field": 1 }',
+					description: 'Include a projection document to specify or restrict fields to return. <br>Use 1 to specify fields to include e.g. {"field": 1} or 0 to specify fields to exclude e.g. {"field": 0}. <br>With the exception of the _id field, you cannot combine inclusion and exclusion statements in projection documents.',
+				},
+				{
+					displayName: 'ID Fields Of Object',
+					name: 'objectIdFields',
+					type: 'string',
+					default: '',
+					description: 'Comma-separated list of fields that will be parse as Mongo ObjectId type',
 				},
 			],
 		},
@@ -168,15 +186,13 @@ export const nodeDescription: INodeTypeDescription = {
 			},
 			displayOptions: {
 				show: {
-					operation: [
-						'find',
-					],
+					operation: ['find'],
 				},
 			},
 			default: '{}',
 			placeholder: `{ "birth": { "$gt": "1950-01-01" } }`,
 			required: true,
-			description: 'MongoDB Find query.',
+			description: 'MongoDB Find query',
 		},
 
 		// ----------------------------------
@@ -188,15 +204,12 @@ export const nodeDescription: INodeTypeDescription = {
 			type: 'string',
 			displayOptions: {
 				show: {
-					operation: [
-						'insert',
-					],
+					operation: ['insert'],
 				},
 			},
 			default: '',
 			placeholder: 'name,description',
-			description:
-				'Comma separated list of the fields to be included into the new document.',
+			description: 'Comma separated list of the fields to be included into the new document',
 		},
 
 		// ----------------------------------
@@ -208,9 +221,7 @@ export const nodeDescription: INodeTypeDescription = {
 			type: 'string',
 			displayOptions: {
 				show: {
-					operation: [
-						'update',
-					],
+					operation: ['update', 'bulkUpdate'],
 				},
 			},
 			default: 'id',
@@ -224,15 +235,12 @@ export const nodeDescription: INodeTypeDescription = {
 			type: 'string',
 			displayOptions: {
 				show: {
-					operation: [
-						'update',
-					],
+					operation: ['update', 'bulkUpdate'],
 				},
 			},
 			default: '',
 			placeholder: 'name,description',
-			description:
-				'Comma separated list of the fields to be included into the new document.',
+			description: 'Comma separated list of the fields to be included into the new document',
 		},
 		{
 			displayName: 'Upsert',
@@ -240,7 +248,7 @@ export const nodeDescription: INodeTypeDescription = {
 			type: 'boolean',
 			displayOptions: {
 				show: {
-					operation: ['update'],
+					operation: ['update', 'bulkUpdate'],
 				},
 			},
 			default: false,
@@ -252,10 +260,7 @@ export const nodeDescription: INodeTypeDescription = {
 			type: 'collection',
 			displayOptions: {
 				show: {
-					operation: [
-						'update',
-						'insert',
-					],
+					operation: ['update', 'insert', 'bulkUpdate'],
 				},
 			},
 			placeholder: 'Add Option',
@@ -266,7 +271,14 @@ export const nodeDescription: INodeTypeDescription = {
 					name: 'dateFields',
 					type: 'string',
 					default: '',
-					description: 'Comma separeted list of fields that will be parse as Mongo Date type.',
+					description: 'Comma separeted list of fields that will be parse as Mongo Date type',
+				},
+				{
+					displayName: 'ID Fields Of Object',
+					name: 'objectIdFields',
+					type: 'string',
+					default: '',
+					description: 'Comma separeted list of fields that will be parse as Mongo ObjectId type',
 				},
 			],
 		},
