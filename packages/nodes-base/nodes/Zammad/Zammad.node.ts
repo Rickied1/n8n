@@ -324,7 +324,7 @@ export class Zammad implements INodeType {
 		const items = this.getInputData();
 
 		const resource = this.getNodeParameter('resource', 0) as ZammadTypes.Resource;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const operation = this.getNodeParameter('operation', 0);
 
 		let responseData;
 		const returnData: IDataObject[] = [];
@@ -406,7 +406,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/user.html#delete
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						await zammadApiRequest.call(this, 'DELETE', `/users/${id}`);
 
@@ -420,7 +420,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/user.html#show
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						responseData = await zammadApiRequest.call(this, 'GET', `/users/${id}`);
 
@@ -443,9 +443,9 @@ export class Zammad implements INodeType {
 
 						qs.query ||= ''; // otherwise triggers 500
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
-						const limit = returnAll ? 0 : this.getNodeParameter('limit', i) as number;
+						const limit = returnAll ? 0 : this.getNodeParameter('limit', i);
 
 						responseData = await zammadApiRequestAllItems.call(
 							this, 'GET', '/users/search', {}, qs, limit,
@@ -534,7 +534,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/organization.html#delete
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						await zammadApiRequest.call(this, 'DELETE', `/organizations/${id}`);
 
@@ -548,7 +548,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/organization.html#show
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						responseData = await zammadApiRequest.call(this, 'GET', `/organizations/${id}`);
 
@@ -561,9 +561,9 @@ export class Zammad implements INodeType {
 						// https://docs.zammad.org/en/latest/api/organization.html#list
 						// https://docs.zammad.org/en/latest/api/organization.html#search - returning empty always
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
-						const limit = returnAll ? 0 : this.getNodeParameter('limit', i) as number;
+						const limit = returnAll ? 0 : this.getNodeParameter('limit', i);
 
 						responseData = await zammadApiRequestAllItems.call(
 							this, 'GET', '/organizations', {}, {}, limit,
@@ -586,7 +586,7 @@ export class Zammad implements INodeType {
 						// https://docs.zammad.org/en/latest/api/group.html#create
 
 						const body: IDataObject = {
-							name: this.getNodeParameter('name', i) as string,
+							name: this.getNodeParameter('name', i),
 						};
 
 						const {
@@ -610,7 +610,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/group.html#update
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						const body: IDataObject = {};
 
@@ -638,7 +638,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/group.html#delete
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						await zammadApiRequest.call(this, 'DELETE', `/groups/${id}`);
 
@@ -652,7 +652,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/group.html#show
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						responseData = await zammadApiRequest.call(this, 'GET', `/groups/${id}`);
 
@@ -664,9 +664,9 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/group.html#list
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
-						const limit = returnAll ? 0 : this.getNodeParameter('limit', i) as number;
+						const limit = returnAll ? 0 : this.getNodeParameter('limit', i);
 
 						responseData = await zammadApiRequestAllItems.call(
 							this, 'GET', '/groups', {}, {}, limit,
@@ -690,7 +690,7 @@ export class Zammad implements INodeType {
 
 						const body = {
 							article: {},
-							title: this.getNodeParameter('title', i) as string,
+							title: this.getNodeParameter('title', i),
 							group: this.getNodeParameter('group', i) as string,
 							customer: this.getNodeParameter('customer', i) as string,
 						};
@@ -724,7 +724,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/ticket/index.html#delete
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						await zammadApiRequest.call(this, 'DELETE', `/tickets/${id}`);
 
@@ -738,7 +738,7 @@ export class Zammad implements INodeType {
 
 						// https://docs.zammad.org/en/latest/api/ticket/index.html#show
 
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						responseData = await zammadApiRequest.call(this, 'GET', `/tickets/${id}`);
 						responseData.articles = await zammadApiRequest.call(this, 'GET', `/ticket_articles/by_ticket/${id}`);
@@ -752,9 +752,9 @@ export class Zammad implements INodeType {
 						// https://docs.zammad.org/en/latest/api/ticket/index.html#list
 						// https://docs.zammad.org/en/latest/api/ticket/index.html#search - returning empty always
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
-						const limit = returnAll ? 0 : this.getNodeParameter('limit', i) as number;
+						const limit = returnAll ? 0 : this.getNodeParameter('limit', i);
 
 						responseData = await zammadApiRequestAllItems.call(
 							this, 'GET', '/tickets', {}, {}, limit,

@@ -46,7 +46,7 @@ export class MongoDb implements INodeType {
 		let returnItems = [];
 
 		const items = this.getInputData();
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const operation = this.getNodeParameter('operation', 0);
 
 		if (operation === 'aggregate') {
 			// ----------------------------------
@@ -54,7 +54,7 @@ export class MongoDb implements INodeType {
 			// ----------------------------------
 
 			try {
-				const queryParameter = JSON.parse(this.getNodeParameter('query', 0) as string);
+				const queryParameter = JSON.parse(this.getNodeParameter('query', 0));
 
 				if (queryParameter._id && typeof queryParameter._id === 'string') {
 					queryParameter._id = new ObjectID(queryParameter._id);
@@ -82,7 +82,7 @@ export class MongoDb implements INodeType {
 			try {
 				const { deletedCount } = await mdb
 					.collection(this.getNodeParameter('collection', 0) as string)
-					.deleteMany(JSON.parse(this.getNodeParameter('query', 0) as string));
+					.deleteMany(JSON.parse(this.getNodeParameter('query', 0)));
 
 				returnItems = this.helpers.returnJsonArray([{ deletedCount }]);
 			} catch (error) {
@@ -99,7 +99,7 @@ export class MongoDb implements INodeType {
 			// ----------------------------------
 
 			try {
-				const queryParameter = JSON.parse(this.getNodeParameter('query', 0) as string);
+				const queryParameter = JSON.parse(this.getNodeParameter('query', 0));
 
 				if (queryParameter._id && typeof queryParameter._id === 'string') {
 					queryParameter._id = new ObjectID(queryParameter._id);
@@ -109,7 +109,7 @@ export class MongoDb implements INodeType {
 					.collection(this.getNodeParameter('collection', 0) as string)
 					.find(queryParameter);
 
-				const options = this.getNodeParameter('options', 0) as IDataObject;
+				const options = this.getNodeParameter('options', 0);
 				const limit = options.limit as number;
 				const skip = options.skip as number;
 				const sort = options.sort && JSON.parse(options.sort as string);
@@ -143,7 +143,7 @@ export class MongoDb implements INodeType {
 					.map(f => f.trim())
 					.filter(f => !!f);
 
-				const options = this.getNodeParameter('options', 0) as IDataObject;
+				const options = this.getNodeParameter('options', 0);
 				const insertItems = getItemCopy(items, fields);
 
 				if (options.dateFields && !options.useDotNotation) {
@@ -182,7 +182,7 @@ export class MongoDb implements INodeType {
 				.map(f => f.trim())
 				.filter(f => !!f);
 
-			const options = this.getNodeParameter('options', 0) as IDataObject;
+			const options = this.getNodeParameter('options', 0);
 
 			let updateKey = this.getNodeParameter('updateKey', 0) as string;
 			updateKey = updateKey.trim();

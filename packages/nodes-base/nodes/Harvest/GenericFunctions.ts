@@ -86,8 +86,8 @@ export async function getAllResource(this: IExecuteFunctions | ILoadOptionsFunct
 
 	qs.per_page = 100;
 
-	const additionalFields = this.getNodeParameter('filters', i) as IDataObject;
-	const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+	const additionalFields = this.getNodeParameter('filters', i);
+	const returnAll = this.getNodeParameter('returnAll', i);
 
 	Object.assign(qs, additionalFields);
 

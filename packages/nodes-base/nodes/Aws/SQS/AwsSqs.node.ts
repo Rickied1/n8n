@@ -312,7 +312,7 @@ export class AwsSqs implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < items.length; i++) {
 			try {
@@ -327,7 +327,7 @@ export class AwsSqs implements INodeType {
 				const options = this.getNodeParameter('options', i, {}) as IDataObject;
 				const sendInputData = this.getNodeParameter('sendInputData', i) as boolean;
 
-				const message = sendInputData ? JSON.stringify(items[i].json) : this.getNodeParameter('message', i) as string;
+				const message = sendInputData ? JSON.stringify(items[i].json) : this.getNodeParameter('message', i);
 				params.push(`MessageBody=${message}`);
 
 				if (options.delaySeconds) {
@@ -341,7 +341,7 @@ export class AwsSqs implements INodeType {
 						params.push(`MessageDeduplicationId=${messageDeduplicationId}`);
 					}
 
-					const messageGroupId = this.getNodeParameter('messageGroupId', i) as string;
+					const messageGroupId = this.getNodeParameter('messageGroupId', i);
 					if (messageGroupId) {
 						params.push(`MessageGroupId=${messageGroupId}`);
 					}

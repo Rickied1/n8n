@@ -1034,7 +1034,7 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'GET';
-						endpoint = this.getNodeParameter('path', i) as string;
+						endpoint = this.getNodeParameter('path', i);
 
 					} else if (operation === 'upload') {
 						// ----------------------------------
@@ -1042,7 +1042,7 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'PUT';
-						endpoint = this.getNodeParameter('path', i) as string;
+						endpoint = this.getNodeParameter('path', i);
 
 						if (this.getNodeParameter('binaryDataUpload', i) === true) {
 							// Is binary file to upload
@@ -1052,7 +1052,7 @@ export class NextCloud implements INodeType {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
 							}
 
-							const propertyNameUpload = this.getNodeParameter('binaryPropertyName', i) as string;
+							const propertyNameUpload = this.getNodeParameter('binaryPropertyName', i);
 
 
 							if (item.binary[propertyNameUpload] === undefined) {
@@ -1072,7 +1072,7 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'MKCOL';
-						endpoint = this.getNodeParameter('path', i) as string;
+						endpoint = this.getNodeParameter('path', i);
 
 					} else if (operation === 'list') {
 						// ----------------------------------
@@ -1080,7 +1080,7 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'PROPFIND';
-						endpoint = this.getNodeParameter('path', i) as string;
+						endpoint = this.getNodeParameter('path', i);
 
 					}
 				}
@@ -1092,8 +1092,8 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'COPY';
-						endpoint = this.getNodeParameter('path', i) as string;
-						const toPath = this.getNodeParameter('toPath', i) as string;
+						endpoint = this.getNodeParameter('path', i);
+						const toPath = this.getNodeParameter('toPath', i);
 						headers.Destination = `${credentials.webDavUrl}/${encodeURI(toPath)}`;
 
 					} else if (operation === 'delete') {
@@ -1102,7 +1102,7 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'DELETE';
-						endpoint = this.getNodeParameter('path', i) as string;
+						endpoint = this.getNodeParameter('path', i);
 
 					} else if (operation === 'move') {
 						// ----------------------------------
@@ -1110,8 +1110,8 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'MOVE';
-						endpoint = this.getNodeParameter('path', i) as string;
-						const toPath = this.getNodeParameter('toPath', i) as string;
+						endpoint = this.getNodeParameter('path', i);
+						const toPath = this.getNodeParameter('toPath', i);
 						headers.Destination = `${credentials.webDavUrl}/${encodeURI(toPath)}`;
 
 					} else if (operation === 'share') {
@@ -1126,19 +1126,19 @@ export class NextCloud implements INodeType {
 						headers['OCS-APIRequest'] = true;
 						headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
-						const bodyParameters = this.getNodeParameter('options', i) as IDataObject;
+						const bodyParameters = this.getNodeParameter('options', i);
 
-						bodyParameters.path = this.getNodeParameter('path', i) as string;
-						bodyParameters.shareType = this.getNodeParameter('shareType', i) as number;
+						bodyParameters.path = this.getNodeParameter('path', i);
+						bodyParameters.shareType = this.getNodeParameter('shareType', i) as unknown as number;
 
 						if (bodyParameters.shareType === 0) {
 							bodyParameters.shareWith = this.getNodeParameter('user', i) as string;
 						} else if (bodyParameters.shareType === 7) {
-							bodyParameters.shareWith = this.getNodeParameter('circleId', i) as number;
+							bodyParameters.shareWith = this.getNodeParameter('circleId', i) as unknown as number;
 						} else if (bodyParameters.shareType === 4) {
-							bodyParameters.shareWith = this.getNodeParameter('email', i) as string;
+							bodyParameters.shareWith = this.getNodeParameter('email', i);
 						} else if (bodyParameters.shareType === 1) {
-							bodyParameters.shareWith = this.getNodeParameter('groupId', i) as number;
+							bodyParameters.shareWith = this.getNodeParameter('groupId', i) as unknown as number;
 						}
 
 						// @ts-ignore
@@ -1158,12 +1158,12 @@ export class NextCloud implements INodeType {
 						headers['OCS-APIRequest'] = true;
 						headers['Content-Type'] = 'application/x-www-form-urlencoded';
 
-						const userid = this.getNodeParameter('userId', i) as string;
-						const email = this.getNodeParameter('email', i) as string;
+						const userid = this.getNodeParameter('userId', i);
+						const email = this.getNodeParameter('email', i);
 
 						body = `userid=${userid}&email=${email}`;
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						if (additionalFields.displayName) {
 							body += `&displayName=${additionalFields.displayName}`;
@@ -1176,7 +1176,7 @@ export class NextCloud implements INodeType {
 
 						requestMethod = 'DELETE';
 
-						const userid = this.getNodeParameter('userId', i) as string;
+						const userid = this.getNodeParameter('userId', i);
 						endpoint = `ocs/v1.php/cloud/users/${userid}`;
 
 						headers['OCS-APIRequest'] = true;
@@ -1189,7 +1189,7 @@ export class NextCloud implements INodeType {
 
 						requestMethod = 'GET';
 
-						const userid = this.getNodeParameter('userId', i) as string;
+						const userid = this.getNodeParameter('userId', i);
 						endpoint = `ocs/v1.php/cloud/users/${userid}`;
 
 						headers['OCS-APIRequest'] = true;
@@ -1201,10 +1201,10 @@ export class NextCloud implements INodeType {
 						// ----------------------------------
 
 						requestMethod = 'GET';
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						qs = this.getNodeParameter('options', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						qs = this.getNodeParameter('options', i);
 						if (!returnAll) {
-							qs.limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = this.getNodeParameter('limit', i);
 						}
 						endpoint = `ocs/v1.php/cloud/users`;
 
@@ -1218,10 +1218,10 @@ export class NextCloud implements INodeType {
 
 						requestMethod = 'PUT';
 
-						const userid = this.getNodeParameter('userId', i) as string;
+						const userid = this.getNodeParameter('userId', i);
 						endpoint = `ocs/v1.php/cloud/users/${userid}`;
 
-						body = Object.entries((this.getNodeParameter('updateFields', i) as IDataObject).field as IDataObject).map(entry => {
+						body = Object.entries((this.getNodeParameter('updateFields', i)).field as IDataObject).map(entry => {
 							const [key, value] = entry;
 							return `${key}=${value}`;
 						}).join('&');
@@ -1277,7 +1277,7 @@ export class NextCloud implements INodeType {
 
 					items[i] = newItem;
 
-					const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+					const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
 					items[i].binary![binaryPropertyName] = await this.helpers.prepareBinaryData(responseData, endpoint);
 

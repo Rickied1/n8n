@@ -107,17 +107,17 @@ export class Tapfiliate implements INodeType {
 		const qs: IDataObject = {};
 		let responseData;
 		const returnData: IDataObject[] = [];
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'affiliate') {
 					if (operation === 'create') {
 						//https://tapfiliate.com/docs/rest/#affiliates-affiliates-collection-post
-						const firstname = this.getNodeParameter('firstname', i) as string;
-						const lastname = this.getNodeParameter('lastname', i) as string;
-						const email = this.getNodeParameter('email', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const firstname = this.getNodeParameter('firstname', i);
+						const lastname = this.getNodeParameter('lastname', i);
+						const email = this.getNodeParameter('email', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IDataObject = {
 							firstname,
 							lastname,
@@ -146,25 +146,25 @@ export class Tapfiliate implements INodeType {
 					}
 					if (operation === 'delete') {
 						//https://tapfiliate.com/docs/rest/#affiliates-affiliate-delete
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
+						const affiliateId = this.getNodeParameter('affiliateId', i);
 						responseData = await tapfiliateApiRequest.call(this, 'DELETE', `/affiliates/${affiliateId}/`);
 						returnData.push({ success: true });
 					}
 					if (operation === 'get') {
 						//https://tapfiliate.com/docs/rest/#affiliates-affiliate-get
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
+						const affiliateId = this.getNodeParameter('affiliateId', i);
 						responseData = await tapfiliateApiRequest.call(this, 'GET', `/affiliates/${affiliateId}/`);
 						returnData.push(responseData);
 					}
 					if (operation === 'getAll') {
 						//https://tapfiliate.com/docs/rest/#affiliates-affiliates-collection-get
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						Object.assign(qs, filters);
 						if (returnAll) {
 							responseData = await tapfiliateApiRequestAllItems.call(this, 'GET', `/affiliates/`, {}, qs);
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = await tapfiliateApiRequest.call(this, 'GET', `/affiliates/`, {}, qs);
 							responseData = responseData.splice(0, limit);
 						}
@@ -174,8 +174,8 @@ export class Tapfiliate implements INodeType {
 				if (resource === 'affiliateMetadata') {
 					if (operation === 'add') {
 						//https://tapfiliate.com/docs/rest/#affiliates-meta-data-key-put
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
-						const metadata = (this.getNodeParameter('metadataUi', i) as IDataObject || {}).metadataValues as IDataObject[] || [];
+						const affiliateId = this.getNodeParameter('affiliateId', i);
+						const metadata = (this.getNodeParameter('metadataUi', i) || {}).metadataValues as IDataObject[] || [];
 						if (metadata.length === 0) {
 							throw new NodeOperationError(this.getNode(), 'Metadata cannot be empty.');
 						}
@@ -186,14 +186,14 @@ export class Tapfiliate implements INodeType {
 					}
 					if (operation === 'remove') {
 						//https://tapfiliate.com/docs/rest/#affiliates-meta-data-key-delete
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
+						const affiliateId = this.getNodeParameter('affiliateId', i);
 						const key = this.getNodeParameter('key', i) as string;
 						responseData = await tapfiliateApiRequest.call(this, 'DELETE', `/affiliates/${affiliateId}/meta-data/${key}/`);
 						returnData.push({ success: true });
 					}
 					if (operation === 'update') {
 						//https://tapfiliate.com/docs/rest/#affiliates-notes-collection-get
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
+						const affiliateId = this.getNodeParameter('affiliateId', i);
 						const key = this.getNodeParameter('key', i) as string;
 						const value = this.getNodeParameter('value', i) as string;
 						responseData = await tapfiliateApiRequest.call(this, 'PUT', `/affiliates/${affiliateId}/meta-data/`, { [key]: value });
@@ -203,9 +203,9 @@ export class Tapfiliate implements INodeType {
 				if (resource === 'programAffiliate') {
 					if (operation === 'add') {
 						//https://tapfiliate.com/docs/rest/#programs-program-affiliates-collection-post
-						const programId = this.getNodeParameter('programId', i) as string;
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const programId = this.getNodeParameter('programId', i);
+						const affiliateId = this.getNodeParameter('affiliateId', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IDataObject = {
 							affiliate: {
 								id: affiliateId,
@@ -218,35 +218,35 @@ export class Tapfiliate implements INodeType {
 					}
 					if (operation === 'approve') {
 						//https://tapfiliate.com/docs/rest/#programs-approve-an-affiliate-for-a-program-put
-						const programId = this.getNodeParameter('programId', i) as string;
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
+						const programId = this.getNodeParameter('programId', i);
+						const affiliateId = this.getNodeParameter('affiliateId', i);
 						responseData = await tapfiliateApiRequest.call(this, 'PUT', `/programs/${programId}/affiliates/${affiliateId}/approved/`);
 						returnData.push(responseData);
 					}
 					if (operation === 'disapprove') {
 						//https://tapfiliate.com/docs/rest/#programs-approve-an-affiliate-for-a-program-delete
-						const programId = this.getNodeParameter('programId', i) as string;
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
+						const programId = this.getNodeParameter('programId', i);
+						const affiliateId = this.getNodeParameter('affiliateId', i);
 						responseData = await tapfiliateApiRequest.call(this, 'DELETE', `/programs/${programId}/affiliates/${affiliateId}/approved/`);
 						returnData.push(responseData);
 					}
 					if (operation === 'get') {
 						//https://tapfiliate.com/docs/rest/#programs-affiliate-in-program-get
-						const programId = this.getNodeParameter('programId', i) as string;
-						const affiliateId = this.getNodeParameter('affiliateId', i) as string;
+						const programId = this.getNodeParameter('programId', i);
+						const affiliateId = this.getNodeParameter('affiliateId', i);
 						responseData = await tapfiliateApiRequest.call(this, 'GET', `/programs/${programId}/affiliates/${affiliateId}/`);
 						returnData.push(responseData);
 					}
 					if (operation === 'getAll') {
 						//https://tapfiliate.com/docs/rest/#programs-program-affiliates-collection-get
-						const programId = this.getNodeParameter('programId', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const programId = this.getNodeParameter('programId', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						Object.assign(qs, filters);
 						if (returnAll) {
 							responseData = await tapfiliateApiRequestAllItems.call(this, 'GET', `/programs/${programId}/affiliates/`, {}, qs);
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = await tapfiliateApiRequest.call(this, 'GET', `/programs/${programId}/affiliates/`, {}, qs);
 							responseData = responseData.splice(0, limit);
 						}

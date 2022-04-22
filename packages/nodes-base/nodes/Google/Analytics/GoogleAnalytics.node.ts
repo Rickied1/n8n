@@ -153,8 +153,8 @@ export class GoogleAnalytics implements INodeType {
 
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		let method = '';
 		const qs: IDataObject = {};
@@ -167,13 +167,13 @@ export class GoogleAnalytics implements INodeType {
 						//https://developers.google.com/analytics/devguides/reporting/core/v4/rest/v4/reports/batchGet
 						method = 'POST';
 						endpoint = '/v4/reports:batchGet';
-						const viewId = this.getNodeParameter('viewId', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const viewId = this.getNodeParameter('viewId', i);
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						const additionalFields = this.getNodeParameter(
 							'additionalFields',
 							i,
 						) as IDataObject;
-						const simple = this.getNodeParameter('simple', i) as boolean;
+						const simple = this.getNodeParameter('simple', i);
 
 						const body: IData = {
 							viewId,
@@ -251,7 +251,7 @@ export class GoogleAnalytics implements INodeType {
 						endpoint = '/v4/userActivity:search';
 						const viewId = this.getNodeParameter('viewId', i);
 						const userId = this.getNodeParameter('userId', i);
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						const additionalFields = this.getNodeParameter(
 							'additionalFields',
 							i,
@@ -269,7 +269,7 @@ export class GoogleAnalytics implements INodeType {
 						if (returnAll) {
 							responseData = await googleApiRequestAllItems.call(this, 'sessions', method, endpoint, body);
 						} else {
-							body.pageSize = this.getNodeParameter('limit', 0) as number;
+							body.pageSize = this.getNodeParameter('limit', 0);
 							responseData = await googleApiRequest.call(this, method, endpoint, body);
 							responseData = responseData.sessions;
 						}

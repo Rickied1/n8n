@@ -198,8 +198,8 @@ export class Cortex implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 			try {
@@ -212,9 +212,9 @@ export class Cortex implements INodeType {
 
 						const analyzer = this.getNodeParameter('analyzer', i) as string;
 
-						const observableType = this.getNodeParameter('observableType', i) as string;
+						const observableType = this.getNodeParameter('observableType', i);
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const tlp = this.getNodeParameter('tlp', i) as string;
 
@@ -235,7 +235,7 @@ export class Cortex implements INodeType {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
 							}
 
-							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
 							if (item.binary[binaryPropertyName] === undefined) {
 								throw new NodeOperationError(this.getNode(), `No binary data property "${binaryPropertyName}" does not exists on item!`);
@@ -301,7 +301,7 @@ export class Cortex implements INodeType {
 					//https://github.com/TheHive-Project/CortexDocs/blob/master/api/api-guide.md#get-details-1
 					if (operation === 'get') {
 
-						const jobId = this.getNodeParameter('jobId', i) as string;
+						const jobId = this.getNodeParameter('jobId', i);
 
 						responseData = await cortexApiRequest.call(
 							this,
@@ -312,7 +312,7 @@ export class Cortex implements INodeType {
 					//https://github.com/TheHive-Project/CortexDocs/blob/master/api/api-guide.md#get-details-and-report
 					if (operation === 'report') {
 
-						const jobId = this.getNodeParameter('jobId', i) as string;
+						const jobId = this.getNodeParameter('jobId', i);
 
 						responseData = await cortexApiRequest.call(
 							this,
@@ -326,7 +326,7 @@ export class Cortex implements INodeType {
 					if (operation === 'execute') {
 						const responderId = (this.getNodeParameter('responder', i) as string).split('::')[0];
 
-						const entityType = this.getNodeParameter('entityType', i) as string;
+						const entityType = this.getNodeParameter('entityType', i);
 
 						const isJSON = this.getNodeParameter('jsonObject', i) as boolean;
 						let body: IDataObject;

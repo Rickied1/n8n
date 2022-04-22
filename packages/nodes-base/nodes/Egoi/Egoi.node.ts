@@ -589,19 +589,19 @@ export class Egoi implements INodeType {
 		const returnData: IDataObject[] = [];
 		const items = this.getInputData();
 		const length = items.length as unknown as number;
-		const operation = this.getNodeParameter('operation', 0) as string;
-		const resource = this.getNodeParameter('resource', 0) as string;
+		const operation = this.getNodeParameter('operation', 0);
+		const resource = this.getNodeParameter('resource', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'contact') {
 					if (operation === 'create') {
 						const listId = this.getNodeParameter('list', i) as string;
 
-						const email = this.getNodeParameter('email', i) as string;
+						const email = this.getNodeParameter('email', i);
 
-						const resolveData = this.getNodeParameter('resolveData', i) as boolean;
+						const resolveData = this.getNodeParameter('resolveData', i);
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const body: ICreateMemberBody = {
 							base: {
@@ -643,17 +643,17 @@ export class Egoi implements INodeType {
 
 						const listId = this.getNodeParameter('list', i) as string;
 
-						const simple = this.getNodeParameter('simple', i) as boolean;
+						const simple = this.getNodeParameter('simple', i);
 
 						const by = this.getNodeParameter('by', 0) as string;
 
 						let endpoint = '';
 
 						if (by === 'id') {
-							const contactId = this.getNodeParameter('contactId', i) as string;
+							const contactId = this.getNodeParameter('contactId', i);
 							endpoint = `/lists/${listId}/contacts/${contactId}`;
 						} else {
-							const email = this.getNodeParameter('email', i) as string;
+							const email = this.getNodeParameter('email', i);
 							endpoint = `/lists/${listId}/contacts?email=${email}`;
 						}
 
@@ -681,16 +681,16 @@ export class Egoi implements INodeType {
 
 						const listId = this.getNodeParameter('list', i) as string;
 
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 
-						const simple = this.getNodeParameter('simple', i) as boolean;
+						const simple = this.getNodeParameter('simple', i);
 
 						if (returnAll) {
 
 							responseData = await egoiApiRequestAllItems.call(this, 'items', 'GET', `/lists/${listId}/contacts`, {});
 
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 
 							responseData = await egoiApiRequest.call(this, 'GET', `/lists/${listId}/contacts`, {}, { limit });
 
@@ -704,10 +704,10 @@ export class Egoi implements INodeType {
 
 					if (operation === 'update') {
 						const listId = this.getNodeParameter('list', i) as string;
-						const contactId = this.getNodeParameter('contactId', i) as string;
-						const resolveData = this.getNodeParameter('resolveData', i) as boolean;
+						const contactId = this.getNodeParameter('contactId', i);
+						const resolveData = this.getNodeParameter('resolveData', i);
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 						const body: ICreateMemberBody = {
 							base: {
 							},

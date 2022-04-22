@@ -99,17 +99,17 @@ export class CloudFirestore implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		if (resource === 'document') {
 			if (operation === 'get') {
-				const projectId = this.getNodeParameter('projectId', 0) as string;
+				const projectId = this.getNodeParameter('projectId', 0);
 				const database = this.getNodeParameter('database', 0) as string;
-				const simple = this.getNodeParameter('simple', 0) as boolean;
+				const simple = this.getNodeParameter('simple', 0);
 				const documentList = items.map((item: IDataObject, i: number) => {
 					const collection = this.getNodeParameter('collection', i) as string;
-					const documentId = this.getNodeParameter('documentId', i) as string;
+					const documentId = this.getNodeParameter('documentId', i);
 					return `projects/${projectId}/databases/${database}/documents/${collection}/${documentId}`;
 				});
 
@@ -135,9 +135,9 @@ export class CloudFirestore implements INodeType {
 					}).filter((el: IDataObject) => !!el));
 				}
 			} else if (operation === 'create') {
-				const projectId = this.getNodeParameter('projectId', 0) as string;
+				const projectId = this.getNodeParameter('projectId', 0);
 				const database = this.getNodeParameter('database', 0) as string;
-				const simple = this.getNodeParameter('simple', 0) as boolean;
+				const simple = this.getNodeParameter('simple', 0);
 
 				await Promise.all(items.map(async (item: IDataObject, i: number) => {
 					const collection = this.getNodeParameter('collection', i) as string;
@@ -164,11 +164,11 @@ export class CloudFirestore implements INodeType {
 					}
 				}));
 			} else if (operation === 'getAll') {
-				const projectId = this.getNodeParameter('projectId', 0) as string;
+				const projectId = this.getNodeParameter('projectId', 0);
 				const database = this.getNodeParameter('database', 0) as string;
 				const collection = this.getNodeParameter('collection', 0) as string;
-				const returnAll = this.getNodeParameter('returnAll', 0) as string;
-				const simple = this.getNodeParameter('simple', 0) as boolean;
+				const returnAll = this.getNodeParameter('returnAll', 0);
+				const simple = this.getNodeParameter('simple', 0);
 
 				if (returnAll) {
 					responseData = await googleApiRequestAllItems.call(
@@ -178,7 +178,7 @@ export class CloudFirestore implements INodeType {
 						`/${projectId}/databases/${database}/documents/${collection}`,
 					);
 				} else {
-					const limit = this.getNodeParameter('limit', 0) as string;
+					const limit = this.getNodeParameter('limit', 0);
 					const getAllResponse = await googleApiRequest.call(
 						this,
 						'GET',
@@ -202,10 +202,10 @@ export class CloudFirestore implements INodeType {
 				const responseData: IDataObject[] = [];
 
 				await Promise.all(items.map(async (item: IDataObject, i: number) => {
-					const projectId = this.getNodeParameter('projectId', i) as string;
+					const projectId = this.getNodeParameter('projectId', i);
 					const database = this.getNodeParameter('database', i) as string;
 					const collection = this.getNodeParameter('collection', i) as string;
-					const documentId = this.getNodeParameter('documentId', i) as string;
+					const documentId = this.getNodeParameter('documentId', i);
 
 					await googleApiRequest.call(
 						this,
@@ -219,12 +219,12 @@ export class CloudFirestore implements INodeType {
 				returnData.push.apply(returnData, responseData);
 
 			} else if (operation === 'upsert') {
-				const projectId = this.getNodeParameter('projectId', 0) as string;
+				const projectId = this.getNodeParameter('projectId', 0);
 				const database = this.getNodeParameter('database', 0) as string;
 
 				const updates = items.map((item: IDataObject, i: number) => {
 					const collection = this.getNodeParameter('collection', i) as string;
-					const updateKey = this.getNodeParameter('updateKey', i) as string;
+					const updateKey = this.getNodeParameter('updateKey', i);
 					// @ts-ignore
 					const documentId = item['json'][updateKey] as string;
 					const columns = this.getNodeParameter('columns', i) as string;
@@ -265,13 +265,13 @@ export class CloudFirestore implements INodeType {
 				returnData.push.apply(returnData, responseData);
 
 				// } else if (operation === 'update') {
-				// 	const projectId = this.getNodeParameter('projectId', 0) as string;
+				// 	const projectId = this.getNodeParameter('projectId', 0);
 				// 	const database = this.getNodeParameter('database', 0) as string;
-				// 	const simple = this.getNodeParameter('simple', 0) as boolean;
+				// 	const simple = this.getNodeParameter('simple', 0);
 
 				// 	await Promise.all(items.map(async (item: IDataObject, i: number) => {
 				// 		const collection = this.getNodeParameter('collection', i) as string;
-				// 		const updateKey = this.getNodeParameter('updateKey', i) as string;
+				// 		const updateKey = this.getNodeParameter('updateKey', i);
 				// 		// @ts-ignore
 				// 		const documentId = item['json'][updateKey] as string;
 				// 		const columns = this.getNodeParameter('columns', i) as string;
@@ -296,13 +296,13 @@ export class CloudFirestore implements INodeType {
 				// 	}));
 
 			} else if (operation === 'query') {
-				const projectId = this.getNodeParameter('projectId', 0) as string;
+				const projectId = this.getNodeParameter('projectId', 0);
 				const database = this.getNodeParameter('database', 0) as string;
-				const simple = this.getNodeParameter('simple', 0) as boolean;
+				const simple = this.getNodeParameter('simple', 0);
 
 
 				await Promise.all(items.map(async (item: IDataObject, i: number) => {
-					const query = this.getNodeParameter('query', i) as string;
+					const query = this.getNodeParameter('query', i);
 					responseData = await googleApiRequest.call(
 						this,
 						'POST',
@@ -329,9 +329,9 @@ export class CloudFirestore implements INodeType {
 			}
 		} else if (resource === 'collection') {
 			if (operation === 'getAll') {
-				const projectId = this.getNodeParameter('projectId', 0) as string;
+				const projectId = this.getNodeParameter('projectId', 0);
 				const database = this.getNodeParameter('database', 0) as string;
-				const returnAll = this.getNodeParameter('returnAll', 0) as string;
+				const returnAll = this.getNodeParameter('returnAll', 0);
 
 				if (returnAll) {
 					const getAllResponse = await googleApiRequestAllItems.call(
@@ -343,7 +343,7 @@ export class CloudFirestore implements INodeType {
 					// @ts-ignore
 					responseData = getAllResponse.map(o => ({ name: o }));
 				} else {
-					const limit = this.getNodeParameter('limit', 0) as string;
+					const limit = this.getNodeParameter('limit', 0);
 					const getAllResponse = await googleApiRequest.call(
 						this,
 						'POST',

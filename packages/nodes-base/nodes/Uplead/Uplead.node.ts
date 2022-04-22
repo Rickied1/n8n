@@ -72,15 +72,15 @@ export class Uplead implements INodeType {
 		const length = items.length as unknown as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'person') {
 					if (operation === 'enrich') {
-						const email = this.getNodeParameter('email', i) as string;
-						const firstname = this.getNodeParameter('firstname', i) as string;
-						const lastname = this.getNodeParameter('lastname', i) as string;
+						const email = this.getNodeParameter('email', i);
+						const firstname = this.getNodeParameter('firstname', i);
+						const lastname = this.getNodeParameter('lastname', i);
 						const domain = this.getNodeParameter('domain', i) as string;
 						if (email) {
 							qs.email = email;
@@ -100,7 +100,7 @@ export class Uplead implements INodeType {
 				if (resource === 'company') {
 					if (operation === 'enrich') {
 						const domain = this.getNodeParameter('domain', i) as string;
-						const company = this.getNodeParameter('company', i) as string;
+						const company = this.getNodeParameter('company', i);
 						if (domain) {
 							qs.domain = domain;
 						}

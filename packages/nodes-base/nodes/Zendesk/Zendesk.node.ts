@@ -273,14 +273,14 @@ export class Zendesk implements INodeType {
 		let responseData;
 		for (let i = 0; i < length; i++) {
 			try {
-				const resource = this.getNodeParameter('resource', 0) as string;
-				const operation = this.getNodeParameter('operation', 0) as string;
+				const resource = this.getNodeParameter('resource', 0);
+				const operation = this.getNodeParameter('operation', 0);
 				//https://developer.zendesk.com/api-reference/ticketing/introduction/
 				if (resource === 'ticket') {
 					//https://developer.zendesk.com/rest_api/docs/support/tickets
 					if (operation === 'create') {
-						const description = this.getNodeParameter('description', i) as string;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const description = this.getNodeParameter('description', i);
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 						const comment: IComment = {
 							body: description,
 						};
@@ -288,7 +288,7 @@ export class Zendesk implements INodeType {
 							comment,
 						};
 						if (jsonParameters) {
-							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i) as string;
+							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i);
 
 							if (additionalFieldsJson !== '') {
 
@@ -303,7 +303,7 @@ export class Zendesk implements INodeType {
 
 						} else {
 
-							const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+							const additionalFields = this.getNodeParameter('additionalFields', i);
 
 							if (additionalFields.type) {
 								body.type = additionalFields.type as string;
@@ -335,12 +335,12 @@ export class Zendesk implements INodeType {
 					}
 					//https://developer.zendesk.com/rest_api/docs/support/tickets#update-ticket
 					if (operation === 'update') {
-						const ticketId = this.getNodeParameter('id', i) as string;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const ticketId = this.getNodeParameter('id', i);
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 						const body: ITicket = {};
 
 						if (jsonParameters) {
-							const updateFieldsJson = this.getNodeParameter('updateFieldsJson', i) as string;
+							const updateFieldsJson = this.getNodeParameter('updateFieldsJson', i);
 
 							if (updateFieldsJson !== '') {
 
@@ -355,7 +355,7 @@ export class Zendesk implements INodeType {
 
 						} else {
 
-							const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+							const updateFields = this.getNodeParameter('updateFields', i);
 
 							if (updateFields.type) {
 								body.type = updateFields.type as string;
@@ -407,8 +407,8 @@ export class Zendesk implements INodeType {
 					//https://developer.zendesk.com/rest_api/docs/support/tickets#show-ticket
 					//https://developer.zendesk.com/api-reference/ticketing/tickets/suspended_tickets/#show-suspended-ticket
 					if (operation === 'get') {
-						const ticketType = this.getNodeParameter('ticketType', i) as string;
-						const ticketId = this.getNodeParameter('id', i) as string;
+						const ticketType = this.getNodeParameter('ticketType', i);
+						const ticketId = this.getNodeParameter('id', i);
 						const endpoint = (ticketType === 'regular') ? `/tickets/${ticketId}` : `/suspended_tickets/${ticketId}`;
 						responseData = await zendeskApiRequest.call(this, 'GET', endpoint, {});
 						responseData = responseData.ticket || responseData.suspended_ticket;
@@ -416,9 +416,9 @@ export class Zendesk implements INodeType {
 					//https://developer.zendesk.com/rest_api/docs/support/search#list-search-results
 					//https://developer.zendesk.com/api-reference/ticketing/tickets/suspended_tickets/#list-suspended-tickets
 					if (operation === 'getAll') {
-						const ticketType = this.getNodeParameter('ticketType', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const ticketType = this.getNodeParameter('ticketType', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const options = this.getNodeParameter('options', i);
 						qs.query = 'type:ticket';
 						if (options.query) {
 							qs.query += ` ${options.query}`;
@@ -441,7 +441,7 @@ export class Zendesk implements INodeType {
 						if (returnAll) {
 							responseData = await zendeskApiRequestAllItems.call(this, property, 'GET', endpoint, {}, qs);
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							qs.per_page = limit;
 							responseData = await zendeskApiRequest.call(this, 'GET', endpoint, {}, qs);
 							responseData = responseData.results || responseData.suspended_tickets;
@@ -450,15 +450,15 @@ export class Zendesk implements INodeType {
 					//https://developer.zendesk.com/rest_api/docs/support/tickets#delete-ticket
 					//https://developer.zendesk.com/api-reference/ticketing/tickets/suspended_tickets/#delete-suspended-ticket
 					if (operation === 'delete') {
-						const ticketType = this.getNodeParameter('ticketType', i) as string;
-						const ticketId = this.getNodeParameter('id', i) as string;
+						const ticketType = this.getNodeParameter('ticketType', i);
+						const ticketId = this.getNodeParameter('id', i);
 						const endpoint = (ticketType === 'regular') ? `/tickets/${ticketId}` : `/suspended_tickets/${ticketId}`;
 						responseData = await zendeskApiRequest.call(this, 'DELETE', endpoint, {});
 						responseData = { success: true };
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/tickets/suspended_tickets/#recover-suspended-ticket
 					if (operation === 'recover') {
-						const ticketId = this.getNodeParameter('id', i) as string;
+						const ticketId = this.getNodeParameter('id', i);
 						try {
 							responseData = await zendeskApiRequest.call(this, 'PUT', `/suspended_tickets/${ticketId}/recover`, {});
 							responseData = responseData.ticket;
@@ -471,17 +471,17 @@ export class Zendesk implements INodeType {
 				if (resource === 'ticketField') {
 					//https://developer.zendesk.com/rest_api/docs/support/tickets#show-ticket
 					if (operation === 'get') {
-						const ticketFieldId = this.getNodeParameter('ticketFieldId', i) as string;
+						const ticketFieldId = this.getNodeParameter('ticketFieldId', i);
 						responseData = await zendeskApiRequest.call(this, 'GET', `/ticket_fields/${ticketFieldId}`, {});
 						responseData = responseData.ticket_field;
 					}
 					//https://developer.zendesk.com/rest_api/docs/support/ticket_fields#list-ticket-fields
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						if (returnAll) {
 							responseData = await zendeskApiRequestAllItems.call(this, 'ticket_fields', 'GET', '/ticket_fields', {}, qs);
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							qs.limit = limit;
 							responseData = await zendeskApiRequestAllItems.call(this, 'ticket_fields', 'GET', '/ticket_fields', {}, qs);
 							responseData = responseData.slice(0, limit);
@@ -492,8 +492,8 @@ export class Zendesk implements INodeType {
 				if (resource === 'user') {
 					//https://developer.zendesk.com/api-reference/ticketing/users/users/#create-user
 					if (operation === 'create') {
-						const name = this.getNodeParameter('name', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const name = this.getNodeParameter('name', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const body: IDataObject = {
 							name,
@@ -517,8 +517,8 @@ export class Zendesk implements INodeType {
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/users/users/#update-user
 					if (operation === 'update') {
-						const userId = this.getNodeParameter('id', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const userId = this.getNodeParameter('id', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						const body: IDataObject = {};
 
@@ -541,21 +541,21 @@ export class Zendesk implements INodeType {
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/users/users/#show-user
 					if (operation === 'get') {
-						const userId = this.getNodeParameter('id', i) as string;
+						const userId = this.getNodeParameter('id', i);
 						responseData = await zendeskApiRequest.call(this, 'GET', `/users/${userId}`, {});
 						responseData = responseData.user;
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/users/users/#list-users
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const options = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const options = this.getNodeParameter('filters', i);
 
 						Object.assign(qs, options);
 
 						if (returnAll) {
 							responseData = await zendeskApiRequestAllItems.call(this, 'users', 'GET', `/users`, {}, qs);
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							qs.per_page = limit;
 							responseData = await zendeskApiRequest.call(this, 'GET', `/users`, {}, qs);
 							responseData = responseData.users;
@@ -563,21 +563,21 @@ export class Zendesk implements INodeType {
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/organizations/organizations/#list-organizations
 					if (operation === 'getOrganizations') {
-						const userId = this.getNodeParameter('id', i) as string;
+						const userId = this.getNodeParameter('id', i);
 						responseData = await zendeskApiRequest.call(this, 'GET', `/users/${userId}/organizations`, {});
 						responseData = responseData.organizations;
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/users/users/#search-users
 					if (operation === 'search') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const options = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const options = this.getNodeParameter('filters', i);
 
 						Object.assign(qs, options);
 
 						if (returnAll) {
 							responseData = await zendeskApiRequestAllItems.call(this, 'users', 'GET', `/users/search`, {}, qs);
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							qs.per_page = limit;
 							responseData = await zendeskApiRequest.call(this, 'GET', `/users/search`, {}, qs);
 							responseData = responseData.users;
@@ -585,13 +585,13 @@ export class Zendesk implements INodeType {
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/users/users/#delete-user
 					if (operation === 'delete') {
-						const userId = this.getNodeParameter('id', i) as string;
+						const userId = this.getNodeParameter('id', i);
 						responseData = await zendeskApiRequest.call(this, 'DELETE', `/users/${userId}`, {});
 						responseData = responseData.user;
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/users/users/#show-user-related-information
 					if (operation === 'getRelatedData') {
-						const userId = this.getNodeParameter('id', i) as string;
+						const userId = this.getNodeParameter('id', i);
 						responseData = await zendeskApiRequest.call(this, 'GET', `/users/${userId}/related`, {});
 						responseData = responseData.user_related;
 					}
@@ -600,7 +600,7 @@ export class Zendesk implements INodeType {
 				if (resource === 'organization') {
 					//https://developer.zendesk.com/api-reference/ticketing/organizations/organizations/#create-organization
 					if (operation === 'create') {
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 
 						const body: IDataObject & { name: string; organization_fields?: { [key: string]: object | string } } = {
 							name,
@@ -625,7 +625,7 @@ export class Zendesk implements INodeType {
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/organizations/organizations/#delete-organization
 					if (operation === 'delete') {
-						const organizationId = this.getNodeParameter('id', i) as string;
+						const organizationId = this.getNodeParameter('id', i);
 						await zendeskApiRequest.call(this, 'DELETE', `/organizations/${organizationId}`, {});
 						responseData = { success: true };
 					}
@@ -636,18 +636,18 @@ export class Zendesk implements INodeType {
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/organizations/organizations/#show-organization
 					if (operation === 'get') {
-						const organizationId = this.getNodeParameter('id', i) as string;
+						const organizationId = this.getNodeParameter('id', i);
 						responseData = await zendeskApiRequest.call(this, 'GET', `/organizations/${organizationId}`, {});
 						responseData = responseData.organization;
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/organizations/organizations/#list-organizations
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						if (returnAll) {
 							responseData = await zendeskApiRequestAllItems.call(this, 'organizations', 'GET', `/organizations`, {}, qs);
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							qs.per_page = limit;
 							responseData = await zendeskApiRequest.call(this, 'GET', `/organizations`, {}, qs);
 							responseData = responseData.organizations;
@@ -655,13 +655,13 @@ export class Zendesk implements INodeType {
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/organizations/organizations/#show-organizations-related-information
 					if (operation === 'getRelatedData') {
-						const organizationId = this.getNodeParameter('id', i) as string;
+						const organizationId = this.getNodeParameter('id', i);
 						responseData = await zendeskApiRequest.call(this, 'GET', `/organizations/${organizationId}/related`, {});
 						responseData = responseData.organization_related;
 					}
 					//https://developer.zendesk.com/api-reference/ticketing/organizations/organizations/#update-organization
 					if (operation === 'update') {
-						const organizationId = this.getNodeParameter('id', i) as string;
+						const organizationId = this.getNodeParameter('id', i);
 
 						const body: IDataObject & { organization_fields?: { [key: string]: object | string } } = {};
 

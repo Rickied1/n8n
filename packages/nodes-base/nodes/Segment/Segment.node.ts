@@ -99,16 +99,16 @@ export class Segment implements INodeType {
 		const length = items.length as unknown as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'group') {
 					//https://segment.com/docs/connections/sources/catalog/libraries/server/http-api/#group
 					if (operation === 'add') {
-						const userId = this.getNodeParameter('userId', i) as string;
-						const groupId = this.getNodeParameter('groupId', i) as string;
+						const userId = this.getNodeParameter('userId', i);
+						const groupId = this.getNodeParameter('groupId', i);
 						const traits = (this.getNodeParameter('traits', i) as IDataObject).traitsUi as IDataObject[];
 						const context = (this.getNodeParameter('context', i) as IDataObject).contextUi as IDataObject;
 						const integrations = (this.getNodeParameter('integrations', i) as IDataObject).integrationsUi as IDataObject;
@@ -239,7 +239,7 @@ export class Segment implements INodeType {
 				if (resource === 'identify') {
 					//https://segment.com/docs/connections/sources/catalog/libraries/server/http-api/#identify
 					if (operation === 'create') {
-						const userId = this.getNodeParameter('userId', i) as string;
+						const userId = this.getNodeParameter('userId', i);
 						const context = (this.getNodeParameter('context', i) as IDataObject).contextUi as IDataObject;
 						const traits = (this.getNodeParameter('traits', i) as IDataObject).traitsUi as IDataObject[];
 						const integrations = (this.getNodeParameter('integrations', i) as IDataObject).integrationsUi as IDataObject;
@@ -368,8 +368,8 @@ export class Segment implements INodeType {
 				if (resource === 'track') {
 					//https://segment.com/docs/connections/sources/catalog/libraries/server/http-api/#track
 					if (operation === 'event') {
-						const userId = this.getNodeParameter('userId', i) as string;
-						const event = this.getNodeParameter('event', i) as string;
+						const userId = this.getNodeParameter('userId', i);
+						const event = this.getNodeParameter('event', i);
 						const context = (this.getNodeParameter('context', i) as IDataObject).contextUi as IDataObject;
 						const integrations = (this.getNodeParameter('integrations', i) as IDataObject).integrationsUi as IDataObject;
 						const properties = (this.getNodeParameter('properties', i) as IDataObject).propertiesUi as IDataObject[];
@@ -498,8 +498,8 @@ export class Segment implements INodeType {
 					}
 					//https://segment.com/docs/connections/sources/catalog/libraries/server/http-api/#page
 					if (operation === 'page') {
-						const userId = this.getNodeParameter('userId', i) as string;
-						const name = this.getNodeParameter('name', i) as string;
+						const userId = this.getNodeParameter('userId', i);
+						const name = this.getNodeParameter('name', i);
 						const context = (this.getNodeParameter('context', i) as IDataObject).contextUi as IDataObject;
 						const integrations = (this.getNodeParameter('integrations', i) as IDataObject).integrationsUi as IDataObject;
 						const properties = (this.getNodeParameter('properties', i) as IDataObject).propertiesUi as IDataObject[];

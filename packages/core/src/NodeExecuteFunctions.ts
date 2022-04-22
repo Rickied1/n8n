@@ -1388,6 +1388,8 @@ export function getNode(node: INode): INode {
 /**
  * Returns the requested resolved (all expressions replaced) node parameters.
  *
+ * Overloads are listed in [`packages/workflow/src/Interfaces.ts`](https://github.com/n8n-io/n8n/blob/master/packages/workflow/src/Interfaces.ts)
+ *
  * @export
  * @param {Workflow} workflow
  * @param {(IRunExecutionData | null)} runExecutionData
@@ -1411,7 +1413,16 @@ export function getNodeParameter(
 	timezone: string,
 	additionalKeys: IWorkflowDataProxyAdditionalKeys,
 	fallbackValue?: any,
-): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object {
+):
+	| NodeParameterValue
+	| INodeParameters
+	| NodeParameterValue[]
+	| INodeParameters[]
+	| object
+	| string
+	| boolean
+	| number
+	| IDataObject {
 	const nodeType = workflow.nodeTypes.getByNameAndVersion(node.type, node.typeVersion);
 	if (nodeType === undefined) {
 		throw new Error(`Node type "${node.type}" is not known so can not return paramter value!`);
@@ -2133,7 +2144,7 @@ export function getExecuteFunctions(
 				normalizeItems,
 			},
 		};
-	})(workflow, runExecutionData, connectionInputData, inputData, node);
+	})(workflow, runExecutionData, connectionInputData, inputData, node) as IExecuteFunctions;
 }
 
 /**

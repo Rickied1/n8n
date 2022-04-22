@@ -83,16 +83,16 @@ export class UnleashedSoftware implements INodeType {
 
 		for (let i = 0; i < length; i++) {
 
-			const resource = this.getNodeParameter('resource', 0) as string;
-			const operation = this.getNodeParameter('operation', 0) as string;
+			const resource = this.getNodeParameter('resource', 0);
+			const operation = this.getNodeParameter('operation', 0);
 
 			//https://apidocs.unleashedsoftware.com/SalesOrders
 			if (resource === 'salesOrder') {
 
 				if (operation === 'getAll') {
 
-					const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-					const filters = this.getNodeParameter('filters', i) as IDataObject;
+					const returnAll = this.getNodeParameter('returnAll', i);
+					const filters = this.getNodeParameter('filters', i);
 
 					if (filters.startDate) {
 						filters.startDate = moment(filters.startDate as string).format('YYYY-MM-DD');
@@ -115,7 +115,7 @@ export class UnleashedSoftware implements INodeType {
 					if (returnAll) {
 						responseData = await unleashedApiRequestAllItems.call(this, 'Items', 'GET', '/SalesOrders', {}, qs);
 					} else {
-						const limit = this.getNodeParameter('limit', i) as number;
+						const limit = this.getNodeParameter('limit', i);
 						qs.pageSize = limit;
 						responseData = await unleashedApiRequest.call(this, 'GET', `/SalesOrders`, {}, qs, 1);
 						responseData = responseData.Items;
@@ -129,9 +129,9 @@ export class UnleashedSoftware implements INodeType {
 			if (resource === 'stockOnHand') {
 
 				if (operation === 'getAll') {
-					const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+					const returnAll = this.getNodeParameter('returnAll', i);
 
-					const filters = this.getNodeParameter('filters', i) as IDataObject;
+					const filters = this.getNodeParameter('filters', i);
 
 					if (filters.asAtDate) {
 						filters.asAtDate = moment(filters.asAtDate as string).format('YYYY-MM-DD');
@@ -150,7 +150,7 @@ export class UnleashedSoftware implements INodeType {
 					if (returnAll) {
 						responseData = await unleashedApiRequestAllItems.call(this, 'Items', 'GET', '/StockOnHand', {}, qs);
 					} else {
-						const limit = this.getNodeParameter('limit', i) as number;
+						const limit = this.getNodeParameter('limit', i);
 						qs.pageSize = limit;
 						responseData = await unleashedApiRequest.call(this, 'GET', `/StockOnHand`, {}, qs, 1);
 						responseData = responseData.Items;
@@ -160,7 +160,7 @@ export class UnleashedSoftware implements INodeType {
 				}
 
 				if (operation === 'get') {
-					const productId = this.getNodeParameter('productId', i) as string;
+					const productId = this.getNodeParameter('productId', i);
 					responseData = await unleashedApiRequest.call(this, 'GET', `/StockOnHand/${productId}`);
 					convertNETDates(responseData);
 				}

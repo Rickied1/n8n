@@ -287,17 +287,17 @@ export class Magento2 implements INodeType {
 		const length = (items.length as unknown) as number;
 		const timezone = this.getTimezone();
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'customer') {
 					if (operation === 'create') {
 						// https://magento.redoc.ly/2.3.7-admin/tag/customerscustomerId#operation/customerCustomerRepositoryV1SavePut
-						const email = this.getNodeParameter('email', i) as string;
-						const firstname = this.getNodeParameter('firstname', i) as string;
-						const lastname = this.getNodeParameter('lastname', i) as string;
+						const email = this.getNodeParameter('email', i);
+						const firstname = this.getNodeParameter('firstname', i);
+						const lastname = this.getNodeParameter('lastname', i);
 
 						const {
 							addresses,
@@ -351,7 +351,7 @@ export class Magento2 implements INodeType {
 
 					if (operation === 'delete') {
 						//https://magento.redoc.ly/2.3.7-admin/tag/customerscustomerId#operation/customerCustomerRepositoryV1SavePut
-						const customerId = this.getNodeParameter('customerId', i) as string;
+						const customerId = this.getNodeParameter('customerId', i);
 
 						responseData = await magentoApiRequest.call(this, 'DELETE', `/rest/default/V1/customers/${customerId}`);
 
@@ -360,24 +360,24 @@ export class Magento2 implements INodeType {
 
 					if (operation === 'get') {
 						//https://magento.redoc.ly/2.3.7-admin/tag/customerscustomerId#operation/customerCustomerRepositoryV1GetByIdGet
-						const customerId = this.getNodeParameter('customerId', i) as string;
+						const customerId = this.getNodeParameter('customerId', i);
 
 						responseData = await magentoApiRequest.call(this, 'GET', `/rest/default/V1/customers/${customerId}`);
 					}
 
 					if (operation === 'getAll') {
 						//https://magento.redoc.ly/2.3.7-admin/tag/customerssearch
-						const filterType = this.getNodeParameter('filterType', i) as string;
+						const filterType = this.getNodeParameter('filterType', i);
 						const sort = this.getNodeParameter('options.sort', i, {}) as { sort: [{ direction: string, field: string }] };
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						let qs: Search = {};
 
 						if (filterType === 'manual') {
 							const filters = this.getNodeParameter('filters', i) as { conditions: Filter[] };
-							const matchType = this.getNodeParameter('matchType', i) as string;
+							const matchType = this.getNodeParameter('matchType', i);
 							qs = getFilterQuery(Object.assign(filters, { matchType }, sort));
 						} else if (filterType === 'json') {
-							const filterJson = this.getNodeParameter('filterJson', i) as string;
+							const filterJson = this.getNodeParameter('filterJson', i);
 							if (validateJSON(filterJson) !== undefined) {
 								qs = JSON.parse(filterJson);
 							} else {
@@ -400,7 +400,7 @@ export class Magento2 implements INodeType {
 							responseData = await magentoApiRequestAllItems.call(this, 'items', 'GET', `/rest/default/V1/customers/search`, {}, qs as unknown as IDataObject);
 
 						} else {
-							const limit = this.getNodeParameter('limit', 0) as number;
+							const limit = this.getNodeParameter('limit', 0);
 							qs.search_criteria!.page_size = limit;
 							responseData = await magentoApiRequest.call(this, 'GET', `/rest/default/V1/customers/search`, {}, qs as unknown as IDataObject);
 							responseData = responseData.items;
@@ -409,10 +409,10 @@ export class Magento2 implements INodeType {
 
 					if (operation === 'update') {
 						//https://magento.redoc.ly/2.3.7-admin/tag/customerscustomerId#operation/customerCustomerRepositoryV1SavePut
-						const customerId = this.getNodeParameter('customerId', i) as string;
-						const firstName = this.getNodeParameter('firstName', i) as string;
-						const lastName = this.getNodeParameter('lastName', i) as string;
-						const email = this.getNodeParameter('email', i) as string;
+						const customerId = this.getNodeParameter('customerId', i);
+						const firstName = this.getNodeParameter('firstName', i);
+						const lastName = this.getNodeParameter('lastName', i);
+						const email = this.getNodeParameter('email', i);
 
 						const {
 							addresses,
@@ -470,7 +470,7 @@ export class Magento2 implements INodeType {
 				if (resource === 'invoice') {
 					if (operation === 'create') {
 						///https://magento.redoc.ly/2.3.7-admin/tag/orderorderIdinvoice
-						const orderId = this.getNodeParameter('orderId', i) as string;
+						const orderId = this.getNodeParameter('orderId', i);
 
 						responseData = await magentoApiRequest.call(this, 'POST', `/rest/default/V1/order/${orderId}/invoice`);
 
@@ -482,7 +482,7 @@ export class Magento2 implements INodeType {
 
 					if (operation === 'cancel') {
 						//https://magento.redoc.ly/2.3.7-admin/tag/ordersidcancel
-						const orderId = this.getNodeParameter('orderId', i) as string;
+						const orderId = this.getNodeParameter('orderId', i);
 
 						responseData = await magentoApiRequest.call(this, 'POST', `/rest/default/V1/orders/${orderId}/cancel`);
 
@@ -491,14 +491,14 @@ export class Magento2 implements INodeType {
 
 					if (operation === 'get') {
 						//https://magento.redoc.ly/2.3.7-admin/tag/ordersid#operation/salesOrderRepositoryV1GetGet
-						const orderId = this.getNodeParameter('orderId', i) as string;
+						const orderId = this.getNodeParameter('orderId', i);
 
 						responseData = await magentoApiRequest.call(this, 'GET', `/rest/default/V1/orders/${orderId}`);
 					}
 
 					if (operation === 'ship') {
 						///https://magento.redoc.ly/2.3.7-admin/tag/orderorderIdship#operation/salesShipOrderV1ExecutePost
-						const orderId = this.getNodeParameter('orderId', i) as string;
+						const orderId = this.getNodeParameter('orderId', i);
 
 						responseData = await magentoApiRequest.call(this, 'POST', `/rest/default/V1/order/${orderId}/ship`);
 
@@ -507,17 +507,17 @@ export class Magento2 implements INodeType {
 
 					if (operation === 'getAll') {
 						//https://magento.redoc.ly/2.3.7-admin/tag/orders#operation/salesOrderRepositoryV1GetListGet
-						const filterType = this.getNodeParameter('filterType', i) as string;
+						const filterType = this.getNodeParameter('filterType', i);
 						const sort = this.getNodeParameter('options.sort', i, {}) as { sort: [{ direction: string, field: string }] };
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						let qs: Search = {};
 
 						if (filterType === 'manual') {
 							const filters = this.getNodeParameter('filters', i) as { conditions: Filter[] };
-							const matchType = this.getNodeParameter('matchType', i) as string;
+							const matchType = this.getNodeParameter('matchType', i);
 							qs = getFilterQuery(Object.assign(filters, { matchType }, sort));
 						} else if (filterType === 'json') {
-							const filterJson = this.getNodeParameter('filterJson', i) as string;
+							const filterJson = this.getNodeParameter('filterJson', i);
 							if (validateJSON(filterJson) !== undefined) {
 								qs = JSON.parse(filterJson);
 							} else {
@@ -539,7 +539,7 @@ export class Magento2 implements INodeType {
 							responseData = await magentoApiRequestAllItems.call(this, 'items', 'GET', `/rest/default/V1/orders`, {}, qs as unknown as IDataObject);
 
 						} else {
-							const limit = this.getNodeParameter('limit', 0) as number;
+							const limit = this.getNodeParameter('limit', 0);
 							qs.search_criteria!.page_size = limit;
 							responseData = await magentoApiRequest.call(this, 'GET', `/rest/default/V1/orders`, {}, qs as unknown as IDataObject);
 							responseData = responseData.items;
@@ -551,8 +551,8 @@ export class Magento2 implements INodeType {
 					if (operation === 'create') {
 						// https://magento.redoc.ly/2.3.7-admin/tag/products#operation/catalogProductRepositoryV1SavePost
 						const sku = this.getNodeParameter('sku', i) as string;
-						const name = this.getNodeParameter('name', i) as string;
-						const attributeSetId = this.getNodeParameter('attributeSetId', i) as string;
+						const name = this.getNodeParameter('name', i);
+						const attributeSetId = this.getNodeParameter('attributeSetId', i);
 						const price = this.getNodeParameter('price', i) as number;
 
 						const {
@@ -600,17 +600,17 @@ export class Magento2 implements INodeType {
 
 					if (operation === 'getAll') {
 						//https://magento.redoc.ly/2.3.7-admin/tag/customerssearch
-						const filterType = this.getNodeParameter('filterType', i) as string;
+						const filterType = this.getNodeParameter('filterType', i);
 						const sort = this.getNodeParameter('options.sort', i, {}) as { sort: [{ direction: string, field: string }] };
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						let qs: Search = {};
 
 						if (filterType === 'manual') {
 							const filters = this.getNodeParameter('filters', i) as { conditions: Filter[] };
-							const matchType = this.getNodeParameter('matchType', i) as string;
+							const matchType = this.getNodeParameter('matchType', i);
 							qs = getFilterQuery(Object.assign(filters, { matchType }, sort));
 						} else if (filterType === 'json') {
-							const filterJson = this.getNodeParameter('filterJson', i) as string;
+							const filterJson = this.getNodeParameter('filterJson', i);
 							if (validateJSON(filterJson) !== undefined) {
 								qs = JSON.parse(filterJson);
 							} else {
@@ -632,7 +632,7 @@ export class Magento2 implements INodeType {
 							responseData = await magentoApiRequestAllItems.call(this, 'items', 'GET', `/rest/default/V1/products`, {}, qs as unknown as IDataObject);
 
 						} else {
-							const limit = this.getNodeParameter('limit', 0) as number;
+							const limit = this.getNodeParameter('limit', 0);
 							qs.search_criteria!.page_size = limit;
 							responseData = await magentoApiRequest.call(this, 'GET', `/rest/default/V1/products`, {}, qs as unknown as IDataObject);
 							responseData = responseData.items;

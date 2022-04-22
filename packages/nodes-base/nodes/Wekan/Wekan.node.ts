@@ -236,8 +236,8 @@ export class Wekan implements INodeType {
 		let returnAll;
 		let limit;
 
-		const operation = this.getNodeParameter('operation', 0) as string;
-		const resource = this.getNodeParameter('resource', 0) as string;
+		const operation = this.getNodeParameter('operation', 0);
+		const resource = this.getNodeParameter('resource', 0);
 
 		// For Post
 		let body: IDataObject;
@@ -264,10 +264,10 @@ export class Wekan implements INodeType {
 						requestMethod = 'POST';
 						endpoint = 'boards';
 
-						body.title = this.getNodeParameter('title', i) as string;
+						body.title = this.getNodeParameter('title', i);
 						body.owner = this.getNodeParameter('owner', i) as string;
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						Object.assign(body, additionalFields);
 
 					} else if (operation === 'delete') {
@@ -277,7 +277,7 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'DELETE';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
 
 						endpoint = `boards/${boardId}`;
 
@@ -288,7 +288,7 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
 
 						endpoint = `boards/${boardId}`;
 
@@ -301,7 +301,7 @@ export class Wekan implements INodeType {
 
 						const userId = this.getNodeParameter('IdUser', i) as string;
 
-						returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						returnAll = this.getNodeParameter('returnAll', i);
 
 						endpoint = `users/${userId}/boards`;
 
@@ -318,16 +318,16 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'POST';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const listId = this.getNodeParameter('listId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const listId = this.getNodeParameter('listId', i);
 
 						endpoint = `boards/${boardId}/lists/${listId}/cards`;
 
-						body.title = this.getNodeParameter('title', i) as string;
-						body.swimlaneId = this.getNodeParameter('swimlaneId', i) as string;
-						body.authorId = this.getNodeParameter('authorId', i) as string;
+						body.title = this.getNodeParameter('title', i);
+						body.swimlaneId = this.getNodeParameter('swimlaneId', i);
+						body.authorId = this.getNodeParameter('authorId', i);
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						Object.assign(body, additionalFields);
 
 					} else if (operation === 'delete') {
@@ -337,9 +337,9 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'DELETE';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const listId = this.getNodeParameter('listId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const listId = this.getNodeParameter('listId', i);
+						const cardId = this.getNodeParameter('cardId', i);
 
 						endpoint = `boards/${boardId}/lists/${listId}/cards/${cardId}`;
 
@@ -350,9 +350,9 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const listId = this.getNodeParameter('listId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const listId = this.getNodeParameter('listId', i);
+						const cardId = this.getNodeParameter('cardId', i);
 
 						endpoint = `boards/${boardId}/lists/${listId}/cards/${cardId}`;
 
@@ -363,18 +363,18 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
 						const fromObject = this.getNodeParameter('fromObject', i) as string;
-						returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						returnAll = this.getNodeParameter('returnAll', i);
 
 						if (fromObject === 'list') {
-							const listId = this.getNodeParameter('listId', i) as string;
+							const listId = this.getNodeParameter('listId', i);
 
 							endpoint = `boards/${boardId}/lists/${listId}/cards`;
 						}
 
 						if (fromObject === 'swimlane') {
-							const swimlaneId = this.getNodeParameter('swimlaneId', i) as string;
+							const swimlaneId = this.getNodeParameter('swimlaneId', i);
 
 							endpoint = `boards/${boardId}/swimlanes/${swimlaneId}/cards`;
 						}
@@ -386,13 +386,13 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'PUT';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const listId = this.getNodeParameter('listId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const listId = this.getNodeParameter('listId', i);
+						const cardId = this.getNodeParameter('cardId', i);
 
 						endpoint = `boards/${boardId}/lists/${listId}/cards/${cardId}`;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 						Object.assign(body, updateFields);
 
 					} else {
@@ -408,12 +408,12 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'POST';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/comments`;
 
-						body.authorId = this.getNodeParameter('authorId', i) as string;
+						body.authorId = this.getNodeParameter('authorId', i);
 						body.comment = this.getNodeParameter('comment', i) as string;
 
 					} else if (operation === 'delete') {
@@ -423,9 +423,9 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'DELETE';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const commentId = this.getNodeParameter('commentId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const commentId = this.getNodeParameter('commentId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/comments/${commentId}`;
 
@@ -436,9 +436,9 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const commentId = this.getNodeParameter('commentId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const commentId = this.getNodeParameter('commentId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/comments/${commentId}`;
 
@@ -449,8 +449,8 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/comments`;
 
@@ -467,11 +467,11 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'POST';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
 
 						endpoint = `boards/${boardId}/lists`;
 
-						body.title = this.getNodeParameter('title', i) as string;
+						body.title = this.getNodeParameter('title', i);
 
 					} else if (operation === 'delete') {
 						// ----------------------------------
@@ -480,8 +480,8 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'DELETE';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const listId = this.getNodeParameter('listId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const listId = this.getNodeParameter('listId', i);
 
 						endpoint = `boards/${boardId}/lists/${listId}`;
 
@@ -492,8 +492,8 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const listId = this.getNodeParameter('listId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const listId = this.getNodeParameter('listId', i);
 
 						endpoint = `boards/${boardId}/lists/${listId}`;
 
@@ -504,8 +504,8 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const boardId = this.getNodeParameter('boardId', i);
+						returnAll = this.getNodeParameter('returnAll', i);
 
 						endpoint = `boards/${boardId}/lists`;
 
@@ -522,12 +522,12 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'POST';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists`;
 
-						body.title = this.getNodeParameter('title', i) as string;
+						body.title = this.getNodeParameter('title', i);
 
 						body.items = this.getNodeParameter('items', i) as string[];
 
@@ -538,9 +538,9 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'DELETE';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const checklistId = this.getNodeParameter('checklistId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const checklistId = this.getNodeParameter('checklistId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists/${checklistId}`;
 
@@ -551,9 +551,9 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const checklistId = this.getNodeParameter('checklistId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const checklistId = this.getNodeParameter('checklistId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists/${checklistId}`;
 
@@ -564,9 +564,9 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						returnAll = this.getNodeParameter('returnAll', i);
 
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists`;
@@ -578,10 +578,10 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const checklistId = this.getNodeParameter('checklistId', i) as string;
-						const itemId = this.getNodeParameter('itemId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const checklistId = this.getNodeParameter('checklistId', i);
+						const itemId = this.getNodeParameter('itemId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists/${checklistId}/items/${itemId}`;
 
@@ -592,10 +592,10 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'DELETE';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const checklistId = this.getNodeParameter('checklistId', i) as string;
-						const itemId = this.getNodeParameter('itemId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const checklistId = this.getNodeParameter('checklistId', i);
+						const itemId = this.getNodeParameter('itemId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists/${checklistId}/items/${itemId}`;
 
@@ -606,14 +606,14 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'PUT';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const checklistId = this.getNodeParameter('checklistId', i) as string;
-						const itemId = this.getNodeParameter('itemId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const checklistId = this.getNodeParameter('checklistId', i);
+						const itemId = this.getNodeParameter('itemId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists/${checklistId}/items/${itemId}`;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 						Object.assign(body, updateFields);
 
 
@@ -630,10 +630,10 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'GET';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const checklistId = this.getNodeParameter('checklistId', i) as string;
-						const itemId = this.getNodeParameter('checklistItemId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const checklistId = this.getNodeParameter('checklistId', i);
+						const itemId = this.getNodeParameter('checklistItemId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists/${checklistId}/items/${itemId}`;
 
@@ -644,10 +644,10 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'DELETE';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const checklistId = this.getNodeParameter('checklistId', i) as string;
-						const itemId = this.getNodeParameter('checklistItemId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const checklistId = this.getNodeParameter('checklistId', i);
+						const itemId = this.getNodeParameter('checklistItemId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists/${checklistId}/items/${itemId}`;
 
@@ -658,21 +658,21 @@ export class Wekan implements INodeType {
 
 						requestMethod = 'PUT';
 
-						const boardId = this.getNodeParameter('boardId', i) as string;
-						const cardId = this.getNodeParameter('cardId', i) as string;
-						const checklistId = this.getNodeParameter('checklistId', i) as string;
-						const itemId = this.getNodeParameter('checklistItemId', i) as string;
+						const boardId = this.getNodeParameter('boardId', i);
+						const cardId = this.getNodeParameter('cardId', i);
+						const checklistId = this.getNodeParameter('checklistId', i);
+						const itemId = this.getNodeParameter('checklistItemId', i);
 
 						endpoint = `boards/${boardId}/cards/${cardId}/checklists/${checklistId}/items/${itemId}`;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 						Object.assign(body, updateFields);
 					}
 				}
 				let responseData = await apiRequest.call(this, requestMethod, endpoint, body, qs);
 
 				if (returnAll === false) {
-					limit = this.getNodeParameter('limit', i) as number;
+					limit = this.getNodeParameter('limit', i);
 					responseData = responseData.splice(0, limit);
 				}
 

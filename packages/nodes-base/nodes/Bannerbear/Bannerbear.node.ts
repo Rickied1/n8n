@@ -116,15 +116,15 @@ export class Bannerbear implements INodeType {
 		const length = items.length as unknown as number;
 		let responseData;
 		const qs: IDataObject = {};
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			if (resource === 'image') {
 				//https://developers.bannerbear.com/#create-an-image
 				if (operation === 'create') {
-					const templateId = this.getNodeParameter('templateId', i) as string;
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-					const modifications = (this.getNodeParameter('modificationsUi', i) as IDataObject).modificationsValues as IDataObject;
+					const templateId = this.getNodeParameter('templateId', i);
+					const additionalFields = this.getNodeParameter('additionalFields', i);
+					const modifications = (this.getNodeParameter('modificationsUi', i)).modificationsValues as IDataObject;
 					const body: IDataObject = {
 						template: templateId,
 					};
@@ -172,14 +172,14 @@ export class Bannerbear implements INodeType {
 				}
 				//https://developers.bannerbear.com/#get-a-specific-image
 				if (operation === 'get') {
-					const imageId = this.getNodeParameter('imageId', i) as string;
+					const imageId = this.getNodeParameter('imageId', i);
 					responseData = await bannerbearApiRequest.call(this, 'GET', `/images/${imageId}`);
 				}
 			}
 			if (resource === 'template') {
 				//https://developers.bannerbear.com/#get-a-specific-template
 				if (operation === 'get') {
-					const templateId = this.getNodeParameter('templateId', i) as string;
+					const templateId = this.getNodeParameter('templateId', i);
 					responseData = await bannerbearApiRequest.call(this, 'GET', `/templates/${templateId}`);
 				}
 				//https://developers.bannerbear.com/#list-templates

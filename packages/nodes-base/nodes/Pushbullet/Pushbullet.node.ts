@@ -449,8 +449,8 @@ export class Pushbullet implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'push') {
@@ -472,15 +472,15 @@ export class Pushbullet implements INodeType {
 						}
 
 						if (['note', 'link'].includes(type)) {
-							body.title = this.getNodeParameter('title', i) as string;
+							body.title = this.getNodeParameter('title', i);
 
 							if (type === 'link') {
-								body.url = this.getNodeParameter('url', i) as string;
+								body.url = this.getNodeParameter('url', i);
 							}
 						}
 
 						if (type === 'file') {
-							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
+							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0);
 
 							if (items[i].binary === undefined) {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
@@ -544,9 +544,9 @@ export class Pushbullet implements INodeType {
 					}
 
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const filters = this.getNodeParameter('filters', i);
 
 						Object.assign(qs, filters);
 
@@ -558,7 +558,7 @@ export class Pushbullet implements INodeType {
 							responseData = await pushbulletApiRequestAllItems.call(this, 'pushes', 'GET', '/pushes', {}, qs);
 
 						} else {
-							qs.limit = this.getNodeParameter('limit', 0) as number;
+							qs.limit = this.getNodeParameter('limit', 0);
 
 							responseData = await pushbulletApiRequest.call(this, 'GET', '/pushes', {}, qs);
 
@@ -567,7 +567,7 @@ export class Pushbullet implements INodeType {
 					}
 
 					if (operation === 'delete') {
-						const pushId = this.getNodeParameter('pushId', i) as string;
+						const pushId = this.getNodeParameter('pushId', i);
 
 						responseData = await pushbulletApiRequest.call(
 							this,
@@ -579,7 +579,7 @@ export class Pushbullet implements INodeType {
 					}
 
 					if (operation === 'update') {
-						const pushId = this.getNodeParameter('pushId', i) as string;
+						const pushId = this.getNodeParameter('pushId', i);
 
 						const dismissed = this.getNodeParameter('dismissed', i) as boolean;
 

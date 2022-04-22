@@ -51,9 +51,9 @@ export class N8nTrainingCustomerMessenger implements INodeType {
 
 		for (let i = 0; i < length; i++) {
 
-			const customerId = this.getNodeParameter('customerId', i) as string;
+			const customerId = this.getNodeParameter('customerId', i);
 
-			const message = this.getNodeParameter('message', i) as string;
+			const message = this.getNodeParameter('message', i);
 
 			responseData = { output: `Sent message to customer ${customerId}:  ${message}` };
 

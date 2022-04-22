@@ -134,15 +134,15 @@ export class Demio implements INodeType {
 		const length = items.length as unknown as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'event') {
 					if (operation === 'get') {
-						const id = this.getNodeParameter('eventId', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const id = this.getNodeParameter('eventId', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						if (additionalFields.date_id !== undefined) {
 							responseData = await demioApiRequest.call(this, 'GET', `/event/${id}/date/${additionalFields.date_id}`);
@@ -152,24 +152,24 @@ export class Demio implements INodeType {
 						}
 					}
 					if (operation === 'getAll') {
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const filters = this.getNodeParameter('filters', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						Object.assign(qs, filters);
 
 						responseData = await demioApiRequest.call(this, 'GET', `/events`, {}, qs);
 
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 
 					}
 					if (operation === 'register') {
-						const eventId = this.getNodeParameter('eventId', i) as string;
-						const firstName = this.getNodeParameter('firstName', i) as string;
-						const email = this.getNodeParameter('email', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const eventId = this.getNodeParameter('eventId', i);
+						const firstName = this.getNodeParameter('firstName', i);
+						const email = this.getNodeParameter('email', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const body: IDataObject = {
 							name: firstName,
@@ -191,8 +191,8 @@ export class Demio implements INodeType {
 				}
 				if (resource === 'report') {
 					if (operation === 'get') {
-						const sessionId = this.getNodeParameter('dateId', i) as string;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const sessionId = this.getNodeParameter('dateId', i);
+						const filters = this.getNodeParameter('filters', i);
 
 						Object.assign(qs, filters);
 

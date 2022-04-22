@@ -157,8 +157,8 @@ export class MicrosoftExcel implements INodeType {
 		let qs: IDataObject = {};
 		const result: IDataObject[] = [];
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		if (resource === 'table') {
 			//https://docs.microsoft.com/en-us/graph/api/table-post-rows?view=graph-rest-1.0&tabs=http
@@ -169,7 +169,7 @@ export class MicrosoftExcel implements INodeType {
 					const workbookId = this.getNodeParameter('workbook', 0) as string;
 					const worksheetId = this.getNodeParameter('worksheet', 0) as string;
 					const tableId = this.getNodeParameter('table', 0) as string;
-					const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', 0);
 					const body: IDataObject = {};
 
 					if (additionalFields.index) {
@@ -217,10 +217,10 @@ export class MicrosoftExcel implements INodeType {
 						const workbookId = this.getNodeParameter('workbook', i) as string;
 						const worksheetId = this.getNodeParameter('worksheet', i) as string;
 						const tableId = this.getNodeParameter('table', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const rawData = this.getNodeParameter('rawData', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const rawData = this.getNodeParameter('rawData', i);
 						if (rawData) {
-							const filters = this.getNodeParameter('filters', i) as IDataObject;
+							const filters = this.getNodeParameter('filters', i);
 							if (filters.fields) {
 								qs['$select'] = filters.fields;
 							}
@@ -228,7 +228,7 @@ export class MicrosoftExcel implements INodeType {
 						if (returnAll === true) {
 							responseData = await microsoftApiRequestAllItemsSkip.call(this, 'value', 'GET', `/drive/items/${workbookId}/workbook/worksheets/${worksheetId}/tables/${tableId}/columns`, {}, qs);
 						} else {
-							qs['$top'] = this.getNodeParameter('limit', i) as number;
+							qs['$top'] = this.getNodeParameter('limit', i);
 							responseData = await microsoftApiRequest.call(this, 'GET', `/drive/items/${workbookId}/workbook/worksheets/${worksheetId}/tables/${tableId}/columns`, {}, qs);
 							responseData = responseData.value;
 						}
@@ -261,10 +261,10 @@ export class MicrosoftExcel implements INodeType {
 						const workbookId = this.getNodeParameter('workbook', i) as string;
 						const worksheetId = this.getNodeParameter('worksheet', i) as string;
 						const tableId = this.getNodeParameter('table', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const rawData = this.getNodeParameter('rawData', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const rawData = this.getNodeParameter('rawData', i);
 						if (rawData) {
-							const filters = this.getNodeParameter('filters', i) as IDataObject;
+							const filters = this.getNodeParameter('filters', i);
 							if (filters.fields) {
 								qs['$select'] = filters.fields;
 							}
@@ -273,7 +273,7 @@ export class MicrosoftExcel implements INodeType {
 							responseData = await microsoftApiRequestAllItemsSkip.call(this, 'value', 'GET', `/drive/items/${workbookId}/workbook/worksheets/${worksheetId}/tables/${tableId}/rows`, {}, qs);
 						} else {
 							const rowsQs = { ...qs };
-							rowsQs['$top'] = this.getNodeParameter('limit', i) as number;
+							rowsQs['$top'] = this.getNodeParameter('limit', i);
 							responseData = await microsoftApiRequest.call(this, 'GET', `/drive/items/${workbookId}/workbook/worksheets/${worksheetId}/tables/${tableId}/rows`, {}, rowsQs);
 							responseData = responseData.value;
 						}
@@ -313,7 +313,7 @@ export class MicrosoftExcel implements INodeType {
 						const tableId = this.getNodeParameter('table', i) as string;
 						const lookupColumn = this.getNodeParameter('lookupColumn', i) as string;
 						const lookupValue = this.getNodeParameter('lookupValue', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						responseData = await microsoftApiRequestAllItemsSkip.call(this, 'value', 'GET', `/drive/items/${workbookId}/workbook/worksheets/${worksheetId}/tables/${tableId}/rows`, {}, {});
 
@@ -363,7 +363,7 @@ export class MicrosoftExcel implements INodeType {
 					//https://docs.microsoft.com/en-us/graph/api/worksheetcollection-add?view=graph-rest-1.0&tabs=http
 					if (operation === 'addWorksheet') {
 						const workbookId = this.getNodeParameter('workbook', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IDataObject = {};
 						if (additionalFields.name) {
 							body.name = additionalFields.name;
@@ -373,15 +373,15 @@ export class MicrosoftExcel implements INodeType {
 						await microsoftApiRequest.call(this, 'POST', `/drive/items/${workbookId}/workbook/closeSession`, {}, {}, '', { 'workbook-session-id': id });
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						if (filters.fields) {
 							qs['$select'] = filters.fields;
 						}
 						if (returnAll === true) {
 							responseData = await microsoftApiRequestAllItems.call(this, 'value', 'GET', `/drive/root/search(q='.xlsx')`, {}, qs);
 						} else {
-							qs['$top'] = this.getNodeParameter('limit', i) as number;
+							qs['$top'] = this.getNodeParameter('limit', i);
 							responseData = await microsoftApiRequest.call(this, 'GET', `/drive/root/search(q='.xlsx')`, {}, qs);
 							responseData = responseData.value;
 						}
@@ -407,16 +407,16 @@ export class MicrosoftExcel implements INodeType {
 				try {
 					//https://docs.microsoft.com/en-us/graph/api/workbook-list-worksheets?view=graph-rest-1.0&tabs=http
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						const workbookId = this.getNodeParameter('workbook', i) as string;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const filters = this.getNodeParameter('filters', i);
 						if (filters.fields) {
 							qs['$select'] = filters.fields;
 						}
 						if (returnAll === true) {
 							responseData = await microsoftApiRequestAllItems.call(this, 'value', 'GET', `/drive/items/${workbookId}/workbook/worksheets`, {}, qs);
 						} else {
-							qs['$top'] = this.getNodeParameter('limit', i) as number;
+							qs['$top'] = this.getNodeParameter('limit', i);
 							responseData = await microsoftApiRequest.call(this, 'GET', `/drive/items/${workbookId}/workbook/worksheets`, {}, qs);
 							responseData = responseData.value;
 						}
@@ -425,10 +425,10 @@ export class MicrosoftExcel implements INodeType {
 					if (operation === 'getContent') {
 						const workbookId = this.getNodeParameter('workbook', i) as string;
 						const worksheetId = this.getNodeParameter('worksheet', i) as string;
-						const range = this.getNodeParameter('range', i) as string;
-						const rawData = this.getNodeParameter('rawData', i) as boolean;
+						const range = this.getNodeParameter('range', i);
+						const rawData = this.getNodeParameter('rawData', i);
 						if (rawData) {
-							const filters = this.getNodeParameter('filters', i) as IDataObject;
+							const filters = this.getNodeParameter('filters', i);
 							if (filters.fields) {
 								qs['$select'] = filters.fields;
 							}

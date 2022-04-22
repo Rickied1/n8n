@@ -400,9 +400,9 @@ export class DateTime implements INodeType {
 
 				if (action === 'format') {
 					const currentDate = this.getNodeParameter('value', i) as string;
-					const dataPropertyName = this.getNodeParameter('dataPropertyName', i) as string;
+					const dataPropertyName = this.getNodeParameter('dataPropertyName', i);
 					const toFormat = this.getNodeParameter('toFormat', i) as string;
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const options = this.getNodeParameter('options', i);
 					let newDate;
 
 					if (currentDate === undefined) {
@@ -469,7 +469,7 @@ export class DateTime implements INodeType {
 					const duration = this.getNodeParameter('duration', i) as number;
 					const timeUnit = this.getNodeParameter('timeUnit', i) as moment.DurationInputArg2;
 					const { fromFormat } = this.getNodeParameter('options', i) as { fromFormat?: string };
-					const dataPropertyName = this.getNodeParameter('dataPropertyName', i) as string;
+					const dataPropertyName = this.getNodeParameter('dataPropertyName', i);
 
 					const newDate = fromFormat
 						? parseDateByFormat(dateValue, fromFormat)

@@ -94,8 +94,8 @@ export class CustomerIo implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const returnData: IDataObject[] = [];
 		const items = this.getInputData();
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		const body: IDataObject = {};
 
 		let responseData;
@@ -105,7 +105,7 @@ export class CustomerIo implements INodeType {
 
 				if (resource === 'campaign') {
 					if (operation === 'get') {
-						const campaignId = this.getNodeParameter('campaignId', i) as number;
+						const campaignId = this.getNodeParameter('campaignId', i) as unknown as number;
 						const endpoint = `/campaigns/${campaignId}`;
 
 						responseData = await customerIoApiRequest.call(this, 'GET', endpoint, body, 'beta');
@@ -120,11 +120,11 @@ export class CustomerIo implements INodeType {
 					}
 
 					if (operation === 'getMetrics') {
-						const campaignId = this.getNodeParameter('campaignId', i) as number;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const campaignId = this.getNodeParameter('campaignId', i) as unknown as number;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						if (jsonParameters) {
-							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i) as string;
+							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i);
 
 							if (additionalFieldsJson !== '') {
 
@@ -137,7 +137,7 @@ export class CustomerIo implements INodeType {
 								}
 							}
 						} else {
-							const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+							const additionalFields = this.getNodeParameter('additionalFields', i);
 							const period = this.getNodeParameter('period', i) as string;
 							let endpoint = `/campaigns/${campaignId}/metrics`;
 
@@ -164,11 +164,11 @@ export class CustomerIo implements INodeType {
 				if (resource === 'customer') {
 
 					if (operation === 'upsert') {
-						const id = this.getNodeParameter('id', i) as number;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const id = this.getNodeParameter('id', i) as unknown as number;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						if (jsonParameters) {
-							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i) as string;
+							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i);
 
 							if (additionalFieldsJson !== '') {
 
@@ -181,7 +181,7 @@ export class CustomerIo implements INodeType {
 								}
 							}
 						} else {
-							const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+							const additionalFields = this.getNodeParameter('additionalFields', i);
 
 							if (additionalFields.customProperties) {
 								const data: any = {}; // tslint:disable-line:no-any
@@ -210,7 +210,7 @@ export class CustomerIo implements INodeType {
 					}
 
 					if (operation === 'delete') {
-						const id = this.getNodeParameter('id', i) as number;
+						const id = this.getNodeParameter('id', i) as unknown as number;
 
 						body.id = id;
 
@@ -226,14 +226,14 @@ export class CustomerIo implements INodeType {
 
 				if (resource === 'event') {
 					if (operation === 'track') {
-						const customerId = this.getNodeParameter('customerId', i) as number;
-						const eventName = this.getNodeParameter('eventName', i) as string;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const customerId = this.getNodeParameter('customerId', i) as unknown as number;
+						const eventName = this.getNodeParameter('eventName', i);
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						body.name = eventName;
 
 						if (jsonParameters) {
-							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i) as string;
+							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i);
 
 							if (additionalFieldsJson !== '') {
 
@@ -244,7 +244,7 @@ export class CustomerIo implements INodeType {
 								}
 							}
 						} else {
-							const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+							const additionalFields = this.getNodeParameter('additionalFields', i);
 							const data: any = {}; // tslint:disable-line:no-any
 
 							if (additionalFields.customAttributes) {
@@ -270,13 +270,13 @@ export class CustomerIo implements INodeType {
 					}
 
 					if (operation === 'trackAnonymous') {
-						const eventName = this.getNodeParameter('eventName', i) as string;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const eventName = this.getNodeParameter('eventName', i);
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						body.name = eventName;
 
 						if (jsonParameters) {
-							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i) as string;
+							const additionalFieldsJson = this.getNodeParameter('additionalFieldsJson', i);
 
 							if (additionalFieldsJson !== '') {
 
@@ -289,7 +289,7 @@ export class CustomerIo implements INodeType {
 								}
 							}
 						} else {
-							const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+							const additionalFields = this.getNodeParameter('additionalFields', i);
 							const data: any = {}; // tslint:disable-line:no-any
 
 							if (additionalFields.customAttributes) {
@@ -311,7 +311,7 @@ export class CustomerIo implements INodeType {
 				}
 
 				if (resource === 'segment') {
-					const segmentId = this.getNodeParameter('segmentId', i) as number;
+					const segmentId = this.getNodeParameter('segmentId', i) as unknown as number;
 					const customerIds = this.getNodeParameter('customerIds', i) as string;
 
 					body.id = segmentId;

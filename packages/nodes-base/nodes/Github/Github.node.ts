@@ -1852,8 +1852,8 @@ export class Github implements INodeType {
 		let requestMethod: string;
 		let endpoint: string;
 
-		const operation = this.getNodeParameter('operation', 0) as string;
-		const resource = this.getNodeParameter('resource', 0) as string;
+		const operation = this.getNodeParameter('operation', 0);
+		const resource = this.getNodeParameter('resource', 0);
 		const fullOperation = `${resource}:${operation}`;
 
 		for (let i = 0; i < items.length; i++) {
@@ -1883,7 +1883,7 @@ export class Github implements INodeType {
 
 						requestMethod = 'PUT';
 
-						const filePath = this.getNodeParameter('filePath', i) as string;
+						const filePath = this.getNodeParameter('filePath', i);
 
 						const additionalParameters = this.getNodeParameter('additionalParameters', i, {}) as IDataObject;
 						if (additionalParameters.author) {
@@ -1912,7 +1912,7 @@ export class Github implements INodeType {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
 							}
 
-							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
 							if (item.binary[binaryPropertyName] === undefined) {
 								throw new NodeOperationError(this.getNode(), `No binary data property "${binaryPropertyName}" does not exists on item!`);
@@ -1946,7 +1946,7 @@ export class Github implements INodeType {
 							body.branch = (additionalParameters.branch as IDataObject).branch;
 						}
 
-						const filePath = this.getNodeParameter('filePath', i) as string;
+						const filePath = this.getNodeParameter('filePath', i);
 						body.message = this.getNodeParameter('commitMessage', i) as string;
 
 						body.sha = await getFileSha.call(this, owner, repository, filePath, body.branch as string | undefined);
@@ -1955,7 +1955,7 @@ export class Github implements INodeType {
 					} else if (operation === 'get') {
 						requestMethod = 'GET';
 
-						const filePath = this.getNodeParameter('filePath', i) as string;
+						const filePath = this.getNodeParameter('filePath', i);
 						const additionalParameters = this.getNodeParameter('additionalParameters', i) as IDataObject;
 
 						if (additionalParameters.reference) {
@@ -1965,7 +1965,7 @@ export class Github implements INodeType {
 						endpoint = `/repos/${owner}/${repository}/contents/${encodeURI(filePath)}`;
 					} else if (operation === 'list') {
 						requestMethod = 'GET';
-						const filePath = this.getNodeParameter('filePath', i) as string;
+						const filePath = this.getNodeParameter('filePath', i);
 						endpoint = `/repos/${owner}/${repository}/contents/${encodeURI(filePath)}`;
 					}
 				} else if (resource === 'issue') {
@@ -1976,7 +1976,7 @@ export class Github implements INodeType {
 
 						requestMethod = 'POST';
 
-						body.title = this.getNodeParameter('title', i) as string;
+						body.title = this.getNodeParameter('title', i);
 						body.body = this.getNodeParameter('body', i) as string;
 						const labels = this.getNodeParameter('labels', i) as IDataObject[];
 
@@ -2084,10 +2084,10 @@ export class Github implements INodeType {
 
 						endpoint = `/repos/${owner}/${repository}/releases`;
 
-						returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						returnAll = this.getNodeParameter('returnAll', 0);
 
 						if (returnAll === false) {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 						}
 					}
 					if (operation === 'update') {
@@ -2147,10 +2147,10 @@ export class Github implements INodeType {
 
 						endpoint = `/repos/${owner}/${repository}/issues`;
 
-						returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						returnAll = this.getNodeParameter('returnAll', 0);
 
 						if (returnAll === false) {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 						}
 					}
 				} else if (resource === 'review') {
@@ -2160,7 +2160,7 @@ export class Github implements INodeType {
 						// ----------------------------------
 						requestMethod = 'GET';
 
-						const reviewId = this.getNodeParameter('reviewId', i) as string;
+						const reviewId = this.getNodeParameter('reviewId', i);
 
 						const pullRequestNumber = this.getNodeParameter('pullRequestNumber', i) as string;
 
@@ -2172,12 +2172,12 @@ export class Github implements INodeType {
 						// ----------------------------------
 						requestMethod = 'GET';
 
-						returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						returnAll = this.getNodeParameter('returnAll', 0);
 
 						const pullRequestNumber = this.getNodeParameter('pullRequestNumber', i) as string;
 
 						if (returnAll === false) {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 						}
 
 						endpoint = `/repos/${owner}/${repository}/pulls/${pullRequestNumber}/reviews`;
@@ -2188,10 +2188,10 @@ export class Github implements INodeType {
 						requestMethod = 'POST';
 
 						const pullRequestNumber = this.getNodeParameter('pullRequestNumber', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						Object.assign(body, additionalFields);
 
-						body.event = snakeCase(this.getNodeParameter('event', i) as string).toUpperCase();
+						body.event = snakeCase(this.getNodeParameter('event', i)).toUpperCase();
 						if (body.event === 'REQUEST_CHANGES' || body.event === 'COMMENT') {
 							body.body = this.getNodeParameter('body', i) as string;
 						}
@@ -2204,7 +2204,7 @@ export class Github implements INodeType {
 						requestMethod = 'PUT';
 
 						const pullRequestNumber = this.getNodeParameter('pullRequestNumber', i) as string;
-						const reviewId = this.getNodeParameter('reviewId', i) as string;
+						const reviewId = this.getNodeParameter('reviewId', i);
 
 						body.body = this.getNodeParameter('body', i) as string;
 
@@ -2220,10 +2220,10 @@ export class Github implements INodeType {
 
 						endpoint = `/users/${owner}/repos`;
 
-						returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						returnAll = this.getNodeParameter('returnAll', 0);
 
 						if (returnAll === false) {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 						}
 
 					} else if (operation === 'invite') {
@@ -2234,7 +2234,7 @@ export class Github implements INodeType {
 						requestMethod = 'POST';
 						const org = this.getNodeParameter('organization', i) as string;
 						endpoint = `/orgs/${org}/invitations`;
-						body.email = this.getNodeParameter('email', i) as string;
+						body.email = this.getNodeParameter('email', i);
 
 					}
 
@@ -2256,7 +2256,7 @@ export class Github implements INodeType {
 							throw new NodeOperationError(this.getNode(), 'File Path is a folder, not a file.');
 						}
 						// Add the returned data to the item as binary property
-						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
 						const newItem: INodeExecutionData = {
 							json: items[i].json,

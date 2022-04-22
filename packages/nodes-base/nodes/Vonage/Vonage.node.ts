@@ -421,15 +421,15 @@ export class Vonage implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'sms') {
 
 					if (operation === 'send') {
 
-						const from = this.getNodeParameter('from', i) as string;
+						const from = this.getNodeParameter('from', i);
 
 						const to = this.getNodeParameter('to', i) as string;
 
@@ -442,7 +442,7 @@ export class Vonage implements INodeType {
 						};
 
 						if (type === 'text' || type === 'unicode') {
-							const message = this.getNodeParameter('message', i) as string;
+							const message = this.getNodeParameter('message', i);
 
 							body.text = message;
 						}
@@ -458,9 +458,9 @@ export class Vonage implements INodeType {
 						}
 
 						if (type === 'wappush') {
-							const title = this.getNodeParameter('title', i) as string;
+							const title = this.getNodeParameter('title', i);
 
-							const url = this.getNodeParameter('url', i) as string;
+							const url = this.getNodeParameter('url', i);
 
 							const validity = this.getNodeParameter('validity', i) as number;
 
@@ -483,7 +483,7 @@ export class Vonage implements INodeType {
 							body.vcal = vcal;
 						}
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						Object.assign(body, additionalFields);
 

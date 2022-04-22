@@ -329,15 +329,15 @@ export class Beeminder implements INodeType {
 		const length = items.length as unknown as number;
 		const timezone = this.getTimezone();
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		let results;
 
 
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'datapoint') {
-					const goalName = this.getNodeParameter('goalName', i) as string;
+					const goalName = this.getNodeParameter('goalName', i);
 					if (operation === 'create') {
 						const value = this.getNodeParameter('value', i) as number;
 						const options = this.getNodeParameter('additionalFields', i) as INodeParameters;
@@ -353,7 +353,7 @@ export class Beeminder implements INodeType {
 						results = await createDatapoint.call(this, data);
 					}
 					else if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						const options = this.getNodeParameter('options', i) as INodeParameters;
 						const data: IDataObject = {
 							goalName,
@@ -361,13 +361,13 @@ export class Beeminder implements INodeType {
 						Object.assign(data, options);
 
 						if (returnAll === false) {
-							data.count = this.getNodeParameter('limit', 0) as number;
+							data.count = this.getNodeParameter('limit', 0);
 						}
 
 						results = await getAllDatapoints.call(this, data);
 					}
 					else if (operation === 'update') {
-						const datapointId = this.getNodeParameter('datapointId', i) as string;
+						const datapointId = this.getNodeParameter('datapointId', i);
 						const options = this.getNodeParameter('updateFields', i) as INodeParameters;
 						const data: IDataObject = {
 							goalName,
@@ -380,7 +380,7 @@ export class Beeminder implements INodeType {
 						results = await updateDatapoint.call(this, data);
 					}
 					else if (operation === 'delete') {
-						const datapointId = this.getNodeParameter('datapointId', i) as string;
+						const datapointId = this.getNodeParameter('datapointId', i);
 						const data: IDataObject = {
 							goalName,
 							datapointId,

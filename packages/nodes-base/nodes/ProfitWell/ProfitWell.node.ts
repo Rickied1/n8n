@@ -100,8 +100,8 @@ export class ProfitWell implements INodeType {
 		const length = items.length as unknown as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'company') {
@@ -113,12 +113,12 @@ export class ProfitWell implements INodeType {
 					if (operation === 'get') {
 						const type = this.getNodeParameter('type', i) as string;
 
-						const simple = this.getNodeParameter('simple', 0) as boolean;
+						const simple = this.getNodeParameter('simple', 0);
 
 						if (type === 'daily') {
 							qs.month = this.getNodeParameter('month', i) as string;
 						}
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						Object.assign(qs, options);
 

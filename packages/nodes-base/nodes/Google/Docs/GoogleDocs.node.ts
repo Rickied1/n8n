@@ -9,6 +9,7 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 	NodeApiError,
 } from 'n8n-workflow';
 
@@ -121,7 +122,7 @@ export class GoogleDocs implements INodeType {
 				try {
 					drives = await googleApiRequestAllItems.call(this, 'drives', 'GET', '', {}, {}, 'https://www.googleapis.com/drive/v3/drives');
 				} catch (error) {
-					throw new NodeApiError(this.getNode(), error, { message: 'Error in loading Drives' });
+					throw new NodeApiError(this.getNode(), error as JsonObject, { message: 'Error in loading Drives' });
 				}
 
 				for (const drive of drives) {
@@ -150,7 +151,7 @@ export class GoogleDocs implements INodeType {
 				try {
 					folders = await googleApiRequestAllItems.call(this, 'files', 'GET', '', {}, qs, 'https://www.googleapis.com/drive/v3/files');
 				} catch (error) {
-					throw new NodeApiError(this.getNode(), error, { message: 'Error in loading Folders' });
+					throw new NodeApiError(this.getNode(), error as JsonObject, { message: 'Error in loading Folders' });
 				}
 
 				for (const folder of folders) {
@@ -170,8 +171,8 @@ export class GoogleDocs implements INodeType {
 
 		let responseData;
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 
@@ -183,10 +184,10 @@ export class GoogleDocs implements INodeType {
 
 						// https://developers.google.com/docs/api/reference/rest/v1/documents/create
 
-						const folderId = this.getNodeParameter('folderId', i) as string;
+						const folderId = this.getNodeParameter('folderId', i);
 
 						const body: IDataObject = {
-							name: this.getNodeParameter('title', i) as string,
+							name: this.getNodeParameter('title', i),
 							mimeType: 'application/vnd.google-apps.document',
 							...(folderId && folderId !== 'default') ? { parents: [folderId] } : {},
 						};
@@ -198,7 +199,7 @@ export class GoogleDocs implements INodeType {
 						// https://developers.google.com/docs/api/reference/rest/v1/documents/get
 
 						const documentURL = this.getNodeParameter('documentURL', i) as string;
-						const simple = this.getNodeParameter('simple', i) as boolean;
+						const simple = this.getNodeParameter('simple', i);
 						let documentId = extractID(documentURL);
 
 						if (!documentId) {
@@ -235,11 +236,11 @@ export class GoogleDocs implements INodeType {
 
 						const documentURL = this.getNodeParameter('documentURL', i) as string;
 						let documentId = extractID(documentURL);
-						const simple = this.getNodeParameter('simple', i) as boolean;
+						const simple = this.getNodeParameter('simple', i);
 						const actionsUi = this.getNodeParameter('actionsUi', i) as {
 							actionFields: IDataObject[]
 						};
-						const { writeControlObject } = this.getNodeParameter('updateFields', i) as IUpdateFields;
+						const { writeControlObject } = this.getNodeParameter('updateFields', i) as unknown as IUpdateFields;
 
 						if (!documentId) {
 							documentId = documentURL;
@@ -444,7 +445,7 @@ export class GoogleDocs implements INodeType {
 
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ error: error.message });
+					returnData.push({ error: (error as JsonObject).message });
 					continue;
 				}
 				throw error;

@@ -165,18 +165,18 @@ export class GetResponse implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'contact') {
 					//https://apireference.getresponse.com/#operation/createContact
 					if (operation === 'create') {
-						const email = this.getNodeParameter('email', i) as string;
+						const email = this.getNodeParameter('email', i);
 
-						const campaignId = this.getNodeParameter('campaignId', i) as string;
+						const campaignId = this.getNodeParameter('campaignId', i);
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const body: IDataObject = {
 							email,
@@ -206,9 +206,9 @@ export class GetResponse implements INodeType {
 					}
 					//https://apireference.getresponse.com/?_ga=2.160836350.2102802044.1604719933-1897033509.1604598019#operation/deleteContact
 					if (operation === 'delete') {
-						const contactId = this.getNodeParameter('contactId', i) as string;
+						const contactId = this.getNodeParameter('contactId', i);
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						Object.assign(qs, options);
 
@@ -218,9 +218,9 @@ export class GetResponse implements INodeType {
 					}
 					//https://apireference.getresponse.com/?_ga=2.160836350.2102802044.1604719933-1897033509.1604598019#operation/getContactById
 					if (operation === 'get') {
-						const contactId = this.getNodeParameter('contactId', i) as string;
+						const contactId = this.getNodeParameter('contactId', i);
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						Object.assign(qs, options);
 
@@ -228,9 +228,9 @@ export class GetResponse implements INodeType {
 					}
 					//https://apireference.getresponse.com/?_ga=2.160836350.2102802044.1604719933-1897033509.1604598019#operation/getContactList
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						const timezone = this.getTimezone();
 
@@ -281,16 +281,16 @@ export class GetResponse implements INodeType {
 						if (returnAll) {
 							responseData = await getResponseApiRequestAllItems.call(this, 'GET', `/contacts`, {}, qs);
 						} else {
-							qs.perPage = this.getNodeParameter('limit', i) as number;
+							qs.perPage = this.getNodeParameter('limit', i);
 							responseData = await getresponseApiRequest.call(this, 'GET', `/contacts`, {}, qs);
 						}
 					}
 					//https://apireference.getresponse.com/?_ga=2.160836350.2102802044.1604719933-1897033509.1604598019#operation/updateContact
 					if (operation === 'update') {
 
-						const contactId = this.getNodeParameter('contactId', i) as string;
+						const contactId = this.getNodeParameter('contactId', i);
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						const body: IDataObject = {};
 

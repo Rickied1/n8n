@@ -166,8 +166,8 @@ export class Splunk implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		let responseData;
 
@@ -241,7 +241,7 @@ export class Splunk implements INodeType {
 						// https://docs.splunk.com/Documentation/Splunk/8.2.2/RESTREF/RESTsearch#saved.2Fsearches
 
 						const qs = {} as IDataObject;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						populate(options, qs);
 						setCount.call(this, qs);
@@ -331,7 +331,7 @@ export class Splunk implements INodeType {
 						// https://docs.splunk.com/Documentation/Splunk/8.2.2/RESTREF/RESTsearch#search.2Fjobs
 
 						const qs = {} as IDataObject;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						populate(options, qs);
 						setCount.call(this, qs);
@@ -362,7 +362,7 @@ export class Splunk implements INodeType {
 						const filters = this.getNodeParameter('filters', i) as IDataObject & {
 							keyValueMatch?: { keyValuePair?: { key: string; value: string; } }
 						};
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						const keyValuePair = filters?.keyValueMatch?.keyValuePair;
 
@@ -400,7 +400,7 @@ export class Splunk implements INodeType {
 							password: this.getNodeParameter('password', i),
 						} as IDataObject;
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						populate(additionalFields, body);
 

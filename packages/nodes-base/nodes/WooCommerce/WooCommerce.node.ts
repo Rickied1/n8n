@@ -136,8 +136,8 @@ export class WooCommerce implements INodeType {
 		const length = items.length as unknown as number;
 		let responseData;
 		const qs: IDataObject = {};
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 
@@ -161,7 +161,7 @@ export class WooCommerce implements INodeType {
 						email: this.getNodeParameter('email', i),
 					} as IDataObject;
 
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					if (Object.keys(additionalFields).length) {
 						Object.assign(body, adjustMetadata(additionalFields));
@@ -208,8 +208,8 @@ export class WooCommerce implements INodeType {
 					// https://woocommerce.github.io/woocommerce-rest-api-docs/?javascript#list-all-customers
 
 					const qs = {} as IDataObject;
-					const filters = this.getNodeParameter('filters', i) as IDataObject;
-					const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+					const filters = this.getNodeParameter('filters', i);
+					const returnAll = this.getNodeParameter('returnAll', i);
 
 					if (Object.keys(filters).length) {
 						Object.assign(qs, filters);
@@ -218,7 +218,7 @@ export class WooCommerce implements INodeType {
 					if (returnAll) {
 						responseData = await woocommerceApiRequestAllItems.call(this, 'GET', '/customers', {}, qs);
 					} else {
-						qs.per_page = this.getNodeParameter('limit', i) as number;
+						qs.per_page = this.getNodeParameter('limit', i);
 						responseData = await woocommerceApiRequest.call(this, 'GET', '/customers', {}, qs);
 					}
 
@@ -231,7 +231,7 @@ export class WooCommerce implements INodeType {
 					// https://woocommerce.github.io/woocommerce-rest-api-docs/?javascript#update-a-customer
 
 					const body = {} as IDataObject;
-					const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+					const updateFields = this.getNodeParameter('updateFields', i);
 
 					if (Object.keys(updateFields).length) {
 						Object.assign(body, adjustMetadata(updateFields));
@@ -247,8 +247,8 @@ export class WooCommerce implements INodeType {
 			} else if (resource === 'product') {
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#create-a-product
 				if (operation === 'create') {
-					const name = this.getNodeParameter('name', i) as string;
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const name = this.getNodeParameter('name', i);
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 					const body: IProduct = {
 						name,
 					};
@@ -259,15 +259,15 @@ export class WooCommerce implements INodeType {
 						body.categories = (additionalFields.categories as string[]).map(category => ({ id: parseInt(category, 10) })) as unknown as IDataObject[];
 					}
 
-					const images = (this.getNodeParameter('imagesUi', i) as IDataObject).imagesValues as IImage[];
+					const images = (this.getNodeParameter('imagesUi', i)).imagesValues as IImage[];
 					if (images) {
 						body.images = images;
 					}
-					const dimension = (this.getNodeParameter('dimensionsUi', i) as IDataObject).dimensionsValues as IDimension;
+					const dimension = (this.getNodeParameter('dimensionsUi', i)).dimensionsValues as IDimension;
 					if (dimension) {
 						body.dimensions = dimension;
 					}
-					const metadata = (this.getNodeParameter('metadataUi', i) as IDataObject).metadataValues as IDataObject[];
+					const metadata = (this.getNodeParameter('metadataUi', i)).metadataValues as IDataObject[];
 					if (metadata) {
 						body.meta_data = metadata;
 					}
@@ -275,21 +275,21 @@ export class WooCommerce implements INodeType {
 				}
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#update-a-product
 				if (operation === 'update') {
-					const productId = this.getNodeParameter('productId', i) as string;
-					const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+					const productId = this.getNodeParameter('productId', i);
+					const updateFields = this.getNodeParameter('updateFields', i);
 					const body: IProduct = {};
 
 					setFields(updateFields, body);
 
-					const images = (this.getNodeParameter('imagesUi', i) as IDataObject).imagesValues as IImage[];
+					const images = (this.getNodeParameter('imagesUi', i)).imagesValues as IImage[];
 					if (images) {
 						body.images = images;
 					}
-					const dimension = (this.getNodeParameter('dimensionsUi', i) as IDataObject).dimensionsValues as IDimension;
+					const dimension = (this.getNodeParameter('dimensionsUi', i)).dimensionsValues as IDimension;
 					if (dimension) {
 						body.dimensions = dimension;
 					}
-					const metadata = (this.getNodeParameter('metadataUi', i) as IDataObject).metadataValues as IDataObject[];
+					const metadata = (this.getNodeParameter('metadataUi', i)).metadataValues as IDataObject[];
 					if (metadata) {
 						body.meta_data = metadata;
 					}
@@ -297,13 +297,13 @@ export class WooCommerce implements INodeType {
 				}
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#retrieve-a-product
 				if (operation === 'get') {
-					const productId = this.getNodeParameter('productId', i) as string;
+					const productId = this.getNodeParameter('productId', i);
 					responseData = await woocommerceApiRequest.call(this, 'GET', `/products/${productId}`, {}, qs);
 				}
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#list-all-products
 				if (operation === 'getAll') {
-					const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const returnAll = this.getNodeParameter('returnAll', i);
+					const options = this.getNodeParameter('options', i);
 					if (options.after) {
 						qs.after = options.after as string;
 					}
@@ -358,58 +358,58 @@ export class WooCommerce implements INodeType {
 					if (returnAll === true) {
 						responseData = await woocommerceApiRequestAllItems.call(this, 'GET', '/products', {}, qs);
 					} else {
-						qs.per_page = this.getNodeParameter('limit', i) as number;
+						qs.per_page = this.getNodeParameter('limit', i);
 						responseData = await woocommerceApiRequest.call(this, 'GET', '/products', {}, qs);
 					}
 				}
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#delete-a-product
 				if (operation === 'delete') {
-					const productId = this.getNodeParameter('productId', i) as string;
+					const productId = this.getNodeParameter('productId', i);
 					responseData = await woocommerceApiRequest.call(this, 'DELETE', `/products/${productId}`, {}, { force: true });
 				}
 			}
 			if (resource === 'order') {
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#create-an-order
 				if (operation === 'create') {
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 					const body: IOrder = {};
 
 					setFields(additionalFields, body);
 
-					const billing = (this.getNodeParameter('billingUi', i) as IDataObject).billingValues as IAddress;
+					const billing = (this.getNodeParameter('billingUi', i)).billingValues as IAddress;
 					if (billing !== undefined) {
 						body.billing = billing;
 						toSnakeCase(billing as IDataObject);
 					}
-					const shipping = (this.getNodeParameter('shippingUi', i) as IDataObject).shippingValues as IAddress;
+					const shipping = (this.getNodeParameter('shippingUi', i)).shippingValues as IAddress;
 					if (shipping !== undefined) {
 						body.shipping = shipping;
 						toSnakeCase(shipping as IDataObject);
 					}
-					const couponLines = (this.getNodeParameter('couponLinesUi', i) as IDataObject).couponLinesValues as ICouponLine[];
+					const couponLines = (this.getNodeParameter('couponLinesUi', i)).couponLinesValues as ICouponLine[];
 					if (couponLines) {
 						body.coupon_lines = couponLines;
 						setMetadata(couponLines);
 						toSnakeCase(couponLines);
 					}
-					const feeLines = (this.getNodeParameter('feeLinesUi', i) as IDataObject).feeLinesValues as IFeeLine[];
+					const feeLines = (this.getNodeParameter('feeLinesUi', i)).feeLinesValues as IFeeLine[];
 					if (feeLines) {
 						body.fee_lines = feeLines;
 						setMetadata(feeLines);
 						toSnakeCase(feeLines);
 					}
-					const lineItems = (this.getNodeParameter('lineItemsUi', i) as IDataObject).lineItemsValues as ILineItem[];
+					const lineItems = (this.getNodeParameter('lineItemsUi', i)).lineItemsValues as ILineItem[];
 					if (lineItems) {
 						body.line_items = lineItems;
 						setMetadata(lineItems);
 						toSnakeCase(lineItems);
 						//@ts-ignore
 					}
-					const metadata = (this.getNodeParameter('metadataUi', i) as IDataObject).metadataValues as IDataObject[];
+					const metadata = (this.getNodeParameter('metadataUi', i)).metadataValues as IDataObject[];
 					if (metadata) {
 						body.meta_data = metadata;
 					}
-					const shippingLines = (this.getNodeParameter('shippingLinesUi', i) as IDataObject).shippingLinesValues as IShoppingLine[];
+					const shippingLines = (this.getNodeParameter('shippingLinesUi', i)).shippingLinesValues as IShoppingLine[];
 					if (shippingLines) {
 						body.shipping_lines = shippingLines;
 						setMetadata(shippingLines);
@@ -419,8 +419,8 @@ export class WooCommerce implements INodeType {
 				}
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#update-an-order
 				if (operation === 'update') {
-					const orderId = this.getNodeParameter('orderId', i) as string;
-					const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+					const orderId = this.getNodeParameter('orderId', i);
+					const updateFields = this.getNodeParameter('updateFields', i);
 					const body: IOrder = {};
 
 					if (updateFields.currency) {
@@ -448,39 +448,39 @@ export class WooCommerce implements INodeType {
 					if (updateFields.transactionID) {
 						body.transaction_id = updateFields.transactionID as string;
 					}
-					const billing = (this.getNodeParameter('billingUi', i) as IDataObject).billingValues as IAddress;
+					const billing = (this.getNodeParameter('billingUi', i)).billingValues as IAddress;
 					if (billing !== undefined) {
 						body.billing = billing;
 						toSnakeCase(billing as IDataObject);
 					}
-					const shipping = (this.getNodeParameter('shippingUi', i) as IDataObject).shippingValues as IAddress;
+					const shipping = (this.getNodeParameter('shippingUi', i)).shippingValues as IAddress;
 					if (shipping !== undefined) {
 						body.shipping = shipping;
 						toSnakeCase(shipping as IDataObject);
 					}
-					const couponLines = (this.getNodeParameter('couponLinesUi', i) as IDataObject).couponLinesValues as ICouponLine[];
+					const couponLines = (this.getNodeParameter('couponLinesUi', i)).couponLinesValues as ICouponLine[];
 					if (couponLines) {
 						body.coupon_lines = couponLines;
 						setMetadata(couponLines);
 						toSnakeCase(couponLines);
 					}
-					const feeLines = (this.getNodeParameter('feeLinesUi', i) as IDataObject).feeLinesValues as IFeeLine[];
+					const feeLines = (this.getNodeParameter('feeLinesUi', i)).feeLinesValues as IFeeLine[];
 					if (feeLines) {
 						body.fee_lines = feeLines;
 						setMetadata(feeLines);
 						toSnakeCase(feeLines);
 					}
-					const lineItems = (this.getNodeParameter('lineItemsUi', i) as IDataObject).lineItemsValues as ILineItem[];
+					const lineItems = (this.getNodeParameter('lineItemsUi', i)).lineItemsValues as ILineItem[];
 					if (lineItems) {
 						body.line_items = lineItems;
 						setMetadata(lineItems);
 						toSnakeCase(lineItems);
 					}
-					const metadata = (this.getNodeParameter('metadataUi', i) as IDataObject).metadataValues as IDataObject[];
+					const metadata = (this.getNodeParameter('metadataUi', i)).metadataValues as IDataObject[];
 					if (metadata) {
 						body.meta_data = metadata;
 					}
-					const shippingLines = (this.getNodeParameter('shippingLinesUi', i) as IDataObject).shippingLinesValues as IShoppingLine[];
+					const shippingLines = (this.getNodeParameter('shippingLinesUi', i)).shippingLinesValues as IShoppingLine[];
 					if (shippingLines) {
 						body.shipping_lines = shippingLines;
 						setMetadata(shippingLines);
@@ -491,13 +491,13 @@ export class WooCommerce implements INodeType {
 				}
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#retrieve-an-order
 				if (operation === 'get') {
-					const orderId = this.getNodeParameter('orderId', i) as string;
+					const orderId = this.getNodeParameter('orderId', i);
 					responseData = await woocommerceApiRequest.call(this, 'GET', `/orders/${orderId}`, {}, qs);
 				}
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#list-all-orders
 				if (operation === 'getAll') {
-					const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const returnAll = this.getNodeParameter('returnAll', i);
+					const options = this.getNodeParameter('options', i);
 					if (options.after) {
 						qs.after = options.after as string;
 					}
@@ -531,13 +531,13 @@ export class WooCommerce implements INodeType {
 					if (returnAll === true) {
 						responseData = await woocommerceApiRequestAllItems.call(this, 'GET', '/orders', {}, qs);
 					} else {
-						qs.per_page = this.getNodeParameter('limit', i) as number;
+						qs.per_page = this.getNodeParameter('limit', i);
 						responseData = await woocommerceApiRequest.call(this, 'GET', '/orders', {}, qs);
 					}
 				}
 				//https://woocommerce.github.io/woocommerce-rest-api-docs/#delete-an-order
 				if (operation === 'delete') {
-					const orderId = this.getNodeParameter('orderId', i) as string;
+					const orderId = this.getNodeParameter('orderId', i);
 					responseData = await woocommerceApiRequest.call(this, 'DELETE', `/orders/${orderId}`, {}, { force: true });
 				}
 			}

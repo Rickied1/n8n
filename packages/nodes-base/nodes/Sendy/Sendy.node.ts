@@ -76,28 +76,28 @@ export class Sendy implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 
 			if (resource === 'campaign') {
 				if (operation === 'create') {
 
-					const fromName = this.getNodeParameter('fromName', i) as string;
+					const fromName = this.getNodeParameter('fromName', i);
 
-					const fromEmail = this.getNodeParameter('fromEmail', i) as string;
+					const fromEmail = this.getNodeParameter('fromEmail', i);
 
 					const replyTo = this.getNodeParameter('replyTo', i) as string;
 
-					const title = this.getNodeParameter('title', i) as string;
+					const title = this.getNodeParameter('title', i);
 
-					const subject = this.getNodeParameter('subject', i) as string;
+					const subject = this.getNodeParameter('subject', i);
 
 					const htmlText = this.getNodeParameter('htmlText', i) as boolean;
 
 					const sendCampaign = this.getNodeParameter('sendCampaign', i) as boolean;
 
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					const body: IDataObject = {
 						from_name: fromName,
@@ -168,11 +168,11 @@ export class Sendy implements INodeType {
 			if (resource === 'subscriber') {
 				if (operation === 'add') {
 
-					const email = this.getNodeParameter('email', i) as string;
+					const email = this.getNodeParameter('email', i);
 
-					const listId = this.getNodeParameter('listId', i) as string;
+					const listId = this.getNodeParameter('listId', i);
 
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					const body: IDataObject = {
 						email,
@@ -197,7 +197,7 @@ export class Sendy implements INodeType {
 
 				if (operation === 'count') {
 
-					const listId = this.getNodeParameter('listId', i) as string;
+					const listId = this.getNodeParameter('listId', i);
 
 					const body: IDataObject = {
 						list_id: listId,
@@ -227,9 +227,9 @@ export class Sendy implements INodeType {
 
 				if (operation === 'delete') {
 
-					const email = this.getNodeParameter('email', i) as string;
+					const email = this.getNodeParameter('email', i);
 
-					const listId = this.getNodeParameter('listId', i) as string;
+					const listId = this.getNodeParameter('listId', i);
 
 					const body: IDataObject = {
 						email,
@@ -252,9 +252,9 @@ export class Sendy implements INodeType {
 
 				if (operation === 'remove') {
 
-					const email = this.getNodeParameter('email', i) as string;
+					const email = this.getNodeParameter('email', i);
 
-					const listId = this.getNodeParameter('listId', i) as string;
+					const listId = this.getNodeParameter('listId', i);
 
 					const body: IDataObject = {
 						email,
@@ -277,9 +277,9 @@ export class Sendy implements INodeType {
 
 				if (operation === 'status') {
 
-					const email = this.getNodeParameter('email', i) as string;
+					const email = this.getNodeParameter('email', i);
 
-					const listId = this.getNodeParameter('listId', i) as string;
+					const listId = this.getNodeParameter('listId', i);
 
 					const body: IDataObject = {
 						email,

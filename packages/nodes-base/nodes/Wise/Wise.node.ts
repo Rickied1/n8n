@@ -168,8 +168,8 @@ export class Wise implements INodeType {
 	async execute(this: IExecuteFunctions) {
 		const items = this.getInputData();
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		const timezone = this.getTimezone();
 
@@ -432,7 +432,7 @@ export class Wise implements INodeType {
 						// https://api-docs.transferwise.com/#transfers-fund
 
 						const profileId = this.getNodeParameter('profileId', i);
-						const transferId = this.getNodeParameter('transferId', i) as string;
+						const transferId = this.getNodeParameter('transferId', i);
 
 						const endpoint = `v3/profiles/${profileId}/transfers/${transferId}/payments`;
 						responseData = await wiseApiRequest.call(this, 'POST', endpoint, { type: 'BALANCE' }, {});

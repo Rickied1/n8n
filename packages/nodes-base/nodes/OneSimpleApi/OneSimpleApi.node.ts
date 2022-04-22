@@ -757,14 +757,14 @@ export class OneSimpleApi implements INodeType {
 		let download;
 		for (let i = 0; i < length; i++) {
 			try {
-				const resource = this.getNodeParameter('resource', 0) as string;
-				const operation = this.getNodeParameter('operation', 0) as string;
+				const resource = this.getNodeParameter('resource', 0);
+				const operation = this.getNodeParameter('operation', 0);
 
 				if (resource === 'website') {
 					if (operation === 'pdf') {
 						const link = this.getNodeParameter('link', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						download = this.getNodeParameter('download', i) as boolean;
+						const options = this.getNodeParameter('options', i);
+						download = this.getNodeParameter('download', i);
 						qs.url = link;
 
 						if (options.page) {
@@ -795,8 +795,8 @@ export class OneSimpleApi implements INodeType {
 
 					if (operation === 'screenshot') {
 						const link = this.getNodeParameter('link', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						download = this.getNodeParameter('download', i) as boolean;
+						const options = this.getNodeParameter('options', i);
+						download = this.getNodeParameter('download', i);
 
 						qs.url = link;
 
@@ -834,7 +834,7 @@ export class OneSimpleApi implements INodeType {
 
 					if (operation === 'seo') {
 						const link = this.getNodeParameter('link', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 						qs.url = link;
 
 						if (options.headers) {
@@ -847,13 +847,13 @@ export class OneSimpleApi implements INodeType {
 
 				if (resource === 'socialProfile') {
 					if (operation === 'instagramProfile') {
-						const profileName = this.getNodeParameter('profileName', i) as string;
+						const profileName = this.getNodeParameter('profileName', i);
 						qs.profile = profileName;
 						responseData = await oneSimpleApiRequest.call(this, 'GET', '/instagram_profile', {}, qs);
 					}
 
 					if (operation === 'spotifyArtistProfile') {
-						const artistName = this.getNodeParameter('artistName', i) as string;
+						const artistName = this.getNodeParameter('artistName', i);
 						qs.profile = artistName;
 						responseData = await oneSimpleApiRequest.call(this, 'GET', '/spotify_profile', {}, qs);
 					}
@@ -893,9 +893,9 @@ export class OneSimpleApi implements INodeType {
 					}
 
 					if (operation === 'qrCode') {
-						const message = this.getNodeParameter('message', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						download = this.getNodeParameter('download', i) as boolean;
+						const message = this.getNodeParameter('message', i);
+						const options = this.getNodeParameter('options', i);
+						download = this.getNodeParameter('download', i);
 
 						qs.message = message;
 

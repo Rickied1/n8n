@@ -192,8 +192,8 @@ export class MonicaCrm implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		let responseData;
 
@@ -225,7 +225,7 @@ export class MonicaCrm implements INodeType {
 							summary: this.getNodeParameter('summary', i),
 						} as IDataObject;
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						if (Object.keys(additionalFields).length) {
 							Object.assign(body, additionalFields);
@@ -290,7 +290,7 @@ export class MonicaCrm implements INodeType {
 							summary: data.summary,
 						} as IDataObject;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						if (Object.keys(updateFields).length) {
 							Object.assign(body, updateFields);
@@ -381,7 +381,7 @@ export class MonicaCrm implements INodeType {
 							called_at: data.called_at,
 						} as IDataObject;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						if (Object.keys(updateFields).length) {
 							Object.assign(body, updateFields);
@@ -486,7 +486,7 @@ export class MonicaCrm implements INodeType {
 						// https://www.monicahq.com/api/contacts#list-all-your-contacts
 
 						const qs = {} as IDataObject;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const filters = this.getNodeParameter('filters', i);
 
 						if (Object.keys(filters).length) {
 							Object.assign(qs, filters);
@@ -778,7 +778,7 @@ export class MonicaCrm implements INodeType {
 
 						// https://www.monicahq.com/api/conversations#update-a-message-in-a-conversation
 						const conversationId = this.getNodeParameter('conversationId', i);
-						const messageId = this.getNodeParameter('messageId', i) as string;
+						const messageId = this.getNodeParameter('messageId', i);
 						const endpoint = `/conversations/${conversationId}/messages/${messageId}`;
 
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
@@ -869,7 +869,7 @@ export class MonicaCrm implements INodeType {
 
 						const { data } = await monicaCrmApiRequest.call(this, 'GET', `/journal/${journalId}`);
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						const body = {
 							post: data.post,
@@ -953,7 +953,7 @@ export class MonicaCrm implements INodeType {
 
 						const noteId = this.getNodeParameter('noteId', i);
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						const { data } = await monicaCrmApiRequest.call(this, 'GET', `/notes/${noteId}`);
 
@@ -985,7 +985,7 @@ export class MonicaCrm implements INodeType {
 
 						// https://www.monicahq.com/api/notes#create-a-reminder
 
-						const initialDate = this.getNodeParameter('initialDate', i) as string;
+						const initialDate = this.getNodeParameter('initialDate', i);
 
 						const body = {
 							contact_id: this.getNodeParameter('contactId', i),
@@ -995,7 +995,7 @@ export class MonicaCrm implements INodeType {
 							title: this.getNodeParameter('title', i),
 						} as IDataObject;
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						if (Object.keys(additionalFields).length) {
 							Object.assign(body, additionalFields);
@@ -1060,7 +1060,7 @@ export class MonicaCrm implements INodeType {
 							title: data.title,
 						} as IDataObject;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						if (Object.keys(updateFields).length) {
 							Object.assign(body, updateFields);
@@ -1165,7 +1165,7 @@ export class MonicaCrm implements INodeType {
 							title: this.getNodeParameter('title', i),
 						} as IDataObject;
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						if (Object.keys(additionalFields).length) {
 							Object.assign(body, additionalFields);
@@ -1227,7 +1227,7 @@ export class MonicaCrm implements INodeType {
 							completed: data.completed,
 						} as IDataObject;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						if (Object.keys(updateFields).length) {
 							Object.assign(body, updateFields);

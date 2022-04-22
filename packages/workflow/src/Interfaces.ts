@@ -480,6 +480,62 @@ export interface IN8nRequestOperationPaginationOffset extends IN8nRequestOperati
 	};
 }
 
+type StringReturnTypeParam =
+	| 'binaryPropertyName'
+	| 'binaryProperty'
+	| 'company'
+	| 'color'
+	| 'currency'
+	| 'description'
+	| 'email'
+	| 'event'
+	| 'from'
+	| 'message'
+	| 'name'
+	| 'id'
+	| 'password'
+	| 'operation'
+	| 'path'
+	| 'query'
+	| 'range'
+	| 'resource'
+	| 'source'
+	| 'subject'
+	| 'text'
+	| 'title'
+	| 'to'
+	| 'topic'
+	| 'url';
+
+type NumberReturnTypeParam = 'limit';
+
+type BooleanReturnTypeParam =
+	| 'binaryData'
+	| 'download'
+	| 'jsonParameters'
+	| 'returnAll'
+	| 'rawData'
+	| 'resolveData'
+	| 'simple';
+
+type IDataObjectReturnTypeParam = 'additionalFields' | 'filters' | 'options' | 'updateFields';
+
+type StringEndPattern =
+	| 'Url'
+	| 'Id'
+	| 'Color'
+	| 'Name'
+	| 'name'
+	| 'Path'
+	| 'Key'
+	| 'Date'
+	| 'Json'
+	| 'Type'
+	| 'Email'
+	| 'Slug';
+
+type IDataObjectEndPattern = 'Ui';
+
 export interface IExecuteFunctions {
 	continueOnFail(): boolean;
 	evaluateExpression(
@@ -495,16 +551,25 @@ export interface IExecuteFunctions {
 	getInputData(inputIndex?: number, inputName?: string): INodeExecutionData[];
 	getMode(): WorkflowExecuteMode;
 	getNode(): INode;
-	getNodeParameter<T extends { resource: string }>(
-		parameterName: 'resource',
-		itemIndex?: number,
-	): T['resource'];
-	// getNodeParameter(parameterName: 'operation', itemIndex?: number): string;
+	//------------------------------------------------
+	getNodeParameter(parameterName: NumberReturnTypeParam, itemIndex: number): number;
+	getNodeParameter(parameterName: StringReturnTypeParam, itemIndex: number): string;
+	getNodeParameter(parameterName: BooleanReturnTypeParam, itemIndex: number): boolean;
+	getNodeParameter(parameterName: IDataObjectReturnTypeParam, itemIndex: number): IDataObject;
+	getNodeParameter<T extends `${string}${StringEndPattern}`>(
+		parameterName: T,
+		itemIndex: number,
+	): string;
+	getNodeParameter<T extends `${string}${IDataObjectEndPattern}`>(
+		parameterName: T,
+		itemIndex: number,
+	): IDataObject;
 	getNodeParameter(
 		parameterName: string,
 		itemIndex: number,
 		fallbackValue?: any,
 	): NodeParameterValue | INodeParameters | NodeParameterValue[] | INodeParameters[] | object;
+	//--------------------------------------------------
 	getWorkflowDataProxy(itemIndex: number): IWorkflowDataProxyData;
 	getWorkflowStaticData(type: string): IDataObject;
 	getRestApiUrl(): string;

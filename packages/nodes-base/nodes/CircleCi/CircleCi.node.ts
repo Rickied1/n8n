@@ -64,15 +64,15 @@ export class CircleCi implements INodeType {
 		const length = items.length as unknown as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'pipeline') {
 					if (operation === 'get') {
 						const vcs = this.getNodeParameter('vcs', i) as string;
-						let slug = this.getNodeParameter('projectSlug', i) as string;
+						let slug = this.getNodeParameter('projectSlug', i);
 						const pipelineNumber = this.getNodeParameter('pipelineNumber', i) as number;
 
 						slug = slug.replace(new RegExp(/\//g), '%2F');
@@ -83,9 +83,9 @@ export class CircleCi implements INodeType {
 					}
 					if (operation === 'getAll') {
 						const vcs = this.getNodeParameter('vcs', i) as string;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						let slug = this.getNodeParameter('projectSlug', i) as string;
+						const filters = this.getNodeParameter('filters', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
+						let slug = this.getNodeParameter('projectSlug', i);
 
 						slug = slug.replace(new RegExp(/\//g), '%2F');
 
@@ -99,7 +99,7 @@ export class CircleCi implements INodeType {
 							responseData = await circleciApiRequestAllItems.call(this, 'items', 'GET', endpoint, {}, qs);
 
 						} else {
-							qs.limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = this.getNodeParameter('limit', i);
 							responseData = await circleciApiRequest.call(this, 'GET', endpoint, {}, qs);
 							responseData = responseData.items;
 							responseData = responseData.splice(0, qs.limit);
@@ -108,9 +108,9 @@ export class CircleCi implements INodeType {
 
 					if (operation === 'trigger') {
 						const vcs = this.getNodeParameter('vcs', i) as string;
-						let slug = this.getNodeParameter('projectSlug', i) as string;
+						let slug = this.getNodeParameter('projectSlug', i);
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						slug = slug.replace(new RegExp(/\//g), '%2F');
 

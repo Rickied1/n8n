@@ -122,11 +122,11 @@ export async function handleBinaryData(
 	endpoint: string,
 ) {
 	const data = await wiseApiRequest.call(this, 'GET', endpoint, {}, {}, { encoding: null });
-	const binaryProperty = this.getNodeParameter('binaryProperty', i) as string;
+	const binaryProperty = this.getNodeParameter('binaryProperty', i);
 
 	items[i].binary = items[i].binary ?? {};
 	items[i].binary![binaryProperty] = await this.helpers.prepareBinaryData(data);
-	items[i].binary![binaryProperty].fileName = this.getNodeParameter('fileName', i) as string;
+	items[i].binary![binaryProperty].fileName = this.getNodeParameter('fileName', i);
 	items[i].binary![binaryProperty].fileExtension = 'pdf';
 
 	return items;

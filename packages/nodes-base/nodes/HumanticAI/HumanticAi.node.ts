@@ -67,17 +67,17 @@ export class HumanticAi implements INodeType {
 		const length = items.length as unknown as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			if (resource === 'profile') {
 				if (operation === 'create') {
-					const userId = this.getNodeParameter('userId', i) as string;
+					const userId = this.getNodeParameter('userId', i);
 					const sendResume = this.getNodeParameter('sendResume', i) as boolean;
 					qs.userid = userId;
 
 					if (sendResume) {
-						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
 						if (items[i].binary === undefined) {
 							throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
@@ -120,8 +120,8 @@ export class HumanticAi implements INodeType {
 					}
 				}
 				if (operation === 'get') {
-					const userId = this.getNodeParameter('userId', i) as string;
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const userId = this.getNodeParameter('userId', i);
+					const options = this.getNodeParameter('options', i);
 
 					qs.userid = userId;
 
@@ -133,12 +133,12 @@ export class HumanticAi implements INodeType {
 					responseData = responseData.results;
 				}
 				if (operation === 'update') {
-					const userId = this.getNodeParameter('userId', i) as string;
+					const userId = this.getNodeParameter('userId', i);
 					const sendResume = this.getNodeParameter('sendResume', i) as string;
 					qs.userid = userId;
 
 					if (sendResume) {
-						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
 						if (items[i].binary === undefined) {
 							throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
@@ -172,7 +172,7 @@ export class HumanticAi implements INodeType {
 						);
 						responseData = responseData.data;
 					} else {
-						const text = this.getNodeParameter('text', i) as string;
+						const text = this.getNodeParameter('text', i);
 						const body: IDataObject = {
 							text,
 						};

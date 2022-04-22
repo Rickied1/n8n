@@ -66,23 +66,23 @@ export class Strava implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 
 			try {
 				if (resource === 'activity') {
 					//https://developers.strava.com/docs/reference/#api-Activities-createActivity
 					if (operation === 'create') {
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 
 						const type = this.getNodeParameter('type', i) as string;
 
-						const startDate = this.getNodeParameter('startDate', i) as string;
+						const startDate = this.getNodeParameter('startDate', i);
 
 						const elapsedTime = this.getNodeParameter('elapsedTime', i) as number;
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						if (additionalFields.trainer === true) {
 							additionalFields.trainer = 1;
@@ -105,7 +105,7 @@ export class Strava implements INodeType {
 					}
 					//https://developers.strava.com/docs/reference/#api-Activities-getActivityById
 					if (operation === 'get') {
-						const activityId = this.getNodeParameter('activityId', i) as string;
+						const activityId = this.getNodeParameter('activityId', i);
 
 						responseData = await stravaApiRequest.call(this, 'GET', `/activities/${activityId}`);
 					}
@@ -118,20 +118,20 @@ export class Strava implements INodeType {
 							'getLaps': 'laps',
 						};
 
-						const activityId = this.getNodeParameter('activityId', i) as string;
+						const activityId = this.getNodeParameter('activityId', i);
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						responseData = await stravaApiRequest.call(this, 'GET', `/activities/${activityId}/${path[operation]}`);
 
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 					}
 					//https://developers.strava.com/docs/reference/#api-Streams-getActivityStreams
 					if (operation === 'getStreams') {
-						const activityId = this.getNodeParameter('activityId', i) as string;
+						const activityId = this.getNodeParameter('activityId', i);
 						const keys = this.getNodeParameter('keys', i) as string[];
 						qs.keys = keys.toString();
 						qs.key_by_type = true;
@@ -140,22 +140,22 @@ export class Strava implements INodeType {
 					}
 					//https://developers.mailerlite.com/reference#subscribers
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						if (returnAll) {
 
 							responseData = await stravaApiRequestAllItems.call(this, 'GET', `/activities`, {}, qs);
 						} else {
-							qs.per_page = this.getNodeParameter('limit', i) as number;
+							qs.per_page = this.getNodeParameter('limit', i);
 
 							responseData = await stravaApiRequest.call(this, 'GET', `/activities`, {}, qs);
 						}
 					}
 					//https://developers.strava.com/docs/reference/#api-Activities-updateActivityById
 					if (operation === 'update') {
-						const activityId = this.getNodeParameter('activityId', i) as string;
+						const activityId = this.getNodeParameter('activityId', i);
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						if (updateFields.trainer === true) {
 							updateFields.trainer = 1;

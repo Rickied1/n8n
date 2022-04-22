@@ -99,8 +99,8 @@ export class S3 implements INodeType {
 		const returnData: IDataObject[] = [];
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < items.length; i++) {
 			try {
 				const headers: IDataObject = {};
@@ -116,8 +116,8 @@ export class S3 implements INodeType {
 							throw new NodeApiError(this.getNode(), error);
 						}
 
-						const name = this.getNodeParameter('name', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const name = this.getNodeParameter('name', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						if (additionalFields.acl) {
 							headers['x-amz-acl'] = paramCase(additionalFields.acl as string);
 						}
@@ -166,11 +166,11 @@ export class S3 implements INodeType {
 					}
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListBuckets.html
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						if (returnAll) {
 							responseData = await s3ApiRequestSOAPAllItems.call(this, 'ListAllMyBucketsResult.Buckets.Bucket', '', 'GET', '');
 						} else {
-							qs.limit = this.getNodeParameter('limit', 0) as number;
+							qs.limit = this.getNodeParameter('limit', 0);
 							responseData = await s3ApiRequestSOAPAllItems.call(this, 'ListAllMyBucketsResult.Buckets.Bucket', '', 'GET', '', '', qs);
 							responseData = responseData.slice(0, qs.limit);
 						}
@@ -179,9 +179,9 @@ export class S3 implements INodeType {
 
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
 					if (operation === 'search') {
-						const bucketName = this.getNodeParameter('bucketName', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+						const bucketName = this.getNodeParameter('bucketName', i);
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const additionalFields = this.getNodeParameter('additionalFields', 0);
 
 						if (additionalFields.prefix) {
 							qs['prefix'] = additionalFields.prefix as string;
@@ -217,7 +217,7 @@ export class S3 implements INodeType {
 						if (returnAll) {
 							responseData = await s3ApiRequestSOAPAllItems.call(this, 'ListBucketResult.Contents', bucketName, 'GET', '', '', qs, {}, {}, region);
 						} else {
-							qs['max-keys'] = this.getNodeParameter('limit', 0) as number;
+							qs['max-keys'] = this.getNodeParameter('limit', 0);
 							responseData = await s3ApiRequestSOAP.call(this, bucketName, 'GET', '', '', qs, {}, {}, region);
 							responseData = responseData.ListBucketResult.Contents;
 						}
@@ -231,9 +231,9 @@ export class S3 implements INodeType {
 				if (resource === 'folder') {
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
 					if (operation === 'create') {
-						const bucketName = this.getNodeParameter('bucketName', i) as string;
-						const folderName = this.getNodeParameter('folderName', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const bucketName = this.getNodeParameter('bucketName', i);
+						const folderName = this.getNodeParameter('folderName', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						let path = `/${folderName}/`;
 
 						if (additionalFields.requesterPays) {
@@ -254,8 +254,8 @@ export class S3 implements INodeType {
 					}
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObjects.html
 					if (operation === 'delete') {
-						const bucketName = this.getNodeParameter('bucketName', i) as string;
-						const folderKey = this.getNodeParameter('folderKey', i) as string;
+						const bucketName = this.getNodeParameter('bucketName', i);
+						const folderKey = this.getNodeParameter('folderKey', i);
 
 						responseData = await s3ApiRequestSOAP.call(this, bucketName, 'GET', '', '', { location: '' });
 
@@ -303,9 +303,9 @@ export class S3 implements INodeType {
 					}
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
 					if (operation === 'getAll') {
-						const bucketName = this.getNodeParameter('bucketName', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const options = this.getNodeParameter('options', 0) as IDataObject;
+						const bucketName = this.getNodeParameter('bucketName', i);
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const options = this.getNodeParameter('options', 0);
 
 						if (options.folderKey) {
 							qs['prefix'] = options.folderKey as string;
@@ -324,7 +324,7 @@ export class S3 implements INodeType {
 						if (returnAll) {
 							responseData = await s3ApiRequestSOAPAllItems.call(this, 'ListBucketResult.Contents', bucketName, 'GET', '', '', qs, {}, {}, region);
 						} else {
-							qs.limit = this.getNodeParameter('limit', 0) as number;
+							qs.limit = this.getNodeParameter('limit', 0);
 							responseData = await s3ApiRequestSOAPAllItems.call(this, 'ListBucketResult.Contents', bucketName, 'GET', '', '', qs, {}, {}, region);
 						}
 						if (Array.isArray(responseData)) {
@@ -339,9 +339,9 @@ export class S3 implements INodeType {
 				if (resource === 'file') {
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_CopyObject.html
 					if (operation === 'copy') {
-						const sourcePath = this.getNodeParameter('sourcePath', i) as string;
-						const destinationPath = this.getNodeParameter('destinationPath', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const sourcePath = this.getNodeParameter('sourcePath', i);
+						const destinationPath = this.getNodeParameter('destinationPath', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						headers['x-amz-copy-source'] = sourcePath;
 
@@ -417,9 +417,9 @@ export class S3 implements INodeType {
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_GetObject.html
 					if (operation === 'download') {
 
-						const bucketName = this.getNodeParameter('bucketName', i) as string;
+						const bucketName = this.getNodeParameter('bucketName', i);
 
-						const fileKey = this.getNodeParameter('fileKey', i) as string;
+						const fileKey = this.getNodeParameter('fileKey', i);
 
 						const fileName = fileKey.split('/')[fileKey.split('/').length - 1];
 
@@ -452,7 +452,7 @@ export class S3 implements INodeType {
 
 						items[i] = newItem;
 
-						const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i) as string;
+						const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i);
 
 						const data = Buffer.from(response.body as string, 'utf8');
 
@@ -460,11 +460,11 @@ export class S3 implements INodeType {
 					}
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_DeleteObject.html
 					if (operation === 'delete') {
-						const bucketName = this.getNodeParameter('bucketName', i) as string;
+						const bucketName = this.getNodeParameter('bucketName', i);
 
-						const fileKey = this.getNodeParameter('fileKey', i) as string;
+						const fileKey = this.getNodeParameter('fileKey', i);
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						if (options.versionId) {
 							qs.versionId = options.versionId as string;
@@ -480,9 +480,9 @@ export class S3 implements INodeType {
 					}
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_ListObjectsV2.html
 					if (operation === 'getAll') {
-						const bucketName = this.getNodeParameter('bucketName', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const options = this.getNodeParameter('options', 0) as IDataObject;
+						const bucketName = this.getNodeParameter('bucketName', i);
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const options = this.getNodeParameter('options', 0);
 
 						if (options.folderKey) {
 							qs['prefix'] = options.folderKey as string;
@@ -503,7 +503,7 @@ export class S3 implements INodeType {
 						if (returnAll) {
 							responseData = await s3ApiRequestSOAPAllItems.call(this, 'ListBucketResult.Contents', bucketName, 'GET', '', '', qs, {}, {}, region);
 						} else {
-							qs.limit = this.getNodeParameter('limit', 0) as number;
+							qs.limit = this.getNodeParameter('limit', 0);
 							responseData = await s3ApiRequestSOAPAllItems.call(this, 'ListBucketResult.Contents', bucketName, 'GET', '', '', qs, {}, {}, region);
 							responseData = responseData.splice(0, qs.limit);
 						}
@@ -517,11 +517,11 @@ export class S3 implements INodeType {
 					}
 					//https://docs.aws.amazon.com/AmazonS3/latest/API/API_PutObject.html
 					if (operation === 'upload') {
-						const bucketName = this.getNodeParameter('bucketName', i) as string;
-						const fileName = this.getNodeParameter('fileName', i) as string;
-						const isBinaryData = this.getNodeParameter('binaryData', i) as boolean;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-						const tagsValues = (this.getNodeParameter('tagsUi', i) as IDataObject).tagsValues as IDataObject[];
+						const bucketName = this.getNodeParameter('bucketName', i);
+						const fileName = this.getNodeParameter('fileName', i);
+						const isBinaryData = this.getNodeParameter('binaryData', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
+						const tagsValues = (this.getNodeParameter('tagsUi', i)).tagsValues as IDataObject[];
 						let path = '/';
 						let body;
 
@@ -588,7 +588,7 @@ export class S3 implements INodeType {
 						const region = responseData.LocationConstraint._;
 
 						if (isBinaryData) {
-							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
+							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0);
 
 							if (items[i].binary === undefined) {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');

@@ -9,6 +9,7 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 	NodeApiError,
 	NodeOperationError,
 } from 'n8n-workflow';
@@ -710,7 +711,7 @@ export class Mandrill implements INodeType {
 				try {
 					templates = await mandrillApiRequest.call(this, '/templates', 'POST', '/list');
 				} catch (error) {
-					throw new NodeApiError(this.getNode(), error);
+					throw new NodeApiError(this.getNode(), error as JsonObject);
 				}
 				for (const template of templates) {
 					const templateName = template.name;
@@ -733,17 +734,17 @@ export class Mandrill implements INodeType {
 		const items = this.getInputData();
 		let responseData;
 		let emailSentResponse;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < items.length; i++) {
 			try {
 				if (resource === 'message') {
 
-					const options = this.getNodeParameter('options', i) as Options;
-					const fromEmail = this.getNodeParameter('fromEmail', i) as string;
-					const toEmail = this.getNodeParameter('toEmail', i) as string;
-					const jsonActive = this.getNodeParameter('jsonParameters', i) as boolean;
+					const options = this.getNodeParameter('options', i) as unknown as Options;
+					const fromEmail = this.getNodeParameter('fromEmail', i);
+					const toEmail = this.getNodeParameter('toEmail', i);
+					const jsonActive = this.getNodeParameter('jsonParameters', i);
 					const toEmailArray = getToEmailArray(toEmail);
 
 					const message: Message = {
@@ -797,14 +798,14 @@ export class Mandrill implements INodeType {
 
 					if (jsonActive) {
 
-						body.message.headers = validateJSON(this.getNodeParameter('headersJson', i) as string);
-						body.message.metadata = validateJSON(this.getNodeParameter('metadataJson', i) as string);
-						body.message.global_merge_vars = validateJSON(this.getNodeParameter('mergeVarsJson', i) as string);
-						body.message.attachments = validateJSON(this.getNodeParameter('attachmentsJson', i) as string);
+						body.message.headers = validateJSON(this.getNodeParameter('headersJson', i));
+						body.message.metadata = validateJSON(this.getNodeParameter('metadataJson', i));
+						body.message.global_merge_vars = validateJSON(this.getNodeParameter('mergeVarsJson', i));
+						body.message.attachments = validateJSON(this.getNodeParameter('attachmentsJson', i));
 
 					} else {
 
-						const headersUi = this.getNodeParameter('headersUi', i) as IDataObject;
+						const headersUi = this.getNodeParameter('headersUi', i);
 						if (!_.isEmpty(headersUi)) {
 							// @ts-ignore
 							body.message.headers = _.map(headersUi.headersValues, (o) => {
@@ -815,7 +816,7 @@ export class Mandrill implements INodeType {
 							});
 						}
 
-						const metadataUi = this.getNodeParameter('metadataUi', i) as IDataObject;
+						const metadataUi = this.getNodeParameter('metadataUi', i);
 						if (!_.isEmpty(metadataUi)) {
 							// @ts-ignore
 							body.message.metadata = _.map(metadataUi.metadataValues, (o: IDataObject) => {
@@ -825,7 +826,7 @@ export class Mandrill implements INodeType {
 							});
 						}
 
-						const mergeVarsUi = this.getNodeParameter('mergeVarsUi', i) as IDataObject;
+						const mergeVarsUi = this.getNodeParameter('mergeVarsUi', i);
 						if (!_.isEmpty(mergeVarsUi)) {
 							// @ts-ignore
 							body.message.global_merge_vars = _.map(mergeVarsUi.mergeVarsValues, (o: IDataObject) => {
@@ -836,7 +837,7 @@ export class Mandrill implements INodeType {
 							});
 						}
 
-						const attachmentsUi = this.getNodeParameter('attachmentsUi', i) as IDataObject;
+						const attachmentsUi = this.getNodeParameter('attachmentsUi', i);
 						let attachmentsBinary: Attachments[] = [], attachmentsValues: Attachments[] = [];
 						if (!_.isEmpty(attachmentsUi)) {
 
@@ -889,7 +890,7 @@ export class Mandrill implements INodeType {
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ error: error.message });
+					returnData.push({ error: (error as JsonObject).message });
 					continue;
 				}
 				throw error;

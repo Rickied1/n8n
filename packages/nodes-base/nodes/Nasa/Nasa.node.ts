@@ -921,8 +921,8 @@ export class Nasa implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		let responseData;
 		const qs: IDataObject = {};
@@ -941,7 +941,7 @@ export class Nasa implements INodeType {
 				// trigger an error in getNodeParameter dealt with in the catch block.
 				let additionalFields;
 				try {
-					additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					additionalFields = this.getNodeParameter('additionalFields', i);
 				} catch (error) {
 					additionalFields = {} as IDataObject;
 				}
@@ -975,7 +975,7 @@ export class Nasa implements INodeType {
 
 					if (operation === 'get') {
 
-						const asteroidId = this.getNodeParameter('asteroidId', i) as IDataObject;
+						const asteroidId = this.getNodeParameter('asteroidId', i) as unknown as IDataObject;
 
 						includeCloseApproachData = additionalFields.includeCloseApproachData as boolean;
 
@@ -990,10 +990,10 @@ export class Nasa implements INodeType {
 
 					if (operation === 'getAll') {
 
-						returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						returnAll = this.getNodeParameter('returnAll', 0);
 
 						if (returnAll === false) {
-							qs.size = this.getNodeParameter('limit', 0) as number;
+							qs.size = this.getNodeParameter('limit', 0);
 						}
 
 						propertyName = 'near_earth_objects';
@@ -1172,7 +1172,7 @@ export class Nasa implements INodeType {
 
 				if (resource === 'earthImagery') {
 
-					const binaryProperty = this.getNodeParameter('binaryPropertyName', i) as string;
+					const binaryProperty = this.getNodeParameter('binaryPropertyName', i);
 
 					const data = await nasaApiRequest.call(this, 'GET', endpoint, qs, { encoding: null });
 
@@ -1195,7 +1195,7 @@ export class Nasa implements INodeType {
 
 					if (download === true) {
 
-						const binaryProperty = this.getNodeParameter('binaryPropertyName', i) as string;
+						const binaryProperty = this.getNodeParameter('binaryPropertyName', i);
 
 						const data = await nasaApiRequest.call(this, 'GET', endpoint, qs, { encoding: null }, responseData.hdurl);
 

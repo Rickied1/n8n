@@ -109,8 +109,8 @@ export class Iterable implements INodeType {
 		const timezone = this.getTimezone();
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		if (resource === 'event') {
 			if (operation === 'track') {
@@ -119,9 +119,9 @@ export class Iterable implements INodeType {
 
 				for (let i = 0; i < length; i++) {
 
-					const name = this.getNodeParameter('name', i) as string;
+					const name = this.getNodeParameter('name', i);
 
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					if (!additionalFields.email && !additionalFields.id) {
 						throw new NodeOperationError(this.getNode(), 'Either email or userId must be passed in to identify the user. Please add one of both via "Additional Fields". If both are passed in, email takes precedence.');
@@ -165,14 +165,14 @@ export class Iterable implements INodeType {
 
 					const value = this.getNodeParameter('value', i) as string;
 
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					const body: IDataObject = {};
 
 					if (identifier === 'email') {
 						body.email = value;
 					} else {
-						body.preferUserId = this.getNodeParameter('preferUserId', i) as boolean;
+						body.preferUserId = this.getNodeParameter('preferUserId', i) as unknown as boolean;
 						body.userId = value;
 					}
 
@@ -211,10 +211,10 @@ export class Iterable implements INodeType {
 					let endpoint;
 
 					if (by === 'email') {
-						const email = this.getNodeParameter('email', i) as string;
+						const email = this.getNodeParameter('email', i);
 						endpoint = `/users/${email}`;
 					} else {
-						const userId = this.getNodeParameter('userId', i) as string;
+						const userId = this.getNodeParameter('userId', i);
 						endpoint = `/users/byUserId/${userId}`;
 					}
 
@@ -240,11 +240,11 @@ export class Iterable implements INodeType {
 					let endpoint;
 
 					if (by === 'email') {
-						const email = this.getNodeParameter('email', i) as string;
+						const email = this.getNodeParameter('email', i);
 						endpoint = `/users/getByEmail`;
 						qs.email = email;
 					} else {
-						const userId = this.getNodeParameter('userId', i) as string;
+						const userId = this.getNodeParameter('userId', i);
 						endpoint = `/users/byUserId/${userId}`;
 					}
 
@@ -267,7 +267,7 @@ export class Iterable implements INodeType {
 		if (resource === 'userList') {
 			if (operation === 'add') {
 				//https://api.iterable.com/api/docs#lists_subscribe
-				const listId = this.getNodeParameter('listId', 0) as string;
+				const listId = this.getNodeParameter('listId', 0);
 
 				const identifier = this.getNodeParameter('identifier', 0) as string;
 
@@ -298,11 +298,11 @@ export class Iterable implements INodeType {
 
 			if (operation === 'remove') {
 				//https://api.iterable.com/api/docs#lists_unsubscribe
-				const listId = this.getNodeParameter('listId', 0) as string;
+				const listId = this.getNodeParameter('listId', 0);
 
 				const identifier = this.getNodeParameter('identifier', 0) as string;
 
-				const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+				const additionalFields = this.getNodeParameter('additionalFields', 0);
 
 				const body: IDataObject = {
 					listId: parseInt(listId, 10),

@@ -9,6 +9,7 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 	NodeOperationError,
 } from 'n8n-workflow';
 
@@ -449,8 +450,8 @@ export class Medium implements INodeType {
 		for (let i = 0; i < items.length; i++) {
 			qs = {};
 			try {
-				resource = this.getNodeParameter('resource', i) as string;
-				operation = this.getNodeParameter('operation', i) as string;
+				resource = this.getNodeParameter('resource', i);
+				operation = this.getNodeParameter('operation', i);
 
 				if (resource === 'post') {
 					//https://github.com/Medium/medium-api-docs
@@ -459,7 +460,7 @@ export class Medium implements INodeType {
 						//         post:create
 						// ----------------------------------
 
-						const title = this.getNodeParameter('title', i) as string;
+						const title = this.getNodeParameter('title', i);
 						const contentFormat = this.getNodeParameter('contentFormat', i) as string;
 						const content = this.getNodeParameter('content', i) as string;
 						bodyRequest = {
@@ -470,7 +471,7 @@ export class Medium implements INodeType {
 
 						};
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						if (additionalFields.tags) {
 							const tags = additionalFields.tags as string;
 							bodyRequest.tags = tags.split(',').map(name => {
@@ -503,7 +504,7 @@ export class Medium implements INodeType {
 
 						// if user wants to publish it under a specific publication
 						if (underPublication) {
-							const publicationId = this.getNodeParameter('publicationId', i) as number;
+							const publicationId = this.getNodeParameter('publicationId', i) as unknown as number;
 
 							responseData = await mediumApiRequest.call(
 								this,
@@ -542,7 +543,7 @@ export class Medium implements INodeType {
 						//         publication:getAll
 						// ----------------------------------
 
-						const returnAll = this.getNodeParameter('returnAll', i) as string;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const user = await mediumApiRequest.call(
 							this,
@@ -561,7 +562,7 @@ export class Medium implements INodeType {
 						responseData = responseData.data;
 
 						if (!returnAll) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 					}
@@ -573,7 +574,7 @@ export class Medium implements INodeType {
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ error: error.message });
+					returnData.push({ error: (error as JsonObject).message });
 					continue;
 				}
 				throw error;

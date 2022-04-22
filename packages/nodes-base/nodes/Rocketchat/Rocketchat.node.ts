@@ -401,17 +401,17 @@ export class Rocketchat implements INodeType {
 		const length = (items.length as unknown) as number;
 		let responseData;
 		const returnData: IDataObject[] = [];
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'chat') {
 					//https://rocket.chat/docs/developer-guides/rest-api/chat/postmessage
 					if (operation === 'postMessage') {
 						const channel = this.getNodeParameter('channel', i) as string;
-						const text = this.getNodeParameter('text', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						const jsonActive = this.getNodeParameter('jsonParameters', i) as boolean;
+						const text = this.getNodeParameter('text', i);
+						const options = this.getNodeParameter('options', i);
+						const jsonActive = this.getNodeParameter('jsonParameters', i);
 
 						const body: IPostMessageBody = {
 							channel,
@@ -491,7 +491,7 @@ export class Rocketchat implements INodeType {
 								body.attachments = attachments;
 							}
 						} else {
-							body.attachments = validateJSON(this.getNodeParameter('attachmentsJson', i) as string);
+							body.attachments = validateJSON(this.getNodeParameter('attachmentsJson', i));
 						}
 
 						responseData = await rocketchatApiRequest.call(this, '/chat', 'POST', 'postMessage', body);

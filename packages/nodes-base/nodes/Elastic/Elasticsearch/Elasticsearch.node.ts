@@ -79,7 +79,7 @@ export class Elasticsearch implements INodeType {
 		const returnData: IDataObject[] = [];
 
 		const resource = this.getNodeParameter('resource', 0) as 'document' | 'index';
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const operation = this.getNodeParameter('operation', 0);
 
 		let responseData;
 
@@ -119,7 +119,7 @@ export class Elasticsearch implements INodeType {
 					const documentId = this.getNodeParameter('documentId', i);
 
 					const qs = {} as IDataObject;
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const options = this.getNodeParameter('options', i);
 
 					if (Object.keys(options).length) {
 						Object.assign(qs, options);
@@ -129,7 +129,7 @@ export class Elasticsearch implements INodeType {
 					const endpoint = `/${indexId}/_doc/${documentId}`;
 					responseData = await elasticsearchApiRequest.call(this, 'GET', endpoint, {}, qs);
 
-					const simple = this.getNodeParameter('simple', i) as IDataObject;
+					const simple = this.getNodeParameter('simple', i);
 
 					if (simple) {
 						responseData = {
@@ -168,7 +168,7 @@ export class Elasticsearch implements INodeType {
 					responseData = await elasticsearchApiRequest.call(this, 'GET', `/${indexId}/_search`, body, qs);
 					responseData = responseData.hits.hits;
 
-					const simple = this.getNodeParameter('simple', 0) as IDataObject;
+					const simple = this.getNodeParameter('simple', 0);
 
 					if (simple) {
 						responseData = responseData.map((item: IDataObject) => {
@@ -210,7 +210,7 @@ export class Elasticsearch implements INodeType {
 					}
 
 					const qs = {} as IDataObject;
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					if (Object.keys(additionalFields).length) {
 						Object.assign(qs, omit(additionalFields, ['documentId']));
@@ -285,7 +285,7 @@ export class Elasticsearch implements INodeType {
 
 					const body = {} as IDataObject;
 					const qs = {} as IDataObject;
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					if (Object.keys(additionalFields).length) {
 						const { aliases, mappings, settings, ...rest } = additionalFields;
@@ -318,10 +318,10 @@ export class Elasticsearch implements INodeType {
 
 					// https://www.elastic.co/guide/en/elasticsearch/reference/current/indices-get-index.html
 
-					const indexId = this.getNodeParameter('indexId', i) as string;
+					const indexId = this.getNodeParameter('indexId', i);
 
 					const qs = {} as IDataObject;
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					if (Object.keys(additionalFields).length) {
 						Object.assign(qs, additionalFields);
@@ -344,7 +344,7 @@ export class Elasticsearch implements INodeType {
 					const returnAll = this.getNodeParameter('returnAll', i);
 
 					if (!returnAll) {
-						const limit = this.getNodeParameter('limit', i) as number;
+						const limit = this.getNodeParameter('limit', i);
 						responseData = responseData.slice(0, limit);
 					}
 

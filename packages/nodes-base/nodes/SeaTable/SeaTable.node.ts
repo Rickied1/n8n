@@ -127,8 +127,8 @@ export class SeaTable implements INodeType {
 		const returnData: IDataObject[] = [];
 		let responseData;
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		const body: IDataObject = {};
 		const qs: IDataObject = {};
@@ -197,8 +197,8 @@ export class SeaTable implements INodeType {
 			} else if (operation === 'get') {
 				for (let i = 0; i < items.length; i++) {
 					try {
-						const tableId = this.getNodeParameter('tableId', 0) as string;
-						const rowId = this.getNodeParameter('rowId', i) as string;
+						const tableId = this.getNodeParameter('tableId', 0);
+						const rowId = this.getNodeParameter('rowId', i);
 						const response = await seaTableApiRequest.call(this, ctx, 'GET', `/dtable-server/api/v1/dtables/{{dtable_uuid}}/rows/${rowId}`, {}, { table_id: tableId, convert: true }) as IDataObject;
 						returnData.push(response);
 
@@ -222,16 +222,16 @@ export class SeaTable implements INodeType {
 					for (let i = 0; i < items.length; i++) {
 						const endpoint = `/dtable-server/api/v1/dtables/{{dtable_uuid}}/rows/`;
 						qs.table_name = tableName;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const filters = this.getNodeParameter('filters', i);
+						const options = this.getNodeParameter('options', i);
+						const returnAll = this.getNodeParameter('returnAll', 0);
 
 						Object.assign(qs, filters, options);
 
 						if (returnAll) {
 							responseData = await setableApiRequestAllItems.call(this, ctx, 'rows', 'GET', endpoint, body, qs);
 						} else {
-							qs.limit = this.getNodeParameter('limit', 0) as number;
+							qs.limit = this.getNodeParameter('limit', 0);
 							responseData = await seaTableApiRequest.call(this, ctx, 'GET', endpoint, body, qs);
 							responseData = responseData.rows;
 						}
@@ -250,7 +250,7 @@ export class SeaTable implements INodeType {
 				for (let i = 0; i < items.length; i++) {
 					try {
 						const tableName = this.getNodeParameter('tableName', 0) as string;
-						const rowId = this.getNodeParameter('rowId', i) as string;
+						const rowId = this.getNodeParameter('rowId', i);
 						const body: IDataObject = {
 							table_name: tableName,
 							row_id: rowId,
@@ -279,7 +279,7 @@ export class SeaTable implements INodeType {
 				let rowInput: IRowObject = {};
 
 				for (let i = 0; i < items.length; i++) {
-					const rowId = this.getNodeParameter('rowId', i) as string;
+					const rowId = this.getNodeParameter('rowId', i);
 					rowInput = {} as IRowObject;
 					try {
 						if (fieldsToSend === 'autoMapInputData') {

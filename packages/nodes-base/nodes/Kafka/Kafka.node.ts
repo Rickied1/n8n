@@ -207,7 +207,7 @@ export class Kafka implements INodeType {
 		let responseData: IDataObject[];
 
 		try {
-			const options = this.getNodeParameter('options', 0) as IDataObject;
+			const options = this.getNodeParameter('options', 0);
 			const sendInputData = this.getNodeParameter('sendInputData', 0) as boolean;
 
 			const useSchemaRegistry = this.getNodeParameter('useSchemaRegistry', 0) as boolean;
@@ -259,7 +259,7 @@ export class Kafka implements INodeType {
 				if (sendInputData === true) {
 					message = JSON.stringify(items[i].json);
 				} else {
-					message = this.getNodeParameter('message', i) as string;
+					message = this.getNodeParameter('message', i);
 				}
 
 				if (useSchemaRegistry) {
@@ -276,21 +276,21 @@ export class Kafka implements INodeType {
 					}
 				}
 
-				const topic = this.getNodeParameter('topic', i) as string;
+				const topic = this.getNodeParameter('topic', i);
 
-				const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+				const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 				let headers;
 
 				if (jsonParameters === true) {
-					headers = this.getNodeParameter('headerParametersJson', i) as string;
+					headers = this.getNodeParameter('headerParametersJson', i);
 					try {
 						headers = JSON.parse(headers);
 					} catch (exception) {
 						throw new NodeOperationError(this.getNode(), 'Headers must be a valid json');
 					}
 				} else {
-					const values = (this.getNodeParameter('headersUi', i) as IDataObject).headerValues as IDataObject[];
+					const values = (this.getNodeParameter('headersUi', i)).headerValues as IDataObject[];
 					headers = {};
 					if (values !== undefined) {
 						for (const value of values) {

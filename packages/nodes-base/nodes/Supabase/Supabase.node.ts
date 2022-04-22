@@ -127,13 +127,13 @@ export class Supabase implements INodeType {
 		const returnData: IDataObject[] = [];
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		if (resource === 'row') {
 			if (operation === 'create') {
 				const records: IDataObject[] = [];
-				const tableId = this.getNodeParameter('tableId', 0) as string;
+				const tableId = this.getNodeParameter('tableId', 0);
 				for (let i = 0; i < length; i++) {
 					const record: IDataObject = {};
 					const dataToSend = this.getNodeParameter('dataToSend', 0) as 'defineBelow' | 'autoMapInputData';
@@ -171,7 +171,7 @@ export class Supabase implements INodeType {
 			}
 
 			if (operation === 'delete') {
-				const tableId = this.getNodeParameter('tableId', 0) as string;
+				const tableId = this.getNodeParameter('tableId', 0);
 				const filterType = this.getNodeParameter('filterType', 0) as string;
 				let endpoint = `/${tableId}`;
 				for (let i = 0; i < length; i++) {
@@ -214,7 +214,7 @@ export class Supabase implements INodeType {
 			}
 
 			if (operation === 'get') {
-				const tableId = this.getNodeParameter('tableId', 0) as string;
+				const tableId = this.getNodeParameter('tableId', 0);
 				const endpoint = `/${tableId}`;
 
 				for (let i = 0; i < length; i++) {
@@ -240,8 +240,8 @@ export class Supabase implements INodeType {
 			}
 
 			if (operation === 'getAll') {
-				const tableId = this.getNodeParameter('tableId', 0) as string;
-				const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+				const tableId = this.getNodeParameter('tableId', 0);
+				const returnAll = this.getNodeParameter('returnAll', 0);
 				const filterType = this.getNodeParameter('filterType', 0) as string;
 				let endpoint = `/${tableId}`;
 				for (let i = 0; i < length; i++) {
@@ -268,7 +268,7 @@ export class Supabase implements INodeType {
 					}
 
 					if (returnAll === false) {
-						qs.limit = this.getNodeParameter('limit', 0) as number;
+						qs.limit = this.getNodeParameter('limit', 0);
 					}
 
 					let rows;
@@ -286,7 +286,7 @@ export class Supabase implements INodeType {
 			}
 
 			if (operation === 'update') {
-				const tableId = this.getNodeParameter('tableId', 0) as string;
+				const tableId = this.getNodeParameter('tableId', 0);
 				const filterType = this.getNodeParameter('filterType', 0) as string;
 				let endpoint = `/${tableId}`;
 				for (let i = 0; i < length; i++) {

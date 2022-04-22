@@ -50,7 +50,7 @@ export async function quickBooksApiRequest(
 ): Promise<any> { // tslint:disable-line:no-any
 
 	const resource = this.getNodeParameter('resource', 0) as string;
-	const operation = this.getNodeParameter('operation', 0) as string;
+	const operation = this.getNodeParameter('operation', 0);
 
 	let isDownload = false;
 
@@ -183,7 +183,7 @@ export async function handleListing(
 
 	const returnAll = this.getNodeParameter('returnAll', i);
 
-	const filters = this.getNodeParameter('filters', i) as IDataObject;
+	const filters = this.getNodeParameter('filters', i);
 	if (filters.query) {
 		qs.query += ` ${filters.query}`;
 	}
@@ -191,7 +191,7 @@ export async function handleListing(
 	if (returnAll) {
 		return await quickBooksApiRequestAllItems.call(this, 'GET', endpoint, qs, {}, resource);
 	} else {
-		const limit = this.getNodeParameter('limit', i) as number;
+		const limit = this.getNodeParameter('limit', i);
 		qs.query += ` MAXRESULTS ${limit}`;
 		responseData = await quickBooksApiRequest.call(this, 'GET', endpoint, qs, {});
 		responseData = responseData.QueryResponse[capitalCase(resource)];
@@ -248,8 +248,8 @@ export async function handleBinaryData(
 	resource: string,
 	resourceId: string,
 ) {
-	const binaryProperty = this.getNodeParameter('binaryProperty', i) as string;
-	const fileName = this.getNodeParameter('fileName', i) as string;
+	const binaryProperty = this.getNodeParameter('binaryProperty', i);
+	const fileName = this.getNodeParameter('fileName', i);
 	const endpoint = `/v3/company/${companyId}/${resource}/${resourceId}/pdf`;
 	const data = await quickBooksApiRequest.call(this, 'GET', endpoint, {}, {}, { encoding: null });
 

@@ -182,9 +182,9 @@ export class Storyblok implements INodeType {
 		const length = items.length as unknown as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const source = this.getNodeParameter('source', 0) as string;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const source = this.getNodeParameter('source', 0);
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (source === 'contentApi') {
@@ -196,14 +196,14 @@ export class Storyblok implements INodeType {
 							responseData = responseData.story;
 						}
 						if (operation === 'getAll') {
-							const filters = this.getNodeParameter('filters', i) as string;
-							const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+							const filters = this.getNodeParameter('filters', i) as unknown as string;
+							const returnAll = this.getNodeParameter('returnAll', i);
 							Object.assign(qs, filters);
 
 							if (returnAll) {
 								responseData = await storyblokApiRequestAllItems.call(this, 'stories', 'GET', '/v1/cdn/stories', {}, qs);
 							} else {
-								const limit = this.getNodeParameter('limit', i) as number;
+								const limit = this.getNodeParameter('limit', i);
 								qs.per_page = limit;
 								responseData = await storyblokApiRequest.call(this, 'GET', `/v1/cdn/stories`, {}, qs);
 								responseData = responseData.stories;
@@ -215,10 +215,10 @@ export class Storyblok implements INodeType {
 					if (resource === 'story') {
 						// if (operation === 'create') {
 						// 	const space = this.getNodeParameter('space', i) as string;
-						// 	const name = this.getNodeParameter('name', i) as string;
+						// 	const name = this.getNodeParameter('name', i);
 						// 	const slug = this.getNodeParameter('slug', i) as string;
-						// 	const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
-						// 	const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						// 	const jsonParameters = this.getNodeParameter('jsonParameters', i);
+						// 	const additionalFields = this.getNodeParameter('additionalFields', i);
 						// 	const body: IDataObject = {
 						// 		name,
 						// 		slug,
@@ -271,28 +271,28 @@ export class Storyblok implements INodeType {
 						// }
 						if (operation === 'delete') {
 							const space = this.getNodeParameter('space', i) as string;
-							const storyId = this.getNodeParameter('storyId', i) as string;
+							const storyId = this.getNodeParameter('storyId', i);
 
 							responseData = await storyblokApiRequest.call(this, 'DELETE', `/v1/spaces/${space}/stories/${storyId}`);
 							responseData = responseData.story;
 						}
 						if (operation === 'get') {
 							const space = this.getNodeParameter('space', i) as string;
-							const storyId = this.getNodeParameter('storyId', i) as string;
+							const storyId = this.getNodeParameter('storyId', i);
 
 							responseData = await storyblokApiRequest.call(this, 'GET', `/v1/spaces/${space}/stories/${storyId}`);
 							responseData = responseData.story;
 						}
 						if (operation === 'getAll') {
 							const space = this.getNodeParameter('space', i) as string;
-							const filters = this.getNodeParameter('filters', i) as string;
-							const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+							const filters = this.getNodeParameter('filters', i) as unknown as string;
+							const returnAll = this.getNodeParameter('returnAll', i);
 							Object.assign(qs, filters);
 
 							if (returnAll) {
 								responseData = await storyblokApiRequestAllItems.call(this, 'stories', 'GET', `/v1/spaces/${space}/stories`, {}, qs);
 							} else {
-								const limit = this.getNodeParameter('limit', i) as number;
+								const limit = this.getNodeParameter('limit', i);
 								qs.per_page = limit;
 								responseData = await storyblokApiRequest.call(this, 'GET', `/v1/spaces/${space}/stories`, {}, qs);
 								responseData = responseData.stories;
@@ -300,8 +300,8 @@ export class Storyblok implements INodeType {
 						}
 						if (operation === 'publish') {
 							const space = this.getNodeParameter('space', i) as string;
-							const storyId = this.getNodeParameter('storyId', i) as string;
-							const options = this.getNodeParameter('options', i) as IDataObject;
+							const storyId = this.getNodeParameter('storyId', i);
+							const options = this.getNodeParameter('options', i);
 							const query: IDataObject = {};
 							// Not sure if these two options work
 							if (options.releaseId) {
@@ -316,7 +316,7 @@ export class Storyblok implements INodeType {
 						}
 						if (operation === 'unpublish') {
 							const space = this.getNodeParameter('space', i) as string;
-							const storyId = this.getNodeParameter('storyId', i) as string;
+							const storyId = this.getNodeParameter('storyId', i);
 
 							responseData = await storyblokApiRequest.call(this, 'GET', `/v1/spaces/${space}/stories/${storyId}/unpublish`);
 							responseData = responseData.story;

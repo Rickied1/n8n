@@ -121,15 +121,15 @@ export class Mindee implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'receipt') {
 					if (operation === 'predict') {
-						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
-						const rawData = this.getNodeParameter('rawData', i) as boolean;
+						const rawData = this.getNodeParameter('rawData', i);
 
 						if (items[i].binary === undefined) {
 							throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
@@ -170,9 +170,9 @@ export class Mindee implements INodeType {
 
 				if (resource === 'invoice') {
 					if (operation === 'predict') {
-						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
-						const rawData = this.getNodeParameter('rawData', i) as boolean;
+						const rawData = this.getNodeParameter('rawData', i);
 
 						if (items[i].binary === undefined) {
 							throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');

@@ -2109,8 +2109,8 @@ export class GoogleDrive implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < items.length; i++) {
 			try {
@@ -2132,7 +2132,7 @@ export class GoogleDrive implements INodeType {
 						//         create
 						// ----------------------------------
 
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 
 						const body: IDataObject = {
 							name,
@@ -2149,7 +2149,7 @@ export class GoogleDrive implements INodeType {
 						//         delete
 						// ----------------------------------
 
-						const driveId = this.getNodeParameter('driveId', i) as string;
+						const driveId = this.getNodeParameter('driveId', i);
 
 						await googleApiRequest.call(this, 'DELETE', `/drive/v3/drives/${driveId}`);
 
@@ -2160,7 +2160,7 @@ export class GoogleDrive implements INodeType {
 						//         get
 						// ----------------------------------
 
-						const driveId = this.getNodeParameter('driveId', i) as string;
+						const driveId = this.getNodeParameter('driveId', i);
 
 						const qs: IDataObject = {};
 
@@ -2174,7 +2174,7 @@ export class GoogleDrive implements INodeType {
 						// ----------------------------------
 						//         list
 						// ----------------------------------
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const qs: IDataObject = {};
 
@@ -2185,7 +2185,7 @@ export class GoogleDrive implements INodeType {
 						if (returnAll === true) {
 							response = await googleApiRequestAllItems.call(this, 'drives', 'GET', `/drive/v3/drives`, {}, qs);
 						} else {
-							qs.pageSize = this.getNodeParameter('limit', i) as number;
+							qs.pageSize = this.getNodeParameter('limit', i);
 							const data = await googleApiRequest.call(this, 'GET', `/drive/v3/drives`, {}, qs);
 							response = data.drives as IDataObject[];
 						}
@@ -2197,7 +2197,7 @@ export class GoogleDrive implements INodeType {
 						//         update
 						// ----------------------------------
 
-						const driveId = this.getNodeParameter('driveId', i) as string;
+						const driveId = this.getNodeParameter('driveId', i);
 
 						const body: IDataObject = {};
 
@@ -2215,7 +2215,7 @@ export class GoogleDrive implements INodeType {
 						//         copy
 						// ----------------------------------
 
-						const fileId = this.getNodeParameter('fileId', i) as string;
+						const fileId = this.getNodeParameter('fileId', i);
 
 						const body: IDataObject = {
 							fields: queryFields,
@@ -2241,8 +2241,8 @@ export class GoogleDrive implements INodeType {
 						//         download
 						// ----------------------------------
 
-						const fileId = this.getNodeParameter('fileId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const fileId = this.getNodeParameter('fileId', i);
+						const options = this.getNodeParameter('options', i);
 
 						const requestOptions = {
 							resolveWithFullResponse: true,
@@ -2295,7 +2295,7 @@ export class GoogleDrive implements INodeType {
 
 						items[i] = newItem;
 
-						const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i) as string;
+						const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i);
 
 						const data = Buffer.from(response.body as string);
 
@@ -2371,7 +2371,7 @@ export class GoogleDrive implements INodeType {
 							}
 						}
 
-						const pageSize = this.getNodeParameter('limit', i) as number;
+						const pageSize = this.getNodeParameter('limit', i);
 
 						const qs = {
 							pageSize,
@@ -2393,7 +2393,7 @@ export class GoogleDrive implements INodeType {
 						// ----------------------------------
 						//         upload
 						// ----------------------------------
-						const resolveData = this.getNodeParameter('resolveData', 0) as boolean;
+						const resolveData = this.getNodeParameter('resolveData', 0);
 
 						let mimeType = 'text/plain';
 						let body;
@@ -2406,7 +2406,7 @@ export class GoogleDrive implements INodeType {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
 							}
 
-							const propertyNameUpload = this.getNodeParameter('binaryPropertyName', i) as string;
+							const propertyNameUpload = this.getNodeParameter('binaryPropertyName', i);
 
 							if (item.binary[propertyNameUpload] === undefined) {
 								throw new NodeOperationError(this.getNode(), `No binary data property "${propertyNameUpload}" does not exists on item!`);
@@ -2426,7 +2426,7 @@ export class GoogleDrive implements INodeType {
 							body = Buffer.from(this.getNodeParameter('fileContent', i) as string, 'utf8');
 						}
 
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 						const parents = this.getNodeParameter('parents', i) as string[];
 
 						let qs: IDataObject = {
@@ -2481,7 +2481,7 @@ export class GoogleDrive implements INodeType {
 						//         file:update
 						// ----------------------------------
 
-						const id = this.getNodeParameter('fileId', i) as string;
+						const id = this.getNodeParameter('fileId', i);
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
 
 						const qs: IDataObject = {
@@ -2513,7 +2513,7 @@ export class GoogleDrive implements INodeType {
 						//         folder:create
 						// ----------------------------------
 
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 
 						const body = {
 							name,
@@ -2537,7 +2537,7 @@ export class GoogleDrive implements INodeType {
 						//         delete
 						// ----------------------------------
 
-						const fileId = this.getNodeParameter('fileId', i) as string;
+						const fileId = this.getNodeParameter('fileId', i);
 
 						const response = await googleApiRequest.call(this, 'DELETE', `/drive/v3/files/${fileId}`);
 
@@ -2549,11 +2549,11 @@ export class GoogleDrive implements INodeType {
 					}
 					if (operation === 'share') {
 
-						const fileId = this.getNodeParameter('fileId', i) as string;
+						const fileId = this.getNodeParameter('fileId', i);
 
-						const permissions = this.getNodeParameter('permissionsUi', i) as IDataObject;
+						const permissions = this.getNodeParameter('permissionsUi', i);
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						const body: IDataObject = {};
 

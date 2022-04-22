@@ -136,7 +136,7 @@ export class TheHive implements INodeType {
 		loadOptions: {
 			async loadResponders(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
 				// request the analyzers from instance
-				const resource = mapResource(this.getNodeParameter('resource') as string);
+				const resource = mapResource(this.getNodeParameter('resource', 0) as string);
 				const resourceId = this.getNodeParameter('id');
 				const endpoint = `/connector/cortex/responder/${resource}/${resourceId}`;
 
@@ -319,8 +319,8 @@ export class TheHive implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 			try {
@@ -386,7 +386,7 @@ export class TheHive implements INodeType {
 
 					if (operation === 'create') {
 						const additionalFields = this.getNodeParameter('additionalFields', i) as INodeParameters;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						const customFields = await prepareCustomFields.call(this, additionalFields, jsonParameters);
 						const body: IDataObject = {
@@ -405,7 +405,7 @@ export class TheHive implements INodeType {
 							...prepareOptional(additionalFields),
 						};
 
-						const artifactUi = this.getNodeParameter('artifactUi', i) as IDataObject;
+						const artifactUi = this.getNodeParameter('artifactUi', i);
 
 						if (artifactUi) {
 
@@ -522,7 +522,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'get') {
-						const alertId = this.getNodeParameter('id', i) as string;
+						const alertId = this.getNodeParameter('id', i);
 
 						responseData = await theHiveApiRequest.call(
 							this,
@@ -534,13 +534,13 @@ export class TheHive implements INodeType {
 					if (operation === 'getAll') {
 						const credentials = await this.getCredentials('theHiveApi');
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const version = credentials.apiVersion;
 
 						const filters = this.getNodeParameter('filters', i, {}) as INodeParameters;
 						const queryAttributs: any = prepareOptional(filters); // tslint:disable-line:no-any
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						const _searchQuery: IQueryObject = And();
 
@@ -575,7 +575,7 @@ export class TheHive implements INodeType {
 						let limit = undefined;
 
 						if (returnAll === false) {
-							limit = this.getNodeParameter('limit', i) as number;
+							limit = this.getNodeParameter('limit', i);
 						}
 
 						if (version === 'v1') {
@@ -630,7 +630,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'markAsRead') {
-						const alertId = this.getNodeParameter('id', i) as string;
+						const alertId = this.getNodeParameter('id', i);
 
 						responseData = await theHiveApiRequest.call(
 							this,
@@ -640,7 +640,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'markAsUnread') {
-						const alertId = this.getNodeParameter('id', i) as string;
+						const alertId = this.getNodeParameter('id', i);
 
 						responseData = await theHiveApiRequest.call(
 							this,
@@ -650,9 +650,9 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'merge') {
-						const alertId = this.getNodeParameter('id', i) as string;
+						const alertId = this.getNodeParameter('id', i);
 
-						const caseId = this.getNodeParameter('caseId', i) as string;
+						const caseId = this.getNodeParameter('caseId', i);
 
 						responseData = await theHiveApiRequest.call(
 							this,
@@ -663,9 +663,9 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'promote') {
-						const alertId = this.getNodeParameter('id', i) as string;
+						const alertId = this.getNodeParameter('id', i);
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const body: IDataObject = {};
 
@@ -680,10 +680,10 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'update') {
-						const alertId = this.getNodeParameter('id', i) as string;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const alertId = this.getNodeParameter('id', i);
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 						const customFields = await prepareCustomFields.call(this, updateFields, jsonParameters);
 
 						const artifactUi = updateFields.artifactUi as IDataObject;
@@ -904,9 +904,9 @@ export class TheHive implements INodeType {
 						const caseId = this.getNodeParameter('caseId', i);
 
 						let body: IDataObject = {
-							dataType: this.getNodeParameter('dataType', i) as string,
-							message: this.getNodeParameter('message', i) as string,
-							startDate: Date.parse(this.getNodeParameter('startDate', i) as string),
+							dataType: this.getNodeParameter('dataType', i),
+							message: this.getNodeParameter('message', i),
+							startDate: Date.parse(this.getNodeParameter('startDate', i)),
 							tlp: this.getNodeParameter('tlp', i) as number,
 							ioc: this.getNodeParameter('ioc', i) as boolean,
 							sighted: this.getNodeParameter('sighted', i) as boolean,
@@ -923,7 +923,7 @@ export class TheHive implements INodeType {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
 							}
 
-							const binaryPropertyName = this.getNodeParameter('binaryProperty', i) as string;
+							const binaryPropertyName = this.getNodeParameter('binaryProperty', i);
 
 							if (item.binary[binaryPropertyName] === undefined) {
 								throw new NodeOperationError(this.getNode(), `No binary data property '${binaryPropertyName}' does not exists on item!`);
@@ -961,7 +961,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'get') {
-						const observableId = this.getNodeParameter('id', i) as string;
+						const observableId = this.getNodeParameter('id', i);
 
 						const credentials = await this.getCredentials('theHiveApi');
 
@@ -1010,11 +1010,11 @@ export class TheHive implements INodeType {
 					if (operation === 'getAll') {
 						const credentials = await this.getCredentials('theHiveApi');
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const version = credentials.apiVersion;
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						const caseId = this.getNodeParameter('caseId', i);
 
@@ -1027,7 +1027,7 @@ export class TheHive implements INodeType {
 						let limit = undefined;
 
 						if (returnAll === false) {
-							limit = this.getNodeParameter('limit', i) as number;
+							limit = this.getNodeParameter('limit', i);
 						}
 
 						if (version === 'v1') {
@@ -1083,7 +1083,7 @@ export class TheHive implements INodeType {
 					if (operation === 'search') {
 						const credentials = await this.getCredentials('theHiveApi');
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const version = credentials.apiVersion;
 
@@ -1091,7 +1091,7 @@ export class TheHive implements INodeType {
 
 						const _searchQuery: IQueryObject = And();
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						for (const key of Object.keys(queryAttributs)) {
 							if (key === 'dataType' || key === 'tags') {
@@ -1126,7 +1126,7 @@ export class TheHive implements INodeType {
 						let limit = undefined;
 
 						if (returnAll === false) {
-							limit = this.getNodeParameter('limit', i) as number;
+							limit = this.getNodeParameter('limit', i);
 						}
 
 						if (version === 'v1') {
@@ -1181,7 +1181,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'update') {
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						const body: IDataObject = {
 							...prepareOptional(this.getNodeParameter('updateFields', i, {}) as INodeParameters),
@@ -1318,14 +1318,14 @@ export class TheHive implements INodeType {
 
 					if (operation === 'create') {
 						const options = this.getNodeParameter('options', i, {}) as INodeParameters;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 						const customFields = await prepareCustomFields.call(this, options, jsonParameters);
 
 						const body: IDataObject = {
 							title: this.getNodeParameter('title', i),
 							description: this.getNodeParameter('description', i),
 							severity: this.getNodeParameter('severity', i),
-							startDate: Date.parse(this.getNodeParameter('startDate', i) as string),
+							startDate: Date.parse(this.getNodeParameter('startDate', i)),
 							owner: this.getNodeParameter('owner', i),
 							flag: this.getNodeParameter('flag', i),
 							tlp: this.getNodeParameter('tlp', i),
@@ -1343,7 +1343,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'get') {
-						const caseId = this.getNodeParameter('id', i) as string;
+						const caseId = this.getNodeParameter('id', i);
 
 						const credentials = await this.getCredentials('theHiveApi');
 
@@ -1392,7 +1392,7 @@ export class TheHive implements INodeType {
 					if (operation === 'getAll') {
 						const credentials = await this.getCredentials('theHiveApi');
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const version = credentials.apiVersion;
 
@@ -1401,7 +1401,7 @@ export class TheHive implements INodeType {
 
 						const _searchQuery: IQueryObject = And();
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						if ('customFieldsUi' in filters) {
 							const customFields = await prepareCustomFields.call(this, filters) as IDataObject;
@@ -1434,7 +1434,7 @@ export class TheHive implements INodeType {
 						let limit = undefined;
 
 						if (returnAll === false) {
-							limit = this.getNodeParameter('limit', i) as number;
+							limit = this.getNodeParameter('limit', i);
 						}
 
 						if (version === 'v1') {
@@ -1488,9 +1488,9 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'update') {
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 						const updateFields = this.getNodeParameter('updateFields', i, {}) as INodeParameters;
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						const customFields = await prepareCustomFields.call(this, updateFields, jsonParameters);
 
@@ -1558,10 +1558,10 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'create') {
-						const caseId = this.getNodeParameter('caseId', i) as string;
+						const caseId = this.getNodeParameter('caseId', i);
 
 						const body: IDataObject = {
-							title: this.getNodeParameter('title', i) as string,
+							title: this.getNodeParameter('title', i),
 							status: this.getNodeParameter('status', i) as string,
 							flag: this.getNodeParameter('flag', i),
 							...prepareOptional(this.getNodeParameter('options', i, {}) as INodeParameters),
@@ -1632,7 +1632,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'get') {
-						const taskId = this.getNodeParameter('id', i) as string;
+						const taskId = this.getNodeParameter('id', i);
 
 						const credentials = await this.getCredentials('theHiveApi');
 
@@ -1680,13 +1680,13 @@ export class TheHive implements INodeType {
 						// get all require a case id (it retursn all tasks for a specific case)
 						const credentials = await this.getCredentials('theHiveApi');
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const version = credentials.apiVersion;
 
-						const caseId = this.getNodeParameter('caseId', i) as string;
+						const caseId = this.getNodeParameter('caseId', i);
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						let endpoint;
 
@@ -1697,7 +1697,7 @@ export class TheHive implements INodeType {
 						let limit = undefined;
 
 						if (returnAll === false) {
-							limit = this.getNodeParameter('limit', i) as number;
+							limit = this.getNodeParameter('limit', i);
 						}
 
 						if (version === 'v1') {
@@ -1755,7 +1755,7 @@ export class TheHive implements INodeType {
 					if (operation === 'search') {
 						const credentials = await this.getCredentials('theHiveApi');
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const version = credentials.apiVersion;
 
@@ -1763,7 +1763,7 @@ export class TheHive implements INodeType {
 
 						const _searchQuery: IQueryObject = And();
 
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 
 						for (const key of Object.keys(queryAttributs)) {
 							if (key === 'title' || key === 'description') {
@@ -1786,7 +1786,7 @@ export class TheHive implements INodeType {
 						let limit = undefined;
 
 						if (returnAll === false) {
-							limit = this.getNodeParameter('limit', i) as number;
+							limit = this.getNodeParameter('limit', i);
 						}
 
 						if (version === 'v1') {
@@ -1841,7 +1841,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'update') {
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 
 						const body: IDataObject = {
 							...prepareOptional(this.getNodeParameter('updateFields', i, {}) as INodeParameters),
@@ -1859,14 +1859,14 @@ export class TheHive implements INodeType {
 				if (resource === 'log') {
 					if (operation === 'create') {
 
-						const taskId = this.getNodeParameter('taskId', i) as string;
+						const taskId = this.getNodeParameter('taskId', i);
 
 						let body: IDataObject = {
 							message: this.getNodeParameter('message', i),
-							startDate: Date.parse(this.getNodeParameter('startDate', i) as string),
+							startDate: Date.parse(this.getNodeParameter('startDate', i)),
 							status: this.getNodeParameter('status', i),
 						};
-						const optionals = this.getNodeParameter('options', i) as IDataObject;
+						const optionals = this.getNodeParameter('options', i);
 
 						let options: IDataObject = {};
 
@@ -1974,7 +1974,7 @@ export class TheHive implements INodeType {
 					}
 
 					if (operation === 'get') {
-						const logId = this.getNodeParameter('id', i) as string;
+						const logId = this.getNodeParameter('id', i);
 
 						const credentials = await this.getCredentials('theHiveApi');
 
@@ -2022,11 +2022,11 @@ export class TheHive implements INodeType {
 					if (operation === 'getAll') {
 						const credentials = await this.getCredentials('theHiveApi');
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						const version = credentials.apiVersion;
 
-						const taskId = this.getNodeParameter('taskId', i) as string;
+						const taskId = this.getNodeParameter('taskId', i);
 
 						let endpoint;
 
@@ -2037,7 +2037,7 @@ export class TheHive implements INodeType {
 						let limit = undefined;
 
 						if (returnAll === false) {
-							limit = this.getNodeParameter('limit', i) as number;
+							limit = this.getNodeParameter('limit', i);
 						}
 
 						if (version === 'v1') {

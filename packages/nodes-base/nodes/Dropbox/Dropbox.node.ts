@@ -777,8 +777,8 @@ export class Dropbox implements INodeType {
 		const returnData: IDataObject[] = [];
 
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		let endpoint = '';
 		let requestMethod = '';
@@ -819,7 +819,7 @@ export class Dropbox implements INodeType {
 						requestMethod = 'POST';
 
 						query.arg = JSON.stringify({
-							path: this.getNodeParameter('path', i) as string,
+							path: this.getNodeParameter('path', i),
 						});
 
 						endpoint = 'https://content.dropboxapi.com/2/files/download';
@@ -834,7 +834,7 @@ export class Dropbox implements INodeType {
 
 						query.arg = JSON.stringify({
 							mode: 'overwrite',
-							path: this.getNodeParameter('path', i) as string,
+							path: this.getNodeParameter('path', i),
 						});
 
 						endpoint = 'https://content.dropboxapi.com/2/files/upload';
@@ -850,7 +850,7 @@ export class Dropbox implements INodeType {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
 							}
 
-							const propertyNameUpload = this.getNodeParameter('binaryPropertyName', i) as string;
+							const propertyNameUpload = this.getNodeParameter('binaryPropertyName', i);
 
 							if (item.binary[propertyNameUpload] === undefined) {
 								throw new NodeOperationError(this.getNode(), `No binary data property "${propertyNameUpload}" does not exists on item!`);
@@ -870,7 +870,7 @@ export class Dropbox implements INodeType {
 
 						requestMethod = 'POST';
 						body = {
-							path: this.getNodeParameter('path', i) as string,
+							path: this.getNodeParameter('path', i),
 						};
 
 						endpoint = 'https://api.dropboxapi.com/2/files/create_folder_v2';
@@ -880,20 +880,20 @@ export class Dropbox implements INodeType {
 						//         list
 						// ----------------------------------
 
-						returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						returnAll = this.getNodeParameter('returnAll', 0);
 
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const filters = this.getNodeParameter('filters', i);
 
 						property = 'entries';
 
 						requestMethod = 'POST';
 						body = {
-							path: this.getNodeParameter('path', i) as string,
+							path: this.getNodeParameter('path', i),
 							limit: 1000,
 						};
 
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', 0) as number;
+							const limit = this.getNodeParameter('limit', 0);
 							body.limit = limit;
 						}
 
@@ -908,17 +908,17 @@ export class Dropbox implements INodeType {
 						//         query
 						// ----------------------------------
 
-						returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						returnAll = this.getNodeParameter('returnAll', 0);
 
-						simple = this.getNodeParameter('simple', 0) as boolean;
+						simple = this.getNodeParameter('simple', 0);
 
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const filters = this.getNodeParameter('filters', i);
 
 						property = 'matches';
 
 						requestMethod = 'POST';
 						body = {
-							query: this.getNodeParameter('query', i) as string,
+							query: this.getNodeParameter('query', i),
 							options: {
 								filename_only: true,
 							},
@@ -931,7 +931,7 @@ export class Dropbox implements INodeType {
 						Object.assign(body.options, filters);
 
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							Object.assign(body.options, { max_results: limit });
 						}
 
@@ -946,8 +946,8 @@ export class Dropbox implements INodeType {
 
 						requestMethod = 'POST';
 						body = {
-							from_path: this.getNodeParameter('path', i) as string,
-							to_path: this.getNodeParameter('toPath', i) as string,
+							from_path: this.getNodeParameter('path', i),
+							to_path: this.getNodeParameter('toPath', i),
 						};
 
 						endpoint = 'https://api.dropboxapi.com/2/files/copy_v2';
@@ -959,7 +959,7 @@ export class Dropbox implements INodeType {
 
 						requestMethod = 'POST';
 						body = {
-							path: this.getNodeParameter('path', i) as string,
+							path: this.getNodeParameter('path', i),
 						};
 
 						endpoint = 'https://api.dropboxapi.com/2/files/delete_v2';
@@ -971,8 +971,8 @@ export class Dropbox implements INodeType {
 
 						requestMethod = 'POST';
 						body = {
-							from_path: this.getNodeParameter('path', i) as string,
-							to_path: this.getNodeParameter('toPath', i) as string,
+							from_path: this.getNodeParameter('path', i),
+							to_path: this.getNodeParameter('toPath', i),
 						};
 
 						endpoint = 'https://api.dropboxapi.com/2/files/move_v2';
@@ -1014,9 +1014,9 @@ export class Dropbox implements INodeType {
 
 					items[i] = newItem;
 
-					const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i) as string;
+					const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i);
 
-					const filePathDownload = this.getNodeParameter('path', i) as string;
+					const filePathDownload = this.getNodeParameter('path', i);
 					items[i].binary![dataPropertyNameDownload] = await this.helpers.prepareBinaryData(Buffer.from(responseData), filePathDownload);
 
 				} else if (resource === 'folder' && operation === 'list') {

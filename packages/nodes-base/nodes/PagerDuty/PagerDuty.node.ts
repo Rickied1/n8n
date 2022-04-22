@@ -214,18 +214,18 @@ export class PagerDuty implements INodeType {
 		const length = items.length as unknown as number;
 		let responseData;
 		const qs: IDataObject = {};
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'incident') {
 					//https://api-reference.pagerduty.com/#!/Incidents/post_incidents
 					if (operation === 'create') {
-						const title = this.getNodeParameter('title', i) as string;
-						const serviceId = this.getNodeParameter('serviceId', i) as string;
-						const email = this.getNodeParameter('email', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-						const conferenceBridge = (this.getNodeParameter('conferenceBridgeUi', i) as IDataObject).conferenceBridgeValues as IDataObject;
+						const title = this.getNodeParameter('title', i);
+						const serviceId = this.getNodeParameter('serviceId', i);
+						const email = this.getNodeParameter('email', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
+						const conferenceBridge = (this.getNodeParameter('conferenceBridgeUi', i)).conferenceBridgeValues as IDataObject;
 						const body: IIncident = {
 							type: 'incident',
 							title,
@@ -269,14 +269,14 @@ export class PagerDuty implements INodeType {
 					}
 					//https://api-reference.pagerduty.com/#!/Incidents/get_incidents_id
 					if (operation === 'get') {
-						const incidentId = this.getNodeParameter('incidentId', i) as string;
+						const incidentId = this.getNodeParameter('incidentId', i);
 						responseData = await pagerDutyApiRequest.call(this, 'GET', `/incidents/${incidentId}`);
 						responseData = responseData.incident;
 					}
 					//https://api-reference.pagerduty.com/#!/Incidents/get_incidents
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const options = this.getNodeParameter('options', 0) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const options = this.getNodeParameter('options', 0);
 						if (options.userIds) {
 							options.userIds = (options.userIds as string).split(',') as string[];
 						}
@@ -293,17 +293,17 @@ export class PagerDuty implements INodeType {
 						if (returnAll) {
 							responseData = await pagerDutyApiRequestAllItems.call(this, 'incidents', 'GET', '/incidents', {}, qs);
 						} else {
-							qs.limit = this.getNodeParameter('limit', 0) as number;
+							qs.limit = this.getNodeParameter('limit', 0);
 							responseData = await pagerDutyApiRequest.call(this, 'GET', '/incidents', {}, qs);
 							responseData = responseData.incidents;
 						}
 					}
 					//https://api-reference.pagerduty.com/#!/Incidents/put_incidents_id
 					if (operation === 'update') {
-						const incidentId = this.getNodeParameter('incidentId', i) as string;
-						const email = this.getNodeParameter('email', i) as string;
-						const conferenceBridge = (this.getNodeParameter('conferenceBridgeUi', i) as IDataObject).conferenceBridgeValues as IDataObject;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const incidentId = this.getNodeParameter('incidentId', i);
+						const email = this.getNodeParameter('email', i);
+						const conferenceBridge = (this.getNodeParameter('conferenceBridgeUi', i)).conferenceBridgeValues as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 						const body: IIncident = {
 							type: 'incident',
 						};
@@ -353,9 +353,9 @@ export class PagerDuty implements INodeType {
 				if (resource === 'incidentNote') {
 					//https://api-reference.pagerduty.com/#!/Incidents/post_incidents_id_notes
 					if (operation === 'create') {
-						const incidentId = this.getNodeParameter('incidentId', i) as string;
+						const incidentId = this.getNodeParameter('incidentId', i);
 						const content = this.getNodeParameter('content', i) as string;
-						const email = this.getNodeParameter('email', i) as string;
+						const email = this.getNodeParameter('email', i);
 						const body: IDataObject = {
 							content,
 						};
@@ -363,12 +363,12 @@ export class PagerDuty implements INodeType {
 					}
 					//https://api-reference.pagerduty.com/#!/Incidents/get_incidents_id_notes
 					if (operation === 'getAll') {
-						const incidentId = this.getNodeParameter('incidentId', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const incidentId = this.getNodeParameter('incidentId', i);
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						if (returnAll) {
 							responseData = await pagerDutyApiRequestAllItems.call(this, 'notes', 'GET', `/incidents/${incidentId}/notes`, {}, qs);
 						} else {
-							qs.limit = this.getNodeParameter('limit', 0) as number;
+							qs.limit = this.getNodeParameter('limit', 0);
 							responseData = await pagerDutyApiRequest.call(this, 'GET', `/incidents/${incidentId}/notes`, {}, qs);
 							responseData = responseData.notes;
 						}
@@ -377,20 +377,20 @@ export class PagerDuty implements INodeType {
 				if (resource === 'logEntry') {
 					//https://api-reference.pagerduty.com/#!/Log_Entries/get_log_entries_id
 					if (operation === 'get') {
-						const logEntryId = this.getNodeParameter('logEntryId', i) as string;
+						const logEntryId = this.getNodeParameter('logEntryId', i);
 						responseData = await pagerDutyApiRequest.call(this, 'GET', `/log_entries/${logEntryId}`);
 						responseData = responseData.log_entry;
 					}
 					//https://api-reference.pagerduty.com/#!/Log_Entries/get_log_entries
 					if (operation === 'getAll') {
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 						Object.assign(qs, options);
 						keysToSnakeCase(qs);
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						if (returnAll) {
 							responseData = await pagerDutyApiRequestAllItems.call(this, 'log_entries', 'GET', '/log_entries', {}, qs);
 						} else {
-							qs.limit = this.getNodeParameter('limit', 0) as number;
+							qs.limit = this.getNodeParameter('limit', 0);
 							responseData = await pagerDutyApiRequest.call(this, 'GET', '/log_entries', {}, qs);
 							responseData = responseData.log_entries;
 						}
@@ -399,7 +399,7 @@ export class PagerDuty implements INodeType {
 				if (resource === 'user') {
 					//https://developer.pagerduty.com/api-reference/reference/REST/openapiv3.json/paths/~1users~1%7Bid%7D/get
 					if (operation === 'get') {
-						const userId = this.getNodeParameter('userId', i) as string;
+						const userId = this.getNodeParameter('userId', i);
 						responseData = await pagerDutyApiRequest.call(this, 'GET', `/users/${userId}`);
 						responseData = responseData.user;
 					}

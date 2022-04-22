@@ -84,16 +84,16 @@ export class Box implements INodeType {
 		const qs: IDataObject = {};
 		let responseData;
 		const timezone = this.getTimezone();
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'file') {
 					// https://developer.box.com/reference/post-files-id-copy
 					if (operation === 'copy') {
-						const fileId = this.getNodeParameter('fileId', i) as string;
-						const parentId = this.getNodeParameter('parentId', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const fileId = this.getNodeParameter('fileId', i);
+						const parentId = this.getNodeParameter('parentId', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IDataObject = {};
 						if (additionalFields.name) {
 							body.name = additionalFields.name as string;
@@ -115,15 +115,15 @@ export class Box implements INodeType {
 					}
 					// https://developer.box.com/reference/delete-files-id
 					if (operation === 'delete') {
-						const fileId = this.getNodeParameter('fileId', i) as string;
+						const fileId = this.getNodeParameter('fileId', i);
 						responseData = await boxApiRequest.call(this, 'DELETE', `/files/${fileId}`);
 						responseData = { success: true };
 						returnData.push(responseData as IDataObject);
 					}
 					// https://developer.box.com/reference/get-files-id-content
 					if (operation === 'download') {
-						const fileId = this.getNodeParameter('fileId', i) as string;
-						const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i) as string;
+						const fileId = this.getNodeParameter('fileId', i);
+						const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i);
 						responseData = await boxApiRequest.call(this, 'GET', `/files/${fileId}`);
 
 						const fileName = responseData.name;
@@ -156,8 +156,8 @@ export class Box implements INodeType {
 					}
 					// https://developer.box.com/reference/get-files-id
 					if (operation === 'get') {
-						const fileId = this.getNodeParameter('fileId', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const fileId = this.getNodeParameter('fileId', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						if (additionalFields.fields) {
 							qs.fields = additionalFields.fields as string;
 						}
@@ -166,9 +166,9 @@ export class Box implements INodeType {
 					}
 					// https://developer.box.com/reference/get-search/
 					if (operation === 'search') {
-						const query = this.getNodeParameter('query', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const query = this.getNodeParameter('query', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const timezone = this.getTimezone();
 						qs.type = 'file';
 						qs.query = query;
@@ -197,7 +197,7 @@ export class Box implements INodeType {
 						if (returnAll) {
 							responseData = await boxApiRequestAllItems.call(this, 'entries', 'GET', `/search`, {}, qs);
 						} else {
-							qs.limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = this.getNodeParameter('limit', i);
 							responseData = await boxApiRequest.call(this, 'GET', `/search`, {}, qs);
 							responseData = responseData.entries;
 						}
@@ -205,10 +205,10 @@ export class Box implements INodeType {
 					}
 					// https://developer.box.com/reference/post-collaborations/
 					if (operation === 'share') {
-						const fileId = this.getNodeParameter('fileId', i) as string;
+						const fileId = this.getNodeParameter('fileId', i);
 						const role = this.getNodeParameter('role', i) as string;
 						const accessibleBy = this.getNodeParameter('accessibleBy', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 						// tslint:disable-next-line: no-any
 						const body: { accessible_by: IDataObject, [key: string]: any } = {
 							accessible_by: {},
@@ -235,14 +235,14 @@ export class Box implements INodeType {
 						}
 
 						if (accessibleBy === 'user') {
-							const useEmail = this.getNodeParameter('useEmail', i) as boolean;
+							const useEmail = this.getNodeParameter('useEmail', i) as unknown as boolean;
 							if (useEmail) {
-								body.accessible_by['login'] = this.getNodeParameter('email', i) as string;
+								body.accessible_by['login'] = this.getNodeParameter('email', i);
 							} else {
-								body.accessible_by['id'] = this.getNodeParameter('userId', i) as string;
+								body.accessible_by['id'] = this.getNodeParameter('userId', i);
 							}
 						} else {
-							body.accessible_by['id'] = this.getNodeParameter('groupId', i) as string;
+							body.accessible_by['id'] = this.getNodeParameter('groupId', i);
 						}
 
 						responseData = await boxApiRequest.call(this, 'POST', `/collaborations`, body, qs);
@@ -250,9 +250,9 @@ export class Box implements INodeType {
 					}
 					// https://developer.box.com/reference/post-files-content
 					if (operation === 'upload') {
-						const parentId = this.getNodeParameter('parentId', i) as string;
-						const isBinaryData = this.getNodeParameter('binaryData', i) as boolean;
-						const fileName = this.getNodeParameter('fileName', i) as string;
+						const parentId = this.getNodeParameter('parentId', i);
+						const isBinaryData = this.getNodeParameter('binaryData', i);
+						const fileName = this.getNodeParameter('fileName', i);
 
 						const attributes: IDataObject = {};
 
@@ -264,7 +264,7 @@ export class Box implements INodeType {
 						}
 
 						if (isBinaryData) {
-							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0) as string;
+							const binaryPropertyName = this.getNodeParameter('binaryPropertyName', 0);
 
 							if (items[i].binary === undefined) {
 								throw new NodeOperationError(this.getNode(), 'No binary data exists on item!');
@@ -324,9 +324,9 @@ export class Box implements INodeType {
 				if (resource === 'folder') {
 					// https://developer.box.com/reference/post-folders
 					if (operation === 'create') {
-						const name = this.getNodeParameter('name', i) as string;
-						const parentId = this.getNodeParameter('parentId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const name = this.getNodeParameter('name', i);
+						const parentId = this.getNodeParameter('parentId', i);
+						const options = this.getNodeParameter('options', i);
 						const body: IDataObject = {
 							name,
 						};
@@ -353,7 +353,7 @@ export class Box implements INodeType {
 					}
 					// https://developer.box.com/reference/delete-folders-id
 					if (operation === 'delete') {
-						const folderId = this.getNodeParameter('folderId', i) as string;
+						const folderId = this.getNodeParameter('folderId', i);
 						const recursive = this.getNodeParameter('recursive', i) as boolean;
 						qs.recursive = recursive;
 
@@ -363,15 +363,15 @@ export class Box implements INodeType {
 					}
 					// https://developer.box.com/reference/get-folders-id/
 					if (operation === 'get') {
-						const folderId = this.getNodeParameter('folderId', i) as string;
+						const folderId = this.getNodeParameter('folderId', i);
 						responseData = await boxApiRequest.call(this, 'GET', `/folders/${folderId}`, qs);
 						returnData.push(responseData as IDataObject);
 					}
 					// https://developer.box.com/reference/get-search/
 					if (operation === 'search') {
-						const query = this.getNodeParameter('query', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const query = this.getNodeParameter('query', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const timezone = this.getTimezone();
 						qs.type = 'folder';
 						qs.query = query;
@@ -400,7 +400,7 @@ export class Box implements INodeType {
 						if (returnAll) {
 							responseData = await boxApiRequestAllItems.call(this, 'entries', 'GET', `/search`, {}, qs);
 						} else {
-							qs.limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = this.getNodeParameter('limit', i);
 							responseData = await boxApiRequest.call(this, 'GET', `/search`, {}, qs);
 							responseData = responseData.entries;
 						}
@@ -408,10 +408,10 @@ export class Box implements INodeType {
 					}
 					// https://developer.box.com/reference/post-collaborations/
 					if (operation === 'share') {
-						const folderId = this.getNodeParameter('folderId', i) as string;
+						const folderId = this.getNodeParameter('folderId', i);
 						const role = this.getNodeParameter('role', i) as string;
 						const accessibleBy = this.getNodeParameter('accessibleBy', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
 						// tslint:disable-next-line: no-any
 						const body: { accessible_by: IDataObject, [key: string]: any } = {
 							accessible_by: {},
@@ -438,14 +438,14 @@ export class Box implements INodeType {
 						}
 
 						if (accessibleBy === 'user') {
-							const useEmail = this.getNodeParameter('useEmail', i) as boolean;
+							const useEmail = this.getNodeParameter('useEmail', i) as unknown as boolean;
 							if (useEmail) {
-								body.accessible_by['login'] = this.getNodeParameter('email', i) as string;
+								body.accessible_by['login'] = this.getNodeParameter('email', i);
 							} else {
-								body.accessible_by['id'] = this.getNodeParameter('userId', i) as string;
+								body.accessible_by['id'] = this.getNodeParameter('userId', i);
 							}
 						} else {
-							body.accessible_by['id'] = this.getNodeParameter('groupId', i) as string;
+							body.accessible_by['id'] = this.getNodeParameter('groupId', i);
 						}
 
 						responseData = await boxApiRequest.call(this, 'POST', `/collaborations`, body, qs);
@@ -453,8 +453,8 @@ export class Box implements INodeType {
 					}
 					//https://developer.box.com/guides/folders/single/move/
 					if (operation === 'update') {
-						const folderId = this.getNodeParameter('folderId', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const folderId = this.getNodeParameter('folderId', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						if (updateFields.fields) {
 							qs.fields = updateFields.fields;

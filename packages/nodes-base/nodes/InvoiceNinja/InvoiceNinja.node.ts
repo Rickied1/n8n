@@ -245,14 +245,14 @@ export class InvoiceNinja implements INodeType {
 		const length = items.length as unknown as number;
 		let responseData;
 		const qs: IDataObject = {};
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			//Routes: https://github.com/invoiceninja/invoiceninja/blob/ff455c8ed9fd0c0326956175ecd509efa8bad263/routes/api.php
 			try {
 				if (resource === 'client') {
 					if (operation === 'create') {
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IClient = {};
 						if (additionalFields.clientName) {
 							body.name = additionalFields.clientName as string;
@@ -278,7 +278,7 @@ export class InvoiceNinja implements INodeType {
 						if (additionalFields.website) {
 							body.website = additionalFields.website as string;
 						}
-						const contactsValues = (this.getNodeParameter('contactsUi', i) as IDataObject).contacstValues as IDataObject[];
+						const contactsValues = (this.getNodeParameter('contactsUi', i)).contacstValues as IDataObject[];
 						if (contactsValues) {
 							const contacts: IContact[] = [];
 							for (const contactValue of contactsValues) {
@@ -292,7 +292,7 @@ export class InvoiceNinja implements INodeType {
 							}
 							body.contacts = contacts;
 						}
-						const shippingAddressValue = (this.getNodeParameter('shippingAddressUi', i) as IDataObject).shippingAddressValue as IDataObject;
+						const shippingAddressValue = (this.getNodeParameter('shippingAddressUi', i)).shippingAddressValue as IDataObject;
 						if (shippingAddressValue) {
 							body.shipping_address1 = shippingAddressValue.streetAddress as string;
 							body.shipping_address2 = shippingAddressValue.aptSuite as string;
@@ -301,7 +301,7 @@ export class InvoiceNinja implements INodeType {
 							body.shipping_postal_code = shippingAddressValue.postalCode as string;
 							body.shipping_country_id = parseInt(shippingAddressValue.countryCode as string, 10);
 						}
-						const billingAddressValue = (this.getNodeParameter('billingAddressUi', i) as IDataObject).billingAddressValue as IDataObject;
+						const billingAddressValue = (this.getNodeParameter('billingAddressUi', i)).billingAddressValue as IDataObject;
 						if (billingAddressValue) {
 							body.address1 = billingAddressValue.streetAddress as string;
 							body.address2 = billingAddressValue.aptSuite as string;
@@ -314,8 +314,8 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'get') {
-						const clientId = this.getNodeParameter('clientId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const clientId = this.getNodeParameter('clientId', i);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
@@ -323,28 +323,28 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
 						if (returnAll === true) {
 							responseData = await invoiceNinjaApiRequestAllItems.call(this, 'data', 'GET', '/clients', {}, qs);
 						} else {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 							responseData = await invoiceNinjaApiRequest.call(this, 'GET', '/clients', {}, qs);
 							responseData = responseData.data;
 						}
 					}
 					if (operation === 'delete') {
-						const clientId = this.getNodeParameter('clientId', i) as string;
+						const clientId = this.getNodeParameter('clientId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'DELETE', `/clients/${clientId}`);
 						responseData = responseData.data;
 					}
 				}
 				if (resource === 'invoice') {
 					if (operation === 'create') {
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IInvoice = {};
 						if (additionalFields.email) {
 							body.email = additionalFields.email as string;
@@ -412,7 +412,7 @@ export class InvoiceNinja implements INodeType {
 						if (additionalFields.emailInvoice) {
 							body.email_invoice = additionalFields.emailInvoice as boolean;
 						}
-						const invoceItemsValues = (this.getNodeParameter('invoiceItemsUi', i) as IDataObject).invoiceItemsValues as IDataObject[];
+						const invoceItemsValues = (this.getNodeParameter('invoiceItemsUi', i)).invoiceItemsValues as IDataObject[];
 						if (invoceItemsValues) {
 							const items: IItem[] = [];
 							for (const itemValue of invoceItemsValues) {
@@ -434,12 +434,12 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'email') {
-						const invoiceId = this.getNodeParameter('invoiceId', i) as string;
+						const invoiceId = this.getNodeParameter('invoiceId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'POST', '/email_invoice', { id: invoiceId });
 					}
 					if (operation === 'get') {
-						const invoiceId = this.getNodeParameter('invoiceId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const invoiceId = this.getNodeParameter('invoiceId', i);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
@@ -447,8 +447,8 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
@@ -458,20 +458,20 @@ export class InvoiceNinja implements INodeType {
 						if (returnAll === true) {
 							responseData = await invoiceNinjaApiRequestAllItems.call(this, 'data', 'GET', '/invoices', {}, qs);
 						} else {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 							responseData = await invoiceNinjaApiRequest.call(this, 'GET', '/invoices', {}, qs);
 							responseData = responseData.data;
 						}
 					}
 					if (operation === 'delete') {
-						const invoiceId = this.getNodeParameter('invoiceId', i) as string;
+						const invoiceId = this.getNodeParameter('invoiceId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'DELETE', `/invoices/${invoiceId}`);
 						responseData = responseData.data;
 					}
 				}
 				if (resource === 'task') {
 					if (operation === 'create') {
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: ITask = {};
 						if (additionalFields.client) {
 							body.client_id = additionalFields.client as number;
@@ -488,7 +488,7 @@ export class InvoiceNinja implements INodeType {
 						if (additionalFields.description) {
 							body.description = additionalFields.description as string;
 						}
-						const timeLogsValues = (this.getNodeParameter('timeLogsUi', i) as IDataObject).timeLogsValues as IDataObject[];
+						const timeLogsValues = (this.getNodeParameter('timeLogsUi', i)).timeLogsValues as IDataObject[];
 						if (timeLogsValues) {
 							const logs: number[][] = [];
 							for (const logValue of timeLogsValues) {
@@ -510,8 +510,8 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'get') {
-						const taskId = this.getNodeParameter('taskId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const taskId = this.getNodeParameter('taskId', i);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
@@ -519,28 +519,28 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
 						if (returnAll === true) {
 							responseData = await invoiceNinjaApiRequestAllItems.call(this, 'data', 'GET', '/tasks', {}, qs);
 						} else {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 							responseData = await invoiceNinjaApiRequest.call(this, 'GET', '/tasks', {}, qs);
 							responseData = responseData.data;
 						}
 					}
 					if (operation === 'delete') {
-						const taskId = this.getNodeParameter('taskId', i) as string;
+						const taskId = this.getNodeParameter('taskId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'DELETE', `/tasks/${taskId}`);
 						responseData = responseData.data;
 					}
 				}
 				if (resource === 'payment') {
 					if (operation === 'create') {
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const invoice = this.getNodeParameter('invoice', i) as number;
 						const amount = this.getNodeParameter('amount', i) as number;
 						const body: IPayment = {
@@ -560,8 +560,8 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'get') {
-						const paymentId = this.getNodeParameter('paymentId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const paymentId = this.getNodeParameter('paymentId', i);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
@@ -569,28 +569,28 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
 						if (returnAll === true) {
 							responseData = await invoiceNinjaApiRequestAllItems.call(this, 'data', 'GET', '/payments', {}, qs);
 						} else {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 							responseData = await invoiceNinjaApiRequest.call(this, 'GET', '/payments', {}, qs);
 							responseData = responseData.data;
 						}
 					}
 					if (operation === 'delete') {
-						const paymentId = this.getNodeParameter('paymentId', i) as string;
+						const paymentId = this.getNodeParameter('paymentId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'DELETE', `/payments/${paymentId}`);
 						responseData = responseData.data;
 					}
 				}
 				if (resource === 'expense') {
 					if (operation === 'create') {
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IExpense = {};
 						if (additionalFields.amount) {
 							body.amount = additionalFields.amount as number;
@@ -647,29 +647,29 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'get') {
-						const expenseId = this.getNodeParameter('expenseId', i) as string;
+						const expenseId = this.getNodeParameter('expenseId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'GET', `/expenses/${expenseId}`, {}, qs);
 						responseData = responseData.data;
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						if (returnAll === true) {
 							responseData = await invoiceNinjaApiRequestAllItems.call(this, 'data', 'GET', '/expenses', {}, qs);
 						} else {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 							responseData = await invoiceNinjaApiRequest.call(this, 'GET', '/expenses', {}, qs);
 							responseData = responseData.data;
 						}
 					}
 					if (operation === 'delete') {
-						const expenseId = this.getNodeParameter('expenseId', i) as string;
+						const expenseId = this.getNodeParameter('expenseId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'DELETE', `/expenses/${expenseId}`);
 						responseData = responseData.data;
 					}
 				}
 				if (resource === 'quote') {
 					if (operation === 'create') {
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IQuote = {
 							is_quote: true,
 						};
@@ -739,7 +739,7 @@ export class InvoiceNinja implements INodeType {
 						if (additionalFields.emailQuote) {
 							body.email_invoice = additionalFields.emailQuote as boolean;
 						}
-						const invoceItemsValues = (this.getNodeParameter('invoiceItemsUi', i) as IDataObject).invoiceItemsValues as IDataObject[];
+						const invoceItemsValues = (this.getNodeParameter('invoiceItemsUi', i)).invoiceItemsValues as IDataObject[];
 						if (invoceItemsValues) {
 							const items: IItem[] = [];
 							for (const itemValue of invoceItemsValues) {
@@ -761,12 +761,12 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'email') {
-						const quoteId = this.getNodeParameter('quoteId', i) as string;
+						const quoteId = this.getNodeParameter('quoteId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'POST', '/email_invoice', { id: quoteId });
 					}
 					if (operation === 'get') {
-						const quoteId = this.getNodeParameter('quoteId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const quoteId = this.getNodeParameter('quoteId', i);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
@@ -774,8 +774,8 @@ export class InvoiceNinja implements INodeType {
 						responseData = responseData.data;
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', 0);
+						const options = this.getNodeParameter('options', i);
 						if (options.include) {
 							qs.include = options.include as string;
 						}
@@ -785,13 +785,13 @@ export class InvoiceNinja implements INodeType {
 						if (returnAll === true) {
 							responseData = await invoiceNinjaApiRequestAllItems.call(this, 'data', 'GET', '/quotes', {}, qs);
 						} else {
-							qs.per_page = this.getNodeParameter('limit', 0) as number;
+							qs.per_page = this.getNodeParameter('limit', 0);
 							responseData = await invoiceNinjaApiRequest.call(this, 'GET', '/quotes', {}, qs);
 							responseData = responseData.data;
 						}
 					}
 					if (operation === 'delete') {
-						const quoteId = this.getNodeParameter('quoteId', i) as string;
+						const quoteId = this.getNodeParameter('quoteId', i);
 						responseData = await invoiceNinjaApiRequest.call(this, 'DELETE', `/invoices/${quoteId}`);
 						responseData = responseData.data;
 					}

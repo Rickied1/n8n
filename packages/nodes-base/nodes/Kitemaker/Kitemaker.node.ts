@@ -138,7 +138,7 @@ export class Kitemaker implements INodeType {
 			},
 
 			async getWorkItems(this: ILoadOptionsFunctions) {
-				const spaceId = this.getNodeParameter('spaceId', 0) as string;
+				const spaceId = this.getNodeParameter('spaceId', 0);
 
 				const responseData = await kitemakerRequest.call(this, {
 					query: getWorkItems,
@@ -241,15 +241,15 @@ export class Kitemaker implements INodeType {
 					// ----------------------------------
 
 					const input = {
-						title: this.getNodeParameter('title', i) as string,
-						statusId: this.getNodeParameter('statusId', i) as string[],
+						title: this.getNodeParameter('title', i),
+						statusId: this.getNodeParameter('statusId', i) as unknown as string[],
 					};
 
 					if (!input.statusId.length) {
 						throw new Error('Please enter a status to set for the work item to create.');
 					}
 
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					if (Object.keys(additionalFields).length) {
 						Object.assign(input, additionalFields);
@@ -268,7 +268,7 @@ export class Kitemaker implements INodeType {
 					//         workItem: get
 					// ----------------------------------
 
-					const workItemId = this.getNodeParameter('workItemId', i) as string;
+					const workItemId = this.getNodeParameter('workItemId', i);
 
 					responseData = await kitemakerRequest.call(this, {
 						query: getWorkItem,
@@ -286,7 +286,7 @@ export class Kitemaker implements INodeType {
 					const allItems = await kitemakerRequestAllItems.call(this, {
 						query: getAllWorkItems,
 						variables: {
-							spaceId: this.getNodeParameter('spaceId', i) as string,
+							spaceId: this.getNodeParameter('spaceId', i),
 						},
 					});
 
@@ -302,7 +302,7 @@ export class Kitemaker implements INodeType {
 						id: this.getNodeParameter('workItemId', i),
 					};
 
-					const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+					const updateFields = this.getNodeParameter('updateFields', i);
 
 					if (!Object.keys(updateFields).length) {
 						throw new Error('Please enter at least one field to update for the work item.');

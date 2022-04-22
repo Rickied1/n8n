@@ -403,8 +403,8 @@ export class ApiTemplateIo implements INodeType {
 
 		let responseData;
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		if (resource === 'account') {
 
@@ -449,11 +449,11 @@ export class ApiTemplateIo implements INodeType {
 				// https://docs.apitemplate.io/reference/api-reference.html#create-an-image-jpeg-and-png
 				for (let i = 0; i < length; i++) {
 					try {
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						let options: IDataObject = {};
 						if (download) {
-							options = this.getNodeParameter('options', i) as IDataObject;
+							options = this.getNodeParameter('options', i);
 						}
 
 						const qs = {
@@ -463,7 +463,7 @@ export class ApiTemplateIo implements INodeType {
 						const body = { overrides: [] } as IDataObject;
 
 						if (jsonParameters === false) {
-							const overrides = (this.getNodeParameter('overridesUi', i) as IDataObject || {}).overrideValues as IDataObject[] || [];
+							const overrides = (this.getNodeParameter('overridesUi', i) || {}).overrideValues as IDataObject[] || [];
 							if (overrides.length !== 0) {
 								const data: IDataObject[] = [];
 								for (const override of overrides) {
@@ -473,7 +473,7 @@ export class ApiTemplateIo implements INodeType {
 								body.overrides = data;
 							}
 						} else {
-							const overrideJson = this.getNodeParameter('overridesJson', i) as string;
+							const overrideJson = this.getNodeParameter('overridesJson', i);
 							if (overrideJson !== '') {
 								const data = validateJSON(overrideJson);
 								if (data === undefined) {
@@ -486,7 +486,7 @@ export class ApiTemplateIo implements INodeType {
 						responseData = await apiTemplateIoApiRequest.call(this, 'POST', '/create', qs, body);
 
 						if (download === true) {
-							const binaryProperty = this.getNodeParameter('binaryProperty', i) as string;
+							const binaryProperty = this.getNodeParameter('binaryProperty', i);
 							const data = await downloadImage.call(this, responseData.download_url);
 							const fileName = responseData.download_url.split('/').pop();
 							const binaryData = await this.helpers.prepareBinaryData(data, options.fileName || fileName);
@@ -529,11 +529,11 @@ export class ApiTemplateIo implements INodeType {
 
 				for (let i = 0; i < length; i++) {
 					try {
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						let options: IDataObject = {};
 						if (download) {
-							options = this.getNodeParameter('options', i) as IDataObject;
+							options = this.getNodeParameter('options', i);
 						}
 
 						const qs = {
@@ -543,13 +543,13 @@ export class ApiTemplateIo implements INodeType {
 						let data;
 
 						if (jsonParameters === false) {
-							const properties = (this.getNodeParameter('propertiesUi', i) as IDataObject || {}).propertyValues as IDataObject[] || [];
+							const properties = (this.getNodeParameter('propertiesUi', i) || {}).propertyValues as IDataObject[] || [];
 							if (properties.length === 0) {
 								throw new NodeOperationError(this.getNode(), 'The parameter properties cannot be empty');
 							}
 							data = properties.reduce((obj, value) => Object.assign(obj, { [`${value.key}`]: value.value }), {});
 						} else {
-							const propertiesJson = this.getNodeParameter('propertiesJson', i) as string;
+							const propertiesJson = this.getNodeParameter('propertiesJson', i);
 							data = validateJSON(propertiesJson);
 							if (data === undefined) {
 								throw new NodeOperationError(this.getNode(), 'A valid JSON must be provided.');
@@ -559,7 +559,7 @@ export class ApiTemplateIo implements INodeType {
 						responseData = await apiTemplateIoApiRequest.call(this, 'POST', '/create', qs, data);
 
 						if (download === true) {
-							const binaryProperty = this.getNodeParameter('binaryProperty', i) as string;
+							const binaryProperty = this.getNodeParameter('binaryProperty', i);
 							const data = await downloadImage.call(this, responseData.download_url);
 							const fileName = responseData.download_url.split('/').pop();
 							const binaryData = await this.helpers.prepareBinaryData(data, options.fileName || fileName);

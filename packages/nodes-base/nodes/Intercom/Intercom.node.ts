@@ -128,16 +128,16 @@ export class Intercom implements INodeType {
 		for (let i = 0; i < length; i++) {
 			try {
 				qs = {};
-				const resource = this.getNodeParameter('resource', 0) as string;
-				const operation = this.getNodeParameter('operation', 0) as string;
+				const resource = this.getNodeParameter('resource', 0);
+				const operation = this.getNodeParameter('operation', 0);
 				//https://developers.intercom.com/intercom-api-reference/reference#leads
 				if (resource === 'lead') {
 					if (operation === 'create' || operation === 'update') {
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-						const jsonActive = this.getNodeParameter('jsonParameters', i) as boolean;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
+						const jsonActive = this.getNodeParameter('jsonParameters', i);
 						const body: ILead = {};
 						if (operation === 'create') {
-							body.email = this.getNodeParameter('email', i) as string;
+							body.email = this.getNodeParameter('email', i);
 						}
 						if (additionalFields.email) {
 							body.email = additionalFields.email as string;
@@ -187,7 +187,7 @@ export class Intercom implements INodeType {
 							body.companies = companies;
 						}
 						if (!jsonActive) {
-							const customAttributesValues = (this.getNodeParameter('customAttributesUi', i) as IDataObject).customAttributesValues as IDataObject[];
+							const customAttributesValues = (this.getNodeParameter('customAttributesUi', i)).customAttributesValues as IDataObject[];
 							if (customAttributesValues) {
 								const customAttributes = {};
 								for (let i = 0; i < customAttributesValues.length; i++) {
@@ -197,7 +197,7 @@ export class Intercom implements INodeType {
 								body.custom_attributes = customAttributes;
 							}
 						} else {
-							const customAttributesJson = validateJSON(this.getNodeParameter('customAttributesJson', i) as string);
+							const customAttributesJson = validateJSON(this.getNodeParameter('customAttributesJson', i));
 							if (customAttributesJson) {
 								body.custom_attributes = customAttributesJson;
 							}
@@ -244,15 +244,15 @@ export class Intercom implements INodeType {
 						}
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						Object.assign(qs, filters);
 
 						try {
 							if (returnAll === true) {
 								responseData = await intercomApiRequestAllItems.call(this, 'contacts', '/contacts', 'GET', {}, qs);
 							} else {
-								qs.per_page = this.getNodeParameter('limit', i) as number;
+								qs.per_page = this.getNodeParameter('limit', i);
 								responseData = await intercomApiRequest.call(this, '/contacts', 'GET', {}, qs);
 								responseData = responseData.contacts;
 							}
@@ -278,12 +278,12 @@ export class Intercom implements INodeType {
 				//https://developers.intercom.com/intercom-api-reference/reference#users
 				if (resource === 'user') {
 					if (operation === 'create' || operation === 'update') {
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-						const jsonActive = this.getNodeParameter('jsonParameters', i) as boolean;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
+						const jsonActive = this.getNodeParameter('jsonParameters', i);
 						const body: IUser = {};
 
 						if (operation === 'create') {
-							const identifierType = this.getNodeParameter('identifierType', i) as string;
+							const identifierType = this.getNodeParameter('identifierType', i);
 							if (identifierType === 'email') {
 								body.email = this.getNodeParameter('idValue', i) as string;
 							} else if (identifierType === 'userId') {
@@ -348,7 +348,7 @@ export class Intercom implements INodeType {
 							body.session_count = additionalFields.sessionCount as number;
 						}
 						if (!jsonActive) {
-							const customAttributesValues = (this.getNodeParameter('customAttributesUi', i) as IDataObject).customAttributesValues as IDataObject[];
+							const customAttributesValues = (this.getNodeParameter('customAttributesUi', i)).customAttributesValues as IDataObject[];
 							if (customAttributesValues) {
 								const customAttributes = {};
 								for (let i = 0; i < customAttributesValues.length; i++) {
@@ -358,7 +358,7 @@ export class Intercom implements INodeType {
 								body.custom_attributes = customAttributes;
 							}
 						} else {
-							const customAttributesJson = validateJSON(this.getNodeParameter('customAttributesJson', i) as string);
+							const customAttributesJson = validateJSON(this.getNodeParameter('customAttributesJson', i));
 							if (customAttributesJson) {
 								body.custom_attributes = customAttributesJson;
 							}
@@ -401,15 +401,15 @@ export class Intercom implements INodeType {
 						}
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						Object.assign(qs, filters);
 
 						try {
 							if (returnAll === true) {
 								responseData = await intercomApiRequestAllItems.call(this, 'users', '/users', 'GET', {}, qs);
 							} else {
-								qs.per_page = this.getNodeParameter('limit', i) as number;
+								qs.per_page = this.getNodeParameter('limit', i);
 								responseData = await intercomApiRequest.call(this, '/users', 'GET', {}, qs);
 								responseData = responseData.users;
 							}
@@ -418,7 +418,7 @@ export class Intercom implements INodeType {
 						}
 					}
 					if (operation === 'delete') {
-						const id = this.getNodeParameter('id', i) as string;
+						const id = this.getNodeParameter('id', i);
 						try {
 							responseData = await intercomApiRequest.call(this, `/users/${id}`, 'DELETE');
 						} catch (error) {
@@ -429,9 +429,9 @@ export class Intercom implements INodeType {
 				//https://developers.intercom.com/intercom-api-reference/reference#companies
 				if (resource === 'company') {
 					if (operation === 'create' || operation === 'update') {
-						const id = this.getNodeParameter('companyId', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-						const jsonActive = this.getNodeParameter('jsonParameters', i) as boolean;
+						const id = this.getNodeParameter('companyId', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
+						const jsonActive = this.getNodeParameter('jsonParameters', i);
 						const body: ICompany = {
 							company_id: id,
 						};
@@ -454,7 +454,7 @@ export class Intercom implements INodeType {
 							body.industry = additionalFields.industry as string;
 						}
 						if (!jsonActive) {
-							const customAttributesValues = (this.getNodeParameter('customAttributesUi', i) as IDataObject).customAttributesValues as IDataObject[];
+							const customAttributesValues = (this.getNodeParameter('customAttributesUi', i)).customAttributesValues as IDataObject[];
 							if (customAttributesValues) {
 								const customAttributes = {};
 								for (let i = 0; i < customAttributesValues.length; i++) {
@@ -464,7 +464,7 @@ export class Intercom implements INodeType {
 								body.custom_attributes = customAttributes;
 							}
 						} else {
-							const customAttributesJson = validateJSON(this.getNodeParameter('customAttributesJson', i) as string);
+							const customAttributesJson = validateJSON(this.getNodeParameter('customAttributesJson', i));
 							if (customAttributesJson) {
 								body.custom_attributes = customAttributesJson;
 							}
@@ -495,15 +495,15 @@ export class Intercom implements INodeType {
 						}
 					}
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						Object.assign(qs, filters);
 
 						try {
 							if (returnAll === true) {
 								responseData = await intercomApiRequestAllItems.call(this, 'companies', '/companies', 'GET', {}, qs);
 							} else {
-								qs.per_page = this.getNodeParameter('limit', i) as number;
+								qs.per_page = this.getNodeParameter('limit', i);
 								responseData = await intercomApiRequest.call(this, '/companies', 'GET', {}, qs);
 								responseData = responseData.companies;
 							}
@@ -514,7 +514,7 @@ export class Intercom implements INodeType {
 					if (operation === 'users') {
 						const listBy = this.getNodeParameter('listBy', 0) as string;
 						const value = this.getNodeParameter('value', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						if (listBy === 'companyId') {
 							qs.company_id = value;
@@ -525,7 +525,7 @@ export class Intercom implements INodeType {
 								if (returnAll === true) {
 									responseData = await intercomApiRequestAllItems.call(this, 'users', `/companies/${value}/users`, 'GET', {}, qs);
 								} else {
-									qs.per_page = this.getNodeParameter('limit', i) as number;
+									qs.per_page = this.getNodeParameter('limit', i);
 									responseData = await intercomApiRequest.call(this, `/companies/${value}/users`, 'GET', {}, qs);
 									responseData = responseData.users;
 								}
@@ -536,7 +536,7 @@ export class Intercom implements INodeType {
 								if (returnAll === true) {
 									responseData = await intercomApiRequestAllItems.call(this, 'users', '/companies', 'GET', {}, qs);
 								} else {
-									qs.per_page = this.getNodeParameter('limit', i) as number;
+									qs.per_page = this.getNodeParameter('limit', i);
 									responseData = await intercomApiRequest.call(this, '/companies', 'GET', {}, qs);
 									responseData = responseData.users;
 								}

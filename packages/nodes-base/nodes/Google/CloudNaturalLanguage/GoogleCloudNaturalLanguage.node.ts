@@ -277,14 +277,14 @@ export class GoogleCloudNaturalLanguage implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const length = items.length as unknown as number;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		const responseData = [];
 		for (let i = 0; i < length; i++) {
 			if (resource === 'document') {
 				if (operation === 'analyzeSentiment') {
-					const source = this.getNodeParameter('source', i) as string;
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const source = this.getNodeParameter('source', i);
+					const options = this.getNodeParameter('options', i);
 					const encodingType = (options.encodingType as string | undefined) || 'UTF16';
 					const documentType = (options.documentType as string | undefined) || 'PLAIN_TEXT';
 

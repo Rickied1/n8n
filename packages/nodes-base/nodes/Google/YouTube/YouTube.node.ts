@@ -214,15 +214,15 @@ export class YouTube implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'channel') {
 					if (operation === 'get') {
 						//https://developers.google.com/youtube/v3/docs/channels/list
 						let part = this.getNodeParameter('part', i) as string[];
-						const channelId = this.getNodeParameter('channelId', i) as string;
+						const channelId = this.getNodeParameter('channelId', i);
 
 						if (part.includes('*')) {
 							part = [
@@ -254,10 +254,10 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/channels/list
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						let part = this.getNodeParameter('part', i) as string[];
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
+						const filters = this.getNodeParameter('filters', i);
 
 						if (part.includes('*')) {
 							part = [
@@ -293,7 +293,7 @@ export class YouTube implements INodeType {
 								qs,
 							);
 						} else {
-							qs.maxResults = this.getNodeParameter('limit', i) as number;
+							qs.maxResults = this.getNodeParameter('limit', i);
 							responseData = await googleApiRequest.call(
 								this,
 								'GET',
@@ -306,8 +306,8 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/channels/update
 					if (operation === 'update') {
-						const channelId = this.getNodeParameter('channelId', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const channelId = this.getNodeParameter('channelId', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						const body: IDataObject = {
 							id: channelId,
@@ -403,8 +403,8 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/channelBanners/insert
 					if (operation === 'uploadBanner') {
-						const channelId = this.getNodeParameter('channelId', i) as string;
-						const binaryProperty = this.getNodeParameter('binaryProperty', i) as string;
+						const channelId = this.getNodeParameter('channelId', i);
+						const binaryProperty = this.getNodeParameter('binaryProperty', i);
 
 						let mimeType;
 
@@ -458,8 +458,8 @@ export class YouTube implements INodeType {
 					//https://developers.google.com/youtube/v3/docs/playlists/list
 					if (operation === 'get') {
 						let part = this.getNodeParameter('part', i) as string[];
-						const playlistId = this.getNodeParameter('playlistId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const playlistId = this.getNodeParameter('playlistId', i);
+						const options = this.getNodeParameter('options', i);
 
 						if (part.includes('*')) {
 							part = [
@@ -490,10 +490,10 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/playlists/list
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						let part = this.getNodeParameter('part', i) as string[];
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
+						const filters = this.getNodeParameter('filters', i);
 
 						if (part.includes('*')) {
 							part = [
@@ -526,7 +526,7 @@ export class YouTube implements INodeType {
 								qs,
 							);
 						} else {
-							qs.maxResults = this.getNodeParameter('limit', i) as number;
+							qs.maxResults = this.getNodeParameter('limit', i);
 							responseData = await googleApiRequest.call(
 								this,
 								'GET',
@@ -539,8 +539,8 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/playlists/insert
 					if (operation === 'create') {
-						const title = this.getNodeParameter('title', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const title = this.getNodeParameter('title', i);
+						const options = this.getNodeParameter('options', i);
 
 						qs.part = 'snippet';
 
@@ -583,9 +583,9 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/playlists/update
 					if (operation === 'update') {
-						const playlistId = this.getNodeParameter('playlistId', i) as string;
-						const title = this.getNodeParameter('title', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const playlistId = this.getNodeParameter('playlistId', i);
+						const title = this.getNodeParameter('title', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						qs.part = 'snippet, status';
 
@@ -632,8 +632,8 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/playlists/delete
 					if (operation === 'delete') {
-						const playlistId = this.getNodeParameter('playlistId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const playlistId = this.getNodeParameter('playlistId', i);
+						const options = this.getNodeParameter('options', i);
 
 						const body: IDataObject = {
 							id: playlistId,
@@ -657,8 +657,8 @@ export class YouTube implements INodeType {
 					//https://developers.google.com/youtube/v3/docs/playlistItems/list
 					if (operation === 'get') {
 						let part = this.getNodeParameter('part', i) as string[];
-						const playlistItemId = this.getNodeParameter('playlistItemId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const playlistItemId = this.getNodeParameter('playlistItemId', i);
+						const options = this.getNodeParameter('options', i);
 
 						if (part.includes('*')) {
 							part = [
@@ -687,11 +687,11 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/playlistItems/list
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						let part = this.getNodeParameter('part', i) as string[];
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						const playlistId = this.getNodeParameter('playlistId', i) as string;
-						//const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const options = this.getNodeParameter('options', i);
+						const playlistId = this.getNodeParameter('playlistId', i);
+						//const filters = this.getNodeParameter('filters', i);
 
 						if (part.includes('*')) {
 							part = [
@@ -718,7 +718,7 @@ export class YouTube implements INodeType {
 								qs,
 							);
 						} else {
-							qs.maxResults = this.getNodeParameter('limit', i) as number;
+							qs.maxResults = this.getNodeParameter('limit', i);
 							responseData = await googleApiRequest.call(
 								this,
 								'GET',
@@ -731,9 +731,9 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/playlistItems/insert
 					if (operation === 'add') {
-						const playlistId = this.getNodeParameter('playlistId', i) as string;
-						const videoId = this.getNodeParameter('videoId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const playlistId = this.getNodeParameter('playlistId', i);
+						const videoId = this.getNodeParameter('videoId', i);
+						const options = this.getNodeParameter('options', i);
 
 						qs.part = 'snippet, contentDetails';
 
@@ -784,8 +784,8 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/playlistItems/delete
 					if (operation === 'delete') {
-						const playlistItemId = this.getNodeParameter('playlistItemId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const playlistItemId = this.getNodeParameter('playlistItemId', i);
+						const options = this.getNodeParameter('options', i);
 
 						const body: IDataObject = {
 							id: playlistItemId,
@@ -808,9 +808,9 @@ export class YouTube implements INodeType {
 				if (resource === 'video') {
 					//https://developers.google.com/youtube/v3/docs/search/list
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const options = this.getNodeParameter('options', i);
+						const filters = this.getNodeParameter('filters', i);
 
 						qs.part = 'snippet';
 
@@ -838,7 +838,7 @@ export class YouTube implements INodeType {
 								qs,
 							);
 						} else {
-							qs.maxResults = this.getNodeParameter('limit', i) as number;
+							qs.maxResults = this.getNodeParameter('limit', i);
 							responseData = await googleApiRequest.call(
 								this,
 								'GET',
@@ -852,8 +852,8 @@ export class YouTube implements INodeType {
 					//https://developers.google.com/youtube/v3/docs/videos/list?hl=en
 					if (operation === 'get') {
 						let part = this.getNodeParameter('part', i) as string[];
-						const videoId = this.getNodeParameter('videoId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const videoId = this.getNodeParameter('videoId', i);
+						const options = this.getNodeParameter('options', i);
 
 						if (part.includes('*')) {
 							part = [
@@ -888,10 +888,10 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/guides/uploading_a_video?hl=en
 					if (operation === 'upload') {
-						const title = this.getNodeParameter('title', i) as string;
-						const categoryId = this.getNodeParameter('categoryId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
-						const binaryProperty = this.getNodeParameter('binaryProperty', i) as string;
+						const title = this.getNodeParameter('title', i);
+						const categoryId = this.getNodeParameter('categoryId', i);
+						const options = this.getNodeParameter('options', i);
+						const binaryProperty = this.getNodeParameter('binaryProperty', i);
 
 						let mimeType;
 
@@ -1002,10 +1002,10 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/playlists/update
 					if (operation === 'update') {
-						const id = this.getNodeParameter('videoId', i) as string;
-						const title = this.getNodeParameter('title', i) as string;
-						const categoryId = this.getNodeParameter('categoryId', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const id = this.getNodeParameter('videoId', i);
+						const title = this.getNodeParameter('title', i);
+						const categoryId = this.getNodeParameter('categoryId', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						qs.part = 'snippet, status, recordingDetails';
 
@@ -1081,8 +1081,8 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/videos/delete?hl=en
 					if (operation === 'delete') {
-						const videoId = this.getNodeParameter('videoId', i) as string;
-						const options = this.getNodeParameter('options', i) as IDataObject;
+						const videoId = this.getNodeParameter('videoId', i);
+						const options = this.getNodeParameter('options', i);
 
 						const body: IDataObject = {
 							id: videoId,
@@ -1103,7 +1103,7 @@ export class YouTube implements INodeType {
 					}
 					//https://developers.google.com/youtube/v3/docs/videos/rate?hl=en
 					if (operation === 'rate') {
-						const videoId = this.getNodeParameter('videoId', i) as string;
+						const videoId = this.getNodeParameter('videoId', i);
 						const rating = this.getNodeParameter('rating', i) as string;
 
 						const body: IDataObject = {
@@ -1124,7 +1124,7 @@ export class YouTube implements INodeType {
 				if (resource === 'videoCategory') {
 					//https://developers.google.com/youtube/v3/docs/videoCategories/list
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						const regionCode = this.getNodeParameter('regionCode', i) as string;
 
 						qs.regionCode = regionCode;
@@ -1141,7 +1141,7 @@ export class YouTube implements INodeType {
 						responseData = responseData.items;
 
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 					}

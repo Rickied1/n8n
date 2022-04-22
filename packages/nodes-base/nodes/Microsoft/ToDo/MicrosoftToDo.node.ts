@@ -9,6 +9,7 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 	NodeOperationError,
 } from 'n8n-workflow';
 
@@ -110,8 +111,8 @@ export class MicrosoftToDo implements INodeType {
 		const qs: IDataObject = {};
 		let responseData;
 		const timezone = this.getTimezone();
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 
@@ -119,12 +120,12 @@ export class MicrosoftToDo implements INodeType {
 					// https://docs.microsoft.com/en-us/graph/api/todotask-post-linkedresources?view=graph-rest-1.0&tabs=http
 					if (operation === 'create') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const taskId = this.getNodeParameter('taskId', i);
 						const body: IDataObject = {
-							applicationName: this.getNodeParameter('applicationName', i) as string,
-							displayName: this.getNodeParameter('displayName', i) as string,
-							...this.getNodeParameter('additionalFields', i) as IDataObject[],
+							applicationName: this.getNodeParameter('applicationName', i),
+							displayName: this.getNodeParameter('displayName', i),
+							...this.getNodeParameter('additionalFields', i),
 						};
 
 						responseData = await microsoftApiRequest.call(this, 'POST', `/todo/lists/${taskListId}/tasks/${taskId}/linkedResources`, body, qs);
@@ -132,9 +133,9 @@ export class MicrosoftToDo implements INodeType {
 						// https://docs.microsoft.com/en-us/graph/api/linkedresource-delete?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'delete') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
-						const linkedResourceId = this.getNodeParameter('linkedResourceId', i) as string;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const taskId = this.getNodeParameter('taskId', i);
+						const linkedResourceId = this.getNodeParameter('linkedResourceId', i);
 
 						responseData = await microsoftApiRequest.call(this, 'DELETE', `/todo/lists/${taskListId}/tasks/${taskId}/linkedResources/${linkedResourceId}`, undefined, qs);
 						responseData = { success: true };
@@ -142,23 +143,23 @@ export class MicrosoftToDo implements INodeType {
 						// https://docs.microsoft.com/en-us/graph/api/linkedresource-get?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'get') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
-						const linkedResourceId = this.getNodeParameter('linkedResourceId', i) as string;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const taskId = this.getNodeParameter('taskId', i);
+						const linkedResourceId = this.getNodeParameter('linkedResourceId', i);
 
 						responseData = await microsoftApiRequest.call(this, 'GET', `/todo/lists/${taskListId}/tasks/${taskId}/linkedResources/${linkedResourceId}`, undefined, qs);
 
 						// https://docs.microsoft.com/en-us/graph/api/todotask-list-linkedresources?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'getAll') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const taskId = this.getNodeParameter('taskId', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						if (returnAll === true) {
 							responseData = await microsoftApiRequestAllItems.call(this, 'value', 'GET', `/todo/lists/${taskListId}/tasks/${taskId}/linkedResources`, undefined, qs);
 						} else {
-							qs['$top'] = this.getNodeParameter('limit', i) as number;
+							qs['$top'] = this.getNodeParameter('limit', i);
 							responseData = await microsoftApiRequest.call(this, 'GET', `/todo/lists/${taskListId}/tasks/${taskId}/linkedResources`, undefined, qs);
 							responseData = responseData.value;
 						}
@@ -166,12 +167,12 @@ export class MicrosoftToDo implements INodeType {
 						// https://docs.microsoft.com/en-us/graph/api/linkedresource-update?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'update') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
-						const linkedResourceId = this.getNodeParameter('linkedResourceId', i) as string;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const taskId = this.getNodeParameter('taskId', i);
+						const linkedResourceId = this.getNodeParameter('linkedResourceId', i);
 
 						const body: IDataObject = {
-							...this.getNodeParameter('updateFields', i) as IDataObject[],
+							...this.getNodeParameter('updateFields', i),
 						};
 
 						responseData = await microsoftApiRequest.call(this, 'PATCH', `/todo/lists/${taskListId}/tasks/${taskId}/linkedResources/${linkedResourceId}`, body, qs);
@@ -185,10 +186,10 @@ export class MicrosoftToDo implements INodeType {
 					// https://docs.microsoft.com/en-us/graph/api/todotasklist-post-tasks?view=graph-rest-1.0&tabs=http
 					if (operation === 'create') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
+						const taskListId = this.getNodeParameter('taskListId', i);
 						const body: IDataObject = {
-							title: this.getNodeParameter('title', i) as string,
-							...this.getNodeParameter('additionalFields', i) as IDataObject[],
+							title: this.getNodeParameter('title', i),
+							...this.getNodeParameter('additionalFields', i),
 						};
 
 						if (body.content) {
@@ -210,8 +211,8 @@ export class MicrosoftToDo implements INodeType {
 						// https://docs.microsoft.com/en-us/graph/api/todotask-delete?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'delete') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const taskId = this.getNodeParameter('taskId', i);
 
 						responseData = await microsoftApiRequest.call(this, 'DELETE', `/todo/lists/${taskListId}/tasks/${taskId}`, undefined, qs);
 						responseData = { success: true };
@@ -219,21 +220,21 @@ export class MicrosoftToDo implements INodeType {
 						// https://docs.microsoft.com/en-us/graph/api/todotask-get?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'get') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const taskId = this.getNodeParameter('taskId', i);
 
 						responseData = await microsoftApiRequest.call(this, 'GET', `/todo/lists/${taskListId}/tasks/${taskId}`, undefined, qs);
 
 						// https://docs.microsoft.com/en-us/graph/api/todotasklist-list-tasks?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'getAll') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						if (returnAll === true) {
 							responseData = await microsoftApiRequestAllItems.call(this, 'value', 'GET', `/todo/lists/${taskListId}/tasks/`, undefined, qs);
 						} else {
-							qs['$top'] = this.getNodeParameter('limit', i) as number;
+							qs['$top'] = this.getNodeParameter('limit', i);
 							responseData = await microsoftApiRequest.call(this, 'GET', `/todo/lists/${taskListId}/tasks/`, undefined, qs);
 							responseData = responseData.value;
 						}
@@ -241,10 +242,10 @@ export class MicrosoftToDo implements INodeType {
 						// https://docs.microsoft.com/en-us/graph/api/todotask-update?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'update') {
 
-						const taskListId = this.getNodeParameter('taskListId', i) as string;
-						const taskId = this.getNodeParameter('taskId', i) as string;
+						const taskListId = this.getNodeParameter('taskListId', i);
+						const taskId = this.getNodeParameter('taskId', i);
 						const body: IDataObject = {
-							...this.getNodeParameter('updateFields', i) as IDataObject[],
+							...this.getNodeParameter('updateFields', i),
 						};
 
 						if (body.content) {
@@ -273,7 +274,7 @@ export class MicrosoftToDo implements INodeType {
 					if (operation === 'create') {
 
 						const body = {
-							displayName: this.getNodeParameter('displayName', i) as string,
+							displayName: this.getNodeParameter('displayName', i),
 						};
 
 						responseData = await microsoftApiRequest.call(this, 'POST', '/todo/lists/', body, qs);
@@ -281,24 +282,24 @@ export class MicrosoftToDo implements INodeType {
 						// https://docs.microsoft.com/en-us/graph/api/todotasklist-delete?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'delete') {
 
-						const listId = this.getNodeParameter('listId', i) as string;
+						const listId = this.getNodeParameter('listId', i);
 						responseData = await microsoftApiRequest.call(this, 'DELETE', `/todo/lists/${listId}`, undefined, qs);
 						responseData = { success: true };
 
 						//https://docs.microsoft.com/en-us/graph/api/todotasklist-get?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'get') {
 
-						const listId = this.getNodeParameter('listId', i) as string;
+						const listId = this.getNodeParameter('listId', i);
 						responseData = await microsoftApiRequest.call(this, 'GET', `/todo/lists/${listId}`, undefined, qs);
 
 						// https://docs.microsoft.com/en-us/graph/api/todo-list-lists?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'getAll') {
 
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						if (returnAll === true) {
 							responseData = await microsoftApiRequestAllItems.call(this, 'value', 'GET', '/todo/lists', undefined, qs);
 						} else {
-							qs['$top'] = this.getNodeParameter('limit', i) as number;
+							qs['$top'] = this.getNodeParameter('limit', i);
 							responseData = await microsoftApiRequest.call(this, 'GET', '/todo/lists', undefined, qs);
 							responseData = responseData.value;
 						}
@@ -306,9 +307,9 @@ export class MicrosoftToDo implements INodeType {
 						// https://docs.microsoft.com/en-us/graph/api/todotasklist-update?view=graph-rest-1.0&tabs=http
 					} else if (operation === 'update') {
 
-						const listId = this.getNodeParameter('listId', i) as string;
+						const listId = this.getNodeParameter('listId', i);
 						const body = {
-							displayName: this.getNodeParameter('displayName', i) as string,
+							displayName: this.getNodeParameter('displayName', i),
 						};
 
 						responseData = await microsoftApiRequest.call(this, 'PATCH', `/todo/lists/${listId}`, body, qs);
@@ -319,7 +320,7 @@ export class MicrosoftToDo implements INodeType {
 				}
 			} catch (error) {
 				if (this.continueOnFail()) {
-					returnData.push({ error: error.message });
+					returnData.push({ error: (error as JsonObject).message });
 					continue;
 				}
 				throw error;

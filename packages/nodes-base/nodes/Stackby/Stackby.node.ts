@@ -192,13 +192,13 @@ export class Stackby implements INodeType {
 		const length = items.length as unknown as number;
 		let responseData;
 		const qs: IDataObject = {};
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const operation = this.getNodeParameter('operation', 0);
 		if (operation === 'read') {
 			for (let i = 0; i < length; i++) {
 				try {
-					const stackId = this.getNodeParameter('stackId', i) as string;
+					const stackId = this.getNodeParameter('stackId', i);
 					const table = encodeURI(this.getNodeParameter('table', i) as string);
-					const rowIds = this.getNodeParameter('id', i) as string;
+					const rowIds = this.getNodeParameter('id', i);
 					qs.rowIds = [rowIds];
 					responseData = await apiRequest.call(this, 'GET', `/rowlist/${stackId}/${table}`, {}, qs);
 					// tslint:disable-next-line: no-any
@@ -215,9 +215,9 @@ export class Stackby implements INodeType {
 		if (operation === 'delete') {
 			for (let i = 0; i < length; i++) {
 				try {
-					const stackId = this.getNodeParameter('stackId', i) as string;
+					const stackId = this.getNodeParameter('stackId', i);
 					const table = encodeURI(this.getNodeParameter('table', i) as string);
-					const rowIds = this.getNodeParameter('id', i) as string;
+					const rowIds = this.getNodeParameter('id', i);
 					qs.rowIds = [rowIds];
 
 					responseData = await apiRequest.call(this, 'DELETE', `/rowdelete/${stackId}/${table}`, {}, qs);
@@ -238,7 +238,7 @@ export class Stackby implements INodeType {
 				const records: { [key: string]: IRecord[] } = {};
 				let key = '';
 				for (let i = 0; i < length; i++) {
-					const stackId = this.getNodeParameter('stackId', i) as string;
+					const stackId = this.getNodeParameter('stackId', i);
 					const table = encodeURI(this.getNodeParameter('table', i) as string);
 					const columns = this.getNodeParameter('columns', i) as string;
 					const columnList = columns.split(',').map(column => column.trim());
@@ -278,9 +278,9 @@ export class Stackby implements INodeType {
 		if (operation === 'list') {
 			for (let i = 0; i < length; i++) {
 				try {
-					const stackId = this.getNodeParameter('stackId', i) as string;
+					const stackId = this.getNodeParameter('stackId', i);
 					const table = encodeURI(this.getNodeParameter('table', i) as string);
-					const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+					const returnAll = this.getNodeParameter('returnAll', 0);
 
 					const additionalFields = this.getNodeParameter('additionalFields', i, {}) as IDataObject;
 
@@ -291,7 +291,7 @@ export class Stackby implements INodeType {
 					if (returnAll === true) {
 						responseData = await apiRequestAllItems.call(this, 'GET', `/rowlist/${stackId}/${table}`, {}, qs);
 					} else {
-						qs.maxrecord = this.getNodeParameter('limit', 0) as number;
+						qs.maxrecord = this.getNodeParameter('limit', 0);
 						responseData = await apiRequest.call(this, 'GET', `/rowlist/${stackId}/${table}`, {}, qs);
 					}
 

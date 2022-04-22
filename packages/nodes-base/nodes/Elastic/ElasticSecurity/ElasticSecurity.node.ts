@@ -166,8 +166,8 @@ export class ElasticSecurity implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		let responseData;
 
@@ -252,7 +252,7 @@ export class ElasticSecurity implements INodeType {
 						const {
 							syncAlerts, // ignored because already set
 							...rest
-						} = this.getNodeParameter('additionalFields', i) as IDataObject;
+						} = this.getNodeParameter('additionalFields', i);
 
 						if (Object.keys(rest).length) {
 							Object.assign(body, rest);
@@ -332,7 +332,7 @@ export class ElasticSecurity implements INodeType {
 						const caseId = this.getNodeParameter('caseId', i);
 
 						const body = {} as IDataObject;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						if (!Object.keys(updateFields).length) {
 							throwOnEmptyUpdate.call(this, resource);
@@ -463,9 +463,9 @@ export class ElasticSecurity implements INodeType {
 
 						// https://www.elastic.co/guide/en/security/current/cases-api-add-comment.html
 
-						const simple = this.getNodeParameter('simple', i) as boolean;
+						const simple = this.getNodeParameter('simple', i);
 
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const body = {
 							comment: this.getNodeParameter('comment', i),
@@ -532,7 +532,7 @@ export class ElasticSecurity implements INodeType {
 
 						// https://www.elastic.co/guide/en/security/current/cases-api-update-comment.html
 
-						const simple = this.getNodeParameter('simple', i) as boolean;
+						const simple = this.getNodeParameter('simple', i);
 						const caseId = this.getNodeParameter('caseId', i);
 						const commentId = this.getNodeParameter('commentId', i);
 
@@ -568,34 +568,34 @@ export class ElasticSecurity implements INodeType {
 
 						const body: ConnectorCreatePayload = {
 							connector_type_id: connectorType,
-							name: this.getNodeParameter('name', i) as string,
+							name: this.getNodeParameter('name', i),
 						};
 
 						if (connectorType === '.jira') {
 							body.config = {
-								apiUrl: this.getNodeParameter('apiUrl', i) as string,
-								projectKey: this.getNodeParameter('projectKey', i) as string,
+								apiUrl: this.getNodeParameter('apiUrl', i),
+								projectKey: this.getNodeParameter('projectKey', i),
 							};
 							body.secrets = {
-								email: this.getNodeParameter('email', i) as string,
+								email: this.getNodeParameter('email', i),
 								apiToken: this.getNodeParameter('apiToken', i) as string,
 							};
 						} else if (connectorType === '.resilient') {
 							body.config = {
-								apiUrl: this.getNodeParameter('apiUrl', i) as string,
-								orgId: this.getNodeParameter('orgId', i) as string,
+								apiUrl: this.getNodeParameter('apiUrl', i),
+								orgId: this.getNodeParameter('orgId', i),
 							};
 							body.secrets = {
-								apiKeyId: this.getNodeParameter('apiKeyId', i) as string,
+								apiKeyId: this.getNodeParameter('apiKeyId', i),
 								apiKeySecret: this.getNodeParameter('apiKeySecret', i) as string,
 							};
 						} else if (connectorType === '.servicenow') {
 							body.config = {
-								apiUrl: this.getNodeParameter('apiUrl', i) as string,
+								apiUrl: this.getNodeParameter('apiUrl', i),
 							};
 							body.secrets = {
-								username: this.getNodeParameter('username', i) as string,
-								password: this.getNodeParameter('password', i) as string,
+								username: this.getNodeParameter('username', i),
+								password: this.getNodeParameter('password', i),
 							};
 						}
 

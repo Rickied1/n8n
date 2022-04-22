@@ -98,15 +98,15 @@ export class Drift implements INodeType {
 		const length = items.length as unknown as number;
 		let responseData;
 		const qs: IDataObject = {};
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'contact') {
 					//https://devdocs.drift.com/docs/creating-a-contact
 					if (operation === 'create') {
-						const email = this.getNodeParameter('email', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const email = this.getNodeParameter('email', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IContact = {
 							email,
 						};
@@ -121,8 +121,8 @@ export class Drift implements INodeType {
 					}
 					//https://devdocs.drift.com/docs/updating-a-contact
 					if (operation === 'update') {
-						const contactId = this.getNodeParameter('contactId', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const contactId = this.getNodeParameter('contactId', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 						const body: IContact = {};
 						if (updateFields.name) {
 							body.name = updateFields.name as string;
@@ -138,7 +138,7 @@ export class Drift implements INodeType {
 					}
 					//https://devdocs.drift.com/docs/retrieving-contact
 					if (operation === 'get') {
-						const contactId = this.getNodeParameter('contactId', i) as string;
+						const contactId = this.getNodeParameter('contactId', i);
 						responseData = await driftApiRequest.call(this, 'GET', `/contacts/${contactId}`);
 						responseData = responseData.data;
 					}
@@ -149,7 +149,7 @@ export class Drift implements INodeType {
 					}
 					//https://devdocs.drift.com/docs/removing-a-contact
 					if (operation === 'delete') {
-						const contactId = this.getNodeParameter('contactId', i) as string;
+						const contactId = this.getNodeParameter('contactId', i);
 						responseData = await driftApiRequest.call(this, 'DELETE', `/contacts/${contactId}`);
 						responseData = { success: true };
 					}

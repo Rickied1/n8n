@@ -282,8 +282,8 @@ export class Ssh implements INodeType {
 
 		const returnData: IDataObject[] = [];
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		const authentication = this.getNodeParameter('authentication', 0) as string;
 
 		const temporaryFiles: string[] = [];
@@ -340,8 +340,8 @@ export class Ssh implements INodeType {
 
 						if (operation === 'download') {
 
-							const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i) as string;
-							const parameterPath = this.getNodeParameter('path', i) as string;
+							const dataPropertyNameDownload = this.getNodeParameter('binaryPropertyName', i);
+							const parameterPath = this.getNodeParameter('path', i);
 
 							const { path } = await file({ prefix: 'n8n-ssh-' });
 							temporaryFiles.push(path);
@@ -369,7 +369,7 @@ export class Ssh implements INodeType {
 
 						if (operation === 'upload') {
 
-							const parameterPath = this.getNodeParameter('path', i) as string;
+							const parameterPath = this.getNodeParameter('path', i);
 							const fileName = this.getNodeParameter('options.fileName', i, '') as string;
 
 							const item = items[i];
@@ -378,7 +378,7 @@ export class Ssh implements INodeType {
 								throw new Error('No binary data exists on item!');
 							}
 
-							const propertyNameUpload = this.getNodeParameter('binaryPropertyName', i) as string;
+							const propertyNameUpload = this.getNodeParameter('binaryPropertyName', i);
 
 							const binaryData = item.binary[propertyNameUpload] as IBinaryData;
 

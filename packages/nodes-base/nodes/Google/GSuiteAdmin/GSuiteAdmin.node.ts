@@ -127,15 +127,15 @@ export class GSuiteAdmin implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			if (resource === 'group') {
 				//https://developers.google.com/admin-sdk/directory/v1/reference/groups/insert
 				if (operation === 'create') {
-					const email = this.getNodeParameter('email', i) as string;
+					const email = this.getNodeParameter('email', i);
 
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					const body: IDataObject = {
 						email,
@@ -153,7 +153,7 @@ export class GSuiteAdmin implements INodeType {
 
 				//https://developers.google.com/admin-sdk/directory/v1/reference/groups/delete
 				if (operation === 'delete') {
-					const groupId = this.getNodeParameter('groupId', i) as string;
+					const groupId = this.getNodeParameter('groupId', i);
 
 					responseData = await googleApiRequest.call(
 						this,
@@ -167,7 +167,7 @@ export class GSuiteAdmin implements INodeType {
 
 				//https://developers.google.com/admin-sdk/directory/v1/reference/groups/get
 				if (operation === 'get') {
-					const groupId = this.getNodeParameter('groupId', i) as string;
+					const groupId = this.getNodeParameter('groupId', i);
 
 					responseData = await googleApiRequest.call(
 						this,
@@ -179,9 +179,9 @@ export class GSuiteAdmin implements INodeType {
 
 				//https://developers.google.com/admin-sdk/directory/v1/reference/groups/list
 				if (operation === 'getAll') {
-					const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+					const returnAll = this.getNodeParameter('returnAll', i);
 
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const options = this.getNodeParameter('options', i);
 
 					Object.assign(qs, options);
 
@@ -200,7 +200,7 @@ export class GSuiteAdmin implements INodeType {
 						);
 
 					} else {
-						qs.maxResults = this.getNodeParameter('limit', i) as number;
+						qs.maxResults = this.getNodeParameter('limit', i);
 
 						responseData = await googleApiRequest.call(
 							this,
@@ -216,9 +216,9 @@ export class GSuiteAdmin implements INodeType {
 
 				//https://developers.google.com/admin-sdk/directory/v1/reference/groups/update
 				if (operation === 'update') {
-					const groupId = this.getNodeParameter('groupId', i) as string;
+					const groupId = this.getNodeParameter('groupId', i);
 
-					const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+					const updateFields = this.getNodeParameter('updateFields', i);
 
 					const body: IDataObject = {};
 
@@ -238,17 +238,17 @@ export class GSuiteAdmin implements INodeType {
 				if (operation === 'create') {
 					const domain = this.getNodeParameter('domain', i) as string;
 
-					const firstName = this.getNodeParameter('firstName', i) as string;
+					const firstName = this.getNodeParameter('firstName', i);
 
-					const lastName = this.getNodeParameter('lastName', i) as string;
+					const lastName = this.getNodeParameter('lastName', i);
 
-					const password = this.getNodeParameter('password', i) as string;
+					const password = this.getNodeParameter('password', i);
 
-					const username = this.getNodeParameter('username', i) as string;
+					const username = this.getNodeParameter('username', i);
 
 					const makeAdmin = this.getNodeParameter('makeAdmin', i) as boolean;
 
-					const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+					const additionalFields = this.getNodeParameter('additionalFields', i);
 
 					const body: IDataObject = {
 						name: {
@@ -299,7 +299,7 @@ export class GSuiteAdmin implements INodeType {
 
 				//https://developers.google.com/admin-sdk/directory/v1/reference/users/delete
 				if (operation === 'delete') {
-					const userId = this.getNodeParameter('userId', i) as string;
+					const userId = this.getNodeParameter('userId', i);
 
 					responseData = await googleApiRequest.call(
 						this,
@@ -313,11 +313,11 @@ export class GSuiteAdmin implements INodeType {
 
 				//https://developers.google.com/admin-sdk/directory/v1/reference/users/get
 				if (operation === 'get') {
-					const userId = this.getNodeParameter('userId', i) as string;
+					const userId = this.getNodeParameter('userId', i);
 
 					const projection = this.getNodeParameter('projection', i) as string;
 
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const options = this.getNodeParameter('options', i);
 
 					qs.projection = projection;
 
@@ -342,11 +342,11 @@ export class GSuiteAdmin implements INodeType {
 
 				//https://developers.google.com/admin-sdk/directory/v1/reference/users/list
 				if (operation === 'getAll') {
-					const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+					const returnAll = this.getNodeParameter('returnAll', i);
 
 					const projection = this.getNodeParameter('projection', i) as string;
 
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const options = this.getNodeParameter('options', i);
 
 					qs.projection = projection;
 
@@ -375,7 +375,7 @@ export class GSuiteAdmin implements INodeType {
 						);
 
 					} else {
-						qs.maxResults = this.getNodeParameter('limit', i) as number;
+						qs.maxResults = this.getNodeParameter('limit', i);
 
 						responseData = await googleApiRequest.call(
 							this,
@@ -391,9 +391,9 @@ export class GSuiteAdmin implements INodeType {
 
 				//https://developers.google.com/admin-sdk/directory/v1/reference/users/update
 				if (operation === 'update') {
-					const userId = this.getNodeParameter('userId', i) as string;
+					const userId = this.getNodeParameter('userId', i);
 
-					const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+					const updateFields = this.getNodeParameter('updateFields', i);
 
 					const body: { name: { givenName?: string, familyName?: string }, emails?: IDataObject[], phones?: IDataObject[] } = { name: {} };
 

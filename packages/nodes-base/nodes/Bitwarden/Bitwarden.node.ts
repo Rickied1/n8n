@@ -120,8 +120,8 @@ export class Bitwarden implements INodeType {
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		let responseData;
 		const returnData: IDataObject[] = [];
@@ -174,7 +174,7 @@ export class Bitwarden implements INodeType {
 					//       collection: update
 					// ----------------------------------
 
-					const updateFields = this.getNodeParameter('updateFields', i) as CollectionUpdateFields;
+					const updateFields = this.getNodeParameter('updateFields', i) as unknown as CollectionUpdateFields;
 
 					if (isEmpty(updateFields)) {
 						throw new NodeOperationError(this.getNode(), `Please enter at least one field to update for the ${resource}.`);
@@ -213,7 +213,7 @@ export class Bitwarden implements INodeType {
 					//         event: getAll
 					// ----------------------------------
 
-					const filters = this.getNodeParameter('filters', i) as IDataObject;
+					const filters = this.getNodeParameter('filters', i);
 					const qs = isEmpty(filters) ? {} : filters;
 					const endpoint = '/public/events';
 					responseData = await handleGetAll.call(this, i, 'GET', endpoint, qs, {});

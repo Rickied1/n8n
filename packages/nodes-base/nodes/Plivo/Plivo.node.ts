@@ -84,8 +84,8 @@ export class Plivo implements INodeType {
 		const items = this.getInputData();
 		const returnData: IDataObject[] = [];
 
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < items.length; i++) {
 
@@ -104,9 +104,9 @@ export class Plivo implements INodeType {
 					// ----------------------------------
 
 					const body = {
-						src: this.getNodeParameter('from', i) as string,
+						src: this.getNodeParameter('from', i),
 						dst: this.getNodeParameter('to', i) as string,
-						text: this.getNodeParameter('message', i) as string,
+						text: this.getNodeParameter('message', i),
 					} as IDataObject;
 
 					responseData = await plivoApiRequest.call(this, 'POST', '/Message', body);
@@ -128,7 +128,7 @@ export class Plivo implements INodeType {
 					// https://www.plivo.com/docs/voice/api/call#make-a-call
 
 					const body = {
-						from: this.getNodeParameter('from', i) as string,
+						from: this.getNodeParameter('from', i),
 						to: this.getNodeParameter('to', i) as string,
 						answer_url: this.getNodeParameter('answer_url', i) as string,
 						answer_method: this.getNodeParameter('answer_method', i) as string,
@@ -153,9 +153,9 @@ export class Plivo implements INodeType {
 					// https://www.plivo.com/docs/sms/api/message#send-a-message
 
 					const body = {
-						src: this.getNodeParameter('from', i) as string,
+						src: this.getNodeParameter('from', i),
 						dst: this.getNodeParameter('to', i) as string,
-						text: this.getNodeParameter('message', i) as string,
+						text: this.getNodeParameter('message', i),
 						type: 'mms',
 						media_urls: this.getNodeParameter('media_urls', i) as string,
 					} as IDataObject;

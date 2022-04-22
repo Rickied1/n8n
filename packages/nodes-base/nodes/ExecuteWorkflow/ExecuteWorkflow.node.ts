@@ -152,7 +152,7 @@ export class ExecuteWorkflow implements INodeType {
 
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
-		const source = this.getNodeParameter('source', 0) as string;
+		const source = this.getNodeParameter('source', 0);
 
 		const workflowInfo: IExecuteWorkflowInfo = {};
 
@@ -160,7 +160,7 @@ export class ExecuteWorkflow implements INodeType {
 
 			if (source === 'database') {
 				// Read workflow from database
-				workflowInfo.id = this.getNodeParameter('workflowId', 0) as string;
+				workflowInfo.id = this.getNodeParameter('workflowId', 0);
 
 			} else if (source === 'localFile') {
 				// Read workflow from filesystem

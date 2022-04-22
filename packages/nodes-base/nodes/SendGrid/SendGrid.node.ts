@@ -129,15 +129,15 @@ export class SendGrid implements INodeType {
 		let responseData;
 		const timezone = this.getTimezone();
 		const returnData: IDataObject[] = [];
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		// https://sendgrid.com/docs/api-reference/
 		if (resource === 'contact') {
 			if (operation === 'getAll') {
 				for (let i = 0; i < length; i++) {
 					try {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						let endpoint = '/marketing/contacts';
 						let method = 'GET';
 						const body: IDataObject = {};
@@ -148,7 +148,7 @@ export class SendGrid implements INodeType {
 						}
 						responseData = await sendGridApiRequestAllItems.call(this, endpoint, method, 'result', body, qs);
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 						returnData.push.apply(returnData, responseData);
@@ -170,10 +170,10 @@ export class SendGrid implements INodeType {
 					try {
 						if (by === 'id') {
 							method = 'GET';
-							const contactId = this.getNodeParameter('contactId', i) as string;
+							const contactId = this.getNodeParameter('contactId', i);
 							endpoint = `/marketing/contacts/${contactId}`;
 						} else {
-							const email = this.getNodeParameter('email', i) as string;
+							const email = this.getNodeParameter('email', i);
 							endpoint = '/marketing/contacts/search';
 							method = 'POST';
 							Object.assign(body, { query: `email LIKE '${email}' ` });
@@ -198,7 +198,7 @@ export class SendGrid implements INodeType {
 					const contacts = [];
 					let lists;
 					for (let i = 0; i < length; i++) {
-						const email = this.getNodeParameter('email', i) as string;
+						const email = this.getNodeParameter('email', i);
 						const additionalFields = this.getNodeParameter(
 							'additionalFields',
 							i,
@@ -293,10 +293,10 @@ export class SendGrid implements INodeType {
 			if (operation === 'getAll') {
 				for (let i = 0; i < length; i++) {
 					try {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						responseData = await sendGridApiRequestAllItems.call(this, `/marketing/lists`, 'GET', 'result', {}, qs);
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 						returnData.push.apply(returnData, responseData);
@@ -312,7 +312,7 @@ export class SendGrid implements INodeType {
 			if (operation === 'get') {
 				for (let i = 0; i < length; i++) {
 					try {
-						const listId = this.getNodeParameter('listId', i) as string;
+						const listId = this.getNodeParameter('listId', i);
 						qs.contact_sample = this.getNodeParameter('contactSample', i) as boolean;
 						responseData = await sendGridApiRequest.call(this, `/marketing/lists/${listId}`, 'GET', {}, qs);
 						returnData.push(responseData);
@@ -328,7 +328,7 @@ export class SendGrid implements INodeType {
 			if (operation === 'create') {
 				for (let i = 0; i < length; i++) {
 					try {
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 						responseData = await sendGridApiRequest.call(this, '/marketing/lists', 'POST', { name }, qs);
 						returnData.push(responseData);
 					} catch (error) {
@@ -343,7 +343,7 @@ export class SendGrid implements INodeType {
 			if (operation === 'delete') {
 				for (let i = 0; i < length; i++) {
 					try {
-						const listId = this.getNodeParameter('listId', i) as string;
+						const listId = this.getNodeParameter('listId', i);
 						qs.delete_contacts = this.getNodeParameter('deleteContacts', i) as boolean;
 						responseData = await sendGridApiRequest.call(this, `/marketing/lists/${listId}`, 'DELETE', {}, qs);
 						responseData = { success: true };
@@ -360,8 +360,8 @@ export class SendGrid implements INodeType {
 			if (operation === 'update') {
 				for (let i = 0; i < length; i++) {
 					try {
-						const name = this.getNodeParameter('name', i) as string;
-						const listId = this.getNodeParameter('listId', i) as string;
+						const name = this.getNodeParameter('name', i);
+						const listId = this.getNodeParameter('listId', i);
 						responseData = await sendGridApiRequest.call(this, `/marketing/lists/${listId}`, 'PATCH', { name }, qs);
 						returnData.push(responseData);
 					} catch (error) {
@@ -378,7 +378,7 @@ export class SendGrid implements INodeType {
 			if (operation === 'send') {
 				for (let i = 0; i < length; i++) {
 					try {
-						const toEmail = this.getNodeParameter('toEmail', i) as string;
+						const toEmail = this.getNodeParameter('toEmail', i);
 
 						const parsedToEmail = toEmail.includes(',')
 							? toEmail.split(',').map((i) => ({ email: i.trim() }))
@@ -409,8 +409,8 @@ export class SendGrid implements INodeType {
 								to: parsedToEmail,
 							}],
 							from: {
-								email: (this.getNodeParameter('fromEmail', i) as string).trim(),
-								name: this.getNodeParameter('fromName', i) as string,
+								email: (this.getNodeParameter('fromEmail', i)).trim(),
+								name: this.getNodeParameter('fromName', i),
 							},
 							mail_settings: {
 								sandbox_mode: {
@@ -423,7 +423,7 @@ export class SendGrid implements INodeType {
 
 						// dynamic template
 						if (dynamicTemplateEnabled) {
-							body.template_id = this.getNodeParameter('templateId', i) as string;
+							body.template_id = this.getNodeParameter('templateId', i);
 
 							const { fields } = this.getNodeParameter('dynamicTemplateFields', i) as {
 								fields: Array<{ [key: string]: string }>
@@ -438,9 +438,9 @@ export class SendGrid implements INodeType {
 
 							// message body
 						} else {
-							body.personalizations[0].subject = this.getNodeParameter('subject', i) as string;
+							body.personalizations[0].subject = this.getNodeParameter('subject', i);
 							body.content = [{
-								type: this.getNodeParameter('contentType', i) as string,
+								type: this.getNodeParameter('contentType', i),
 								value: this.getNodeParameter('contentValue', i) as string,
 							}];
 						}

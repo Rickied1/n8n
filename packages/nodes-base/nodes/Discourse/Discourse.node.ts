@@ -152,16 +152,16 @@ export class Discourse implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'category') {
 					//https://docs.discourse.org/#tag/Categories/paths/~1categories.json/post
 					if (operation === 'create') {
-						const name = this.getNodeParameter('name', i) as string;
-						const color = this.getNodeParameter('color', i) as string;
-						const textColor = this.getNodeParameter('textColor', i) as string;
+						const name = this.getNodeParameter('name', i);
+						const color = this.getNodeParameter('color', i);
+						const textColor = this.getNodeParameter('textColor', i);
 
 						const body: IDataObject = {
 							name,
@@ -180,7 +180,7 @@ export class Discourse implements INodeType {
 					}
 					//https://docs.discourse.org/#tag/Categories/paths/~1categories.json/get
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						responseData = await discourseApiRequest.call(
 							this,
@@ -193,17 +193,17 @@ export class Discourse implements INodeType {
 						responseData = responseData.category_list.categories;
 
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 					}
 					//https://docs.discourse.org/#tag/Categories/paths/~1categories~1{id}/put
 					if (operation === 'update') {
-						const categoryId = this.getNodeParameter('categoryId', i) as string;
+						const categoryId = this.getNodeParameter('categoryId', i);
 
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						const body: IDataObject = {
 							name,
@@ -224,7 +224,7 @@ export class Discourse implements INodeType {
 				if (resource === 'group') {
 					//https://docs.discourse.org/#tag/Posts/paths/~1posts.json/post
 					if (operation === 'create') {
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 
 						const body: IDataObject = {
 							name,
@@ -241,7 +241,7 @@ export class Discourse implements INodeType {
 					}
 					//https://docs.discourse.org/#tag/Groups/paths/~1groups~1{name}.json/get
 					if (operation === 'get') {
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 
 						responseData = await discourseApiRequest.call(
 							this,
@@ -256,7 +256,7 @@ export class Discourse implements INodeType {
 					}
 					//https://docs.discourse.org/#tag/Groups/paths/~1groups.json/get
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 
 						responseData = await discourseApiRequest.call(
 							this,
@@ -269,15 +269,15 @@ export class Discourse implements INodeType {
 						responseData = responseData.groups;
 
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 					}
 					//https://docs.discourse.org/#tag/Posts/paths/~1posts~1{id}.json/put
 					if (operation === 'update') {
-						const groupId = this.getNodeParameter('groupId', i) as string;
+						const groupId = this.getNodeParameter('groupId', i);
 
-						const name = this.getNodeParameter('name', i) as string;
+						const name = this.getNodeParameter('name', i);
 
 						const body: IDataObject = {
 							name,
@@ -295,8 +295,8 @@ export class Discourse implements INodeType {
 					//https://docs.discourse.org/#tag/Posts/paths/~1posts.json/post
 					if (operation === 'create') {
 						const content = this.getNodeParameter('content', i) as string;
-						const title = this.getNodeParameter('title', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const title = this.getNodeParameter('title', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const body: IDataObject = {
 							title,
@@ -314,7 +314,7 @@ export class Discourse implements INodeType {
 					}
 					//https://docs.discourse.org/#tag/Posts/paths/~1posts~1{id}.json/get
 					if (operation === 'get') {
-						const postId = this.getNodeParameter('postId', i) as string;
+						const postId = this.getNodeParameter('postId', i);
 
 						responseData = await discourseApiRequest.call(
 							this,
@@ -364,11 +364,11 @@ export class Discourse implements INodeType {
 					}
 					//https://docs.discourse.org/#tag/Posts/paths/~1posts~1{id}.json/put
 					if (operation === 'update') {
-						const postId = this.getNodeParameter('postId', i) as string;
+						const postId = this.getNodeParameter('postId', i);
 
 						const content = this.getNodeParameter('content', i) as string;
 
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const updateFields = this.getNodeParameter('updateFields', i);
 
 						const body: IDataObject = {
 							raw: content,
@@ -392,9 +392,9 @@ export class Discourse implements INodeType {
 				// 	if (operation === 'query') {
 				// 		qs.term = this.getNodeParameter('term', i) as string;
 
-				// 		const simple = this.getNodeParameter('simple', i) as boolean;
+				// 		const simple = this.getNodeParameter('simple', i);
 
-				// 		const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+				// 		const updateFields = this.getNodeParameter('updateFields', i);
 
 				// 		Object.assign(qs, updateFields);
 
@@ -422,11 +422,11 @@ export class Discourse implements INodeType {
 				if (resource === 'user') {
 					//https://docs.discourse.org/#tag/Users/paths/~1users/post
 					if (operation === 'create') {
-						const name = this.getNodeParameter('name', i) as string;
-						const email = this.getNodeParameter('email', i) as string;
-						const password = this.getNodeParameter('password', i) as string;
-						const username = this.getNodeParameter('username', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const name = this.getNodeParameter('name', i);
+						const email = this.getNodeParameter('email', i);
+						const password = this.getNodeParameter('password', i);
+						const username = this.getNodeParameter('username', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 
 						const body: IDataObject = {
 							name,
@@ -449,10 +449,10 @@ export class Discourse implements INodeType {
 						const by = this.getNodeParameter('by', i) as string;
 						let endpoint = '';
 						if (by === 'username') {
-							const username = this.getNodeParameter('username', i) as string;
+							const username = this.getNodeParameter('username', i);
 							endpoint = `/users/${username}`;
 						} else if (by === 'externalId') {
-							const externalId = this.getNodeParameter('externalId', i) as string;
+							const externalId = this.getNodeParameter('externalId', i);
 							endpoint = `/u/by-external/${externalId}.json`;
 						}
 
@@ -464,7 +464,7 @@ export class Discourse implements INodeType {
 					}
 					//https://docs.discourse.org/#tag/Users/paths/~1admin~1users~1{id}.json/delete
 					if (operation === 'getAll') {
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+						const returnAll = this.getNodeParameter('returnAll', i);
 						const flag = this.getNodeParameter('flag', i) as boolean;
 
 						responseData = await discourseApiRequest.call(
@@ -476,7 +476,7 @@ export class Discourse implements INodeType {
 						);
 
 						if (returnAll === false) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 					}
@@ -485,7 +485,7 @@ export class Discourse implements INodeType {
 					//https://docs.discourse.org/#tag/Groups/paths/~1groups~1{group_id}~1members.json/put
 					if (operation === 'add') {
 						const usernames = this.getNodeParameter('usernames', i) as string;
-						const groupId = this.getNodeParameter('groupId', i) as string;
+						const groupId = this.getNodeParameter('groupId', i);
 						const body: IDataObject = {
 							usernames,
 						};
@@ -500,7 +500,7 @@ export class Discourse implements INodeType {
 					//https://docs.discourse.org/#tag/Groups/paths/~1groups~1{group_id}~1members.json/delete
 					if (operation === 'remove') {
 						const usernames = this.getNodeParameter('usernames', i) as string;
-						const groupId = this.getNodeParameter('groupId', i) as string;
+						const groupId = this.getNodeParameter('groupId', i);
 						const body: IDataObject = {
 							usernames,
 						};

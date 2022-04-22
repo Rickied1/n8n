@@ -171,16 +171,16 @@ export class Twist implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'channel') {
 					//https://developer.twist.com/v3/#add-channel
 					if (operation === 'create') {
-						const workspaceId = this.getNodeParameter('workspaceId', i) as string;
-						const name = this.getNodeParameter('name', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const workspaceId = this.getNodeParameter('workspaceId', i);
+						const name = this.getNodeParameter('name', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IDataObject = {
 							workspace_id: workspaceId,
 							name,
@@ -191,35 +191,35 @@ export class Twist implements INodeType {
 					}
 					//https://developer.twist.com/v3/#remove-channel
 					if (operation === 'delete') {
-						qs.id = this.getNodeParameter('channelId', i) as string;
+						qs.id = this.getNodeParameter('channelId', i);
 
 						responseData = await twistApiRequest.call(this, 'POST', '/channels/remove', {}, qs);
 					}
 					//https://developer.twist.com/v3/#get-channel
 					if (operation === 'get') {
-						qs.id = this.getNodeParameter('channelId', i) as string;
+						qs.id = this.getNodeParameter('channelId', i);
 
 						responseData = await twistApiRequest.call(this, 'GET', '/channels/getone', {}, qs);
 					}
 					//https://developer.twist.com/v3/#get-all-channels
 					if (operation === 'getAll') {
-						const workspaceId = this.getNodeParameter('workspaceId', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const workspaceId = this.getNodeParameter('workspaceId', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						qs.workspace_id = workspaceId;
 						Object.assign(qs, filters);
 
 						responseData = await twistApiRequest.call(this, 'GET', '/channels/get', {}, qs);
 
 						if (!returnAll) {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							responseData = responseData.splice(0, limit);
 						}
 					}
 					//https://developer.twist.com/v3/#update-channel
 					if (operation === 'update') {
-						const channelId = this.getNodeParameter('channelId', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const channelId = this.getNodeParameter('channelId', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 						const body: IDataObject = {
 							id: channelId,
 						};
@@ -229,13 +229,13 @@ export class Twist implements INodeType {
 					}
 					//https://developer.twist.com/v3/#archive-channel
 					if (operation === 'archive') {
-						qs.id = this.getNodeParameter('channelId', i) as string;
+						qs.id = this.getNodeParameter('channelId', i);
 
 						responseData = await twistApiRequest.call(this, 'POST', '/channels/archive', {}, qs);
 					}
 					//https://developer.twist.com/v3/#unarchive-channel
 					if (operation === 'unarchive') {
-						qs.id = this.getNodeParameter('channelId', i) as string;
+						qs.id = this.getNodeParameter('channelId', i);
 
 						responseData = await twistApiRequest.call(this, 'POST', '/channels/unarchive', {}, qs);
 					}
@@ -243,9 +243,9 @@ export class Twist implements INodeType {
 				if (resource === 'comment') {
 					//https://developer.twist.com/v3/#add-comment
 					if (operation === 'create') {
-						const threadId = this.getNodeParameter('threadId', i) as string;
+						const threadId = this.getNodeParameter('threadId', i);
 						const content = this.getNodeParameter('content', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IDataObject = {
 							thread_id: threadId,
 							content,
@@ -313,27 +313,27 @@ export class Twist implements INodeType {
 					}
 					//https://developer.twist.com/v3/#remove-comment
 					if (operation === 'delete') {
-						qs.id = this.getNodeParameter('commentId', i) as string;
+						qs.id = this.getNodeParameter('commentId', i);
 
 						responseData = await twistApiRequest.call(this, 'POST', '/comments/remove', {}, qs);
 					}
 					//https://developer.twist.com/v3/#get-comment
 					if (operation === 'get') {
-						qs.id = this.getNodeParameter('commentId', i) as string;
+						qs.id = this.getNodeParameter('commentId', i);
 
 						responseData = await twistApiRequest.call(this, 'GET', '/comments/getone', {}, qs);
 						responseData = responseData?.comment;
 					}
 					//https://developer.twist.com/v3/#get-all-comments
 					if (operation === 'getAll') {
-						const threadId = this.getNodeParameter('threadId', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const threadId = this.getNodeParameter('threadId', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						qs.thread_id = threadId;
 
 						Object.assign(qs, filters);
 						if (!returnAll) {
-							qs.limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = this.getNodeParameter('limit', i);
 						}
 						if (qs.older_than_ts) {
 							qs.older_than_ts = moment(qs.older_than_ts as string).unix();
@@ -349,8 +349,8 @@ export class Twist implements INodeType {
 					}
 					//https://developer.twist.com/v3/#update-comment
 					if (operation === 'update') {
-						const commentId = this.getNodeParameter('commentId', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const commentId = this.getNodeParameter('commentId', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 						const body: IDataObject = {
 							id: commentId,
 						};
@@ -419,10 +419,10 @@ export class Twist implements INodeType {
 				if (resource === 'messageConversation') {
 					//https://developer.twist.com/v3/#add-message-to-conversation
 					if (operation === 'create') {
-						const workspaceId = this.getNodeParameter('workspaceId', i) as string;
-						const conversationId = this.getNodeParameter('conversationId', i) as string;
+						const workspaceId = this.getNodeParameter('workspaceId', i);
+						const conversationId = this.getNodeParameter('conversationId', i);
 						const content = this.getNodeParameter('content', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IDataObject = {
 							conversation_id: conversationId,
 							workspace_id: workspaceId,
@@ -499,14 +499,14 @@ export class Twist implements INodeType {
 					}
 					//https://developer.twist.com/v3/#get-message
 					if (operation === 'get') {
-						qs.id = this.getNodeParameter('id', i) as string;
+						qs.id = this.getNodeParameter('id', i);
 
 						responseData = await twistApiRequest.call(this, 'GET', '/conversation_messages/getone', {}, qs);
 					}
 					//https://developer.twist.com/v3/#get-all-messages
 					if (operation === 'getAll') {
-						const conversationId = this.getNodeParameter('conversationId', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const conversationId = this.getNodeParameter('conversationId', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						qs.conversation_id = conversationId;
 						Object.assign(qs, additionalFields);
 
@@ -514,14 +514,14 @@ export class Twist implements INodeType {
 					}
 					//https://developer.twist.com/v3/#remove-message-from-conversation
 					if (operation === 'delete') {
-						qs.id = this.getNodeParameter('id', i) as string;
+						qs.id = this.getNodeParameter('id', i);
 
 						responseData = await twistApiRequest.call(this, 'POST', '/conversation_messages/remove', {}, qs);
 					}
 					//https://developer.twist.com/v3/#update-message-in-conversation
 					if (operation === 'update') {
-						const id = this.getNodeParameter('id', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const id = this.getNodeParameter('id', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 						const body: IDataObject = {
 							id,
 						};
@@ -590,10 +590,10 @@ export class Twist implements INodeType {
 				if (resource === 'thread') {
 					//https://developer.twist.com/v3/#add-thread
 					if (operation === 'create') {
-						const channelId = this.getNodeParameter('channelId', i) as string;
-						const title = this.getNodeParameter('title', i) as string;
+						const channelId = this.getNodeParameter('channelId', i);
+						const title = this.getNodeParameter('title', i);
 						const content = this.getNodeParameter('content', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						const body: IDataObject = {
 							channel_id: channelId,
 							content,
@@ -662,26 +662,26 @@ export class Twist implements INodeType {
 					}
 					//https://developer.twist.com/v3/#remove-thread
 					if (operation === 'delete') {
-						qs.id = this.getNodeParameter('threadId', i) as string;
+						qs.id = this.getNodeParameter('threadId', i);
 
 						responseData = await twistApiRequest.call(this, 'POST', '/threads/remove', {}, qs);
 					}
 					//https://developer.twist.com/v3/#get-thread
 					if (operation === 'get') {
-						qs.id = this.getNodeParameter('threadId', i) as string;
+						qs.id = this.getNodeParameter('threadId', i);
 
 						responseData = await twistApiRequest.call(this, 'GET', '/threads/getone', {}, qs);
 					}
 					//https://developer.twist.com/v3/#get-all-threads
 					if (operation === 'getAll') {
-						const channelId = this.getNodeParameter('channelId', i) as string;
-						const returnAll = this.getNodeParameter('returnAll', i) as boolean;
-						const filters = this.getNodeParameter('filters', i) as IDataObject;
+						const channelId = this.getNodeParameter('channelId', i);
+						const returnAll = this.getNodeParameter('returnAll', i);
+						const filters = this.getNodeParameter('filters', i);
 						qs.channel_id = channelId;
 
 						Object.assign(qs, filters);
 						if (!returnAll) {
-							qs.limit = this.getNodeParameter('limit', i) as number;
+							qs.limit = this.getNodeParameter('limit', i);
 						}
 						if (qs.older_than_ts) {
 							qs.older_than_ts = moment(qs.older_than_ts as string).unix();
@@ -697,8 +697,8 @@ export class Twist implements INodeType {
 					}
 					//https://developer.twist.com/v3/#update-thread
 					if (operation === 'update') {
-						const threadId = this.getNodeParameter('threadId', i) as string;
-						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						const threadId = this.getNodeParameter('threadId', i);
+						const updateFields = this.getNodeParameter('updateFields', i);
 						const body: IDataObject = {
 							id: threadId,
 						};

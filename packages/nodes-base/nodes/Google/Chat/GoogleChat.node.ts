@@ -12,6 +12,7 @@ import {
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
+	JsonObject,
 	NodeOperationError,
 } from 'n8n-workflow';
 
@@ -201,7 +202,7 @@ export class GoogleChat implements INodeType {
 				} catch (err) {
 					return {
 						status: 'Error',
-						message: `${err.message}`,
+						message: `${(err as JsonObject).message}`,
 					};
 				}
 
@@ -219,8 +220,8 @@ export class GoogleChat implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'media') {
@@ -231,7 +232,7 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/media/download
 
-						const resourceName = this.getNodeParameter('resourceName', i) as string;
+						const resourceName = this.getNodeParameter('resourceName', i);
 
 						const endpoint = `/v1/media/${resourceName}?alt=media`;
 
@@ -263,7 +264,7 @@ export class GoogleChat implements INodeType {
 
 						items[i] = newItem;
 
-						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i) as string;
+						const binaryPropertyName = this.getNodeParameter('binaryPropertyName', i);
 
 						items[i].binary![binaryPropertyName] = await this.helpers.prepareBinaryData(responseData, endpoint);
 
@@ -278,7 +279,7 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces/get
 
-						const spaceId = this.getNodeParameter('spaceId', i) as string;
+						const spaceId = this.getNodeParameter('spaceId', i);
 
 						responseData = await googleApiRequest.call(
 							this,
@@ -294,7 +295,7 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces/list
 
-						const returnAll = this.getNodeParameter('returnAll', 0) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						if (returnAll) {
 							responseData = await googleApiRequestAllItems.call(
 								this,
@@ -303,7 +304,7 @@ export class GoogleChat implements INodeType {
 								`/v1/spaces`,
 							);
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							qs.pageSize = limit;
 
 							responseData = await googleApiRequest.call(
@@ -325,7 +326,7 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces.members/get
 
-						const memberId = this.getNodeParameter('memberId', i) as string;
+						const memberId = this.getNodeParameter('memberId', i);
 
 						responseData = await googleApiRequest.call(
 							this,
@@ -341,9 +342,9 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces.members/list
 
-						const spaceId = this.getNodeParameter('spaceId', i) as string;
+						const spaceId = this.getNodeParameter('spaceId', i);
 
-						const returnAll = this.getNodeParameter('returnAll', 0) as IDataObject;
+						const returnAll = this.getNodeParameter('returnAll', 0);
 						if (returnAll) {
 							responseData = await googleApiRequestAllItems.call(
 								this,
@@ -355,7 +356,7 @@ export class GoogleChat implements INodeType {
 							);
 
 						} else {
-							const limit = this.getNodeParameter('limit', i) as number;
+							const limit = this.getNodeParameter('limit', i);
 							qs.pageSize = limit;
 
 							responseData = await googleApiRequest.call(
@@ -378,10 +379,10 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces.messages/create
 
-						const spaceId = this.getNodeParameter('spaceId', i) as string;
+						const spaceId = this.getNodeParameter('spaceId', i);
 
 						// get additional fields for threadKey and requestId
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						if (additionalFields.threadKey) {
 							qs.threadKey = additionalFields.threadKey;
 						}
@@ -390,9 +391,9 @@ export class GoogleChat implements INodeType {
 						}
 
 						let message: IMessage = {};
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 						if (jsonParameters) {
-							const messageJson = this.getNodeParameter('messageJson', i);
+							const messageJson = this.getNodeParameter('messageJson', i) as unknown as IDataObject;
 
 							if (messageJson instanceof Object) {
 								// if it is an object
@@ -439,7 +440,7 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces.messages/delete
 
-						const messageId = this.getNodeParameter('messageId', i) as string;
+						const messageId = this.getNodeParameter('messageId', i);
 
 						responseData = await googleApiRequest.call(
 							this,
@@ -455,7 +456,7 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces.messages/get
 
-						const messageId = this.getNodeParameter('messageId', i) as string;
+						const messageId = this.getNodeParameter('messageId', i);
 
 						responseData = await googleApiRequest.call(
 							this,
@@ -471,12 +472,12 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces.messages/update
 
-						const messageId = this.getNodeParameter('messageId', i) as string;
+						const messageId = this.getNodeParameter('messageId', i);
 
 						let message: IMessage = {};
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 						if (jsonParameters) {
-							const updateFieldsJson = this.getNodeParameter('updateFieldsJson', i);
+							const updateFieldsJson = this.getNodeParameter('updateFieldsJson', i) as unknown as IDataObject;
 
 							if (updateFieldsJson instanceof Object) {
 								// if it is an object
@@ -491,7 +492,7 @@ export class GoogleChat implements INodeType {
 							}
 
 						} else {
-							const updateFieldsUi = this.getNodeParameter('updateFieldsUi', i) as IDataObject;
+							const updateFieldsUi = this.getNodeParameter('updateFieldsUi', i);
 							if (updateFieldsUi.text) {
 								message.text = updateFieldsUi.text as string;
 							}
@@ -533,7 +534,7 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/reference/rest/v1/spaces.messages.attachments/get
 
-						const attachmentName = this.getNodeParameter('attachmentName', i) as string;
+						const attachmentName = this.getNodeParameter('attachmentName', i);
 
 						responseData = await googleApiRequest.call(
 							this,
@@ -550,18 +551,18 @@ export class GoogleChat implements INodeType {
 
 						// https://developers.google.com/chat/how-tos/webhooks
 
-						const uri = this.getNodeParameter('incomingWebhookUrl', i) as string;
+						const uri = this.getNodeParameter('incomingWebhookUrl', i);
 
 						// get additional fields for threadKey
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						const additionalFields = this.getNodeParameter('additionalFields', i);
 						if (additionalFields.threadKey) {
 							qs.threadKey = additionalFields.threadKey;
 						}
 
 						let message: IMessage = {};
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 						if (jsonParameters) {
-							const messageJson = this.getNodeParameter('messageJson', i);
+							const messageJson = this.getNodeParameter('messageJson', i) as unknown as IDataObject;
 
 							if (messageJson instanceof Object) {
 								// if it is an object
@@ -608,9 +609,9 @@ export class GoogleChat implements INodeType {
 				if (this.continueOnFail()) {
 					// Return the actual reason as error
 					if (operation === 'download') {
-						items[i].json = { error: error.message };
+						items[i].json = { error: (error as JsonObject).message };
 					} else {
-						returnData.push({ error: error.message });
+						returnData.push({ error: (error as JsonObject).message });
 					}
 					continue;
 				}

@@ -139,21 +139,21 @@ export class Mailjet implements INodeType {
 		const returnData: IDataObject[] = [];
 		const length = items.length as unknown as number;
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'email') {
 					//https://dev.mailjet.com/email/guides/send-api-v31/#send-a-basic-email
 					if (operation === 'send') {
-						const fromEmail = this.getNodeParameter('fromEmail', i) as string;
+						const fromEmail = this.getNodeParameter('fromEmail', i);
 						const htmlBody = this.getNodeParameter('html', i) as string;
-						const textBody = this.getNodeParameter('text', i) as string;
-						const subject = this.getNodeParameter('subject', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-						const toEmail = (this.getNodeParameter('toEmail', i) as string).split(',') as string[];
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const textBody = this.getNodeParameter('text', i);
+						const subject = this.getNodeParameter('subject', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
+						const toEmail = (this.getNodeParameter('toEmail', i)).split(',') as string[];
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						const body: IMessage = {
 							From: {
@@ -173,14 +173,14 @@ export class Mailjet implements INodeType {
 						}
 
 						if (jsonParameters) {
-							const variablesJson = this.getNodeParameter('variablesJson', i) as string;
+							const variablesJson = this.getNodeParameter('variablesJson', i);
 							const parsedJson = validateJSON(variablesJson);
 							if (parsedJson === undefined) {
 								throw new NodeOperationError(this.getNode(),`Parameter 'Variables (JSON)' has a invalid JSON`);
 							}
 							body.Variables = parsedJson;
 						} else {
-							const variables = (this.getNodeParameter('variablesUi', i) as IDataObject).variablesValues as IDataObject[] || [];
+							const variables = (this.getNodeParameter('variablesUi', i)).variablesValues as IDataObject[] || [];
 							for (const variable of variables) {
 								body.Variables![variable.name as string] = variable.value;
 							}
@@ -235,12 +235,12 @@ export class Mailjet implements INodeType {
 					}
 					//https://dev.mailjet.com/email/guides/send-api-v31/#use-a-template
 					if (operation === 'sendTemplate') {
-						const fromEmail = this.getNodeParameter('fromEmail', i) as string;
-						const templateId = parseInt(this.getNodeParameter('templateId', i) as string, 10);
-						const subject = this.getNodeParameter('subject', i) as string;
-						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
-						const toEmail = (this.getNodeParameter('toEmail', i) as string).split(',') as string[];
-						const jsonParameters = this.getNodeParameter('jsonParameters', i) as boolean;
+						const fromEmail = this.getNodeParameter('fromEmail', i);
+						const templateId = parseInt(this.getNodeParameter('templateId', i), 10);
+						const subject = this.getNodeParameter('subject', i);
+						const additionalFields = this.getNodeParameter('additionalFields', i);
+						const toEmail = (this.getNodeParameter('toEmail', i)).split(',') as string[];
+						const jsonParameters = this.getNodeParameter('jsonParameters', i);
 
 						const body: IMessage = {
 							From: {
@@ -261,19 +261,19 @@ export class Mailjet implements INodeType {
 						}
 
 						if (jsonParameters) {
-							const variablesJson = this.getNodeParameter('variablesJson', i) as string;
+							const variablesJson = this.getNodeParameter('variablesJson', i);
 							const parsedJson = validateJSON(variablesJson);
 							if (parsedJson === undefined) {
 								throw new NodeOperationError(this.getNode(), `Parameter 'Variables (JSON)' has a invalid JSON`);
 							}
 							body.Variables = parsedJson;
 						} else {
-							const variables = (this.getNodeParameter('variablesUi', i) as IDataObject).variablesValues as IDataObject[] || [];
+							const variables = (this.getNodeParameter('variablesUi', i)).variablesValues as IDataObject[] || [];
 							for (const variable of variables) {
 								body.Variables![variable.name as string] = variable.value;
 							}
 						}
-						
+
 						if (additionalFields.bccEmail) {
 							const bccEmail = (additionalFields.bccEmail as string).split(',') as string[];
 							for (const email of bccEmail) {
@@ -318,9 +318,9 @@ export class Mailjet implements INodeType {
 				if (resource === 'sms') {
 					//https://dev.mailjet.com/sms/reference/send-message#v4_post_sms-send
 					if (operation === 'send') {
-						const from = this.getNodeParameter('from', i) as string;
-						const to = this.getNodeParameter('to', i) as boolean;
-						const text = this.getNodeParameter('text', i) as string;
+						const from = this.getNodeParameter('from', i);
+						const to = this.getNodeParameter('to', i);
+						const text = this.getNodeParameter('text', i);
 						const body: IDataObject = {
 							From: from,
 							To: to,

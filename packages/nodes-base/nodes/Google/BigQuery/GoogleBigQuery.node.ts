@@ -165,8 +165,8 @@ export class GoogleBigQuery implements INodeType {
 		const length = (items.length as unknown) as number;
 		const qs: IDataObject = {};
 		let responseData;
-		const resource = this.getNodeParameter('resource', 0) as string;
-		const operation = this.getNodeParameter('operation', 0) as string;
+		const resource = this.getNodeParameter('resource', 0);
+		const operation = this.getNodeParameter('operation', 0);
 
 		if (resource === 'record') {
 
@@ -182,15 +182,15 @@ export class GoogleBigQuery implements INodeType {
 
 				// https://cloud.google.com/bigquery/docs/reference/rest/v2/tabledata/insertAll
 
-				const projectId = this.getNodeParameter('projectId', 0) as string;
-				const datasetId = this.getNodeParameter('datasetId', 0) as string;
-				const tableId = this.getNodeParameter('tableId', 0) as string;
+				const projectId = this.getNodeParameter('projectId', 0);
+				const datasetId = this.getNodeParameter('datasetId', 0);
+				const tableId = this.getNodeParameter('tableId', 0);
 				const rows: IDataObject[] = [];
 				const body: IDataObject = {};
 
 				for (let i = 0; i < length; i++) {
 
-					const options = this.getNodeParameter('options', i) as IDataObject;
+					const options = this.getNodeParameter('options', i);
 					Object.assign(body, options);
 					if (body.traceId === undefined) {
 						body.traceId = uuid();
@@ -232,11 +232,11 @@ export class GoogleBigQuery implements INodeType {
 
 				// https://cloud.google.com/bigquery/docs/reference/rest/v2/tables/get
 
-				const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
-				const projectId = this.getNodeParameter('projectId', 0) as string;
-				const datasetId = this.getNodeParameter('datasetId', 0) as string;
-				const tableId = this.getNodeParameter('tableId', 0) as string;
-				const simple = this.getNodeParameter('simple', 0) as boolean;
+				const returnAll = this.getNodeParameter('returnAll', 0);
+				const projectId = this.getNodeParameter('projectId', 0);
+				const datasetId = this.getNodeParameter('datasetId', 0);
+				const tableId = this.getNodeParameter('tableId', 0);
+				const simple = this.getNodeParameter('simple', 0);
 				let fields;
 
 				if (simple === true) {
