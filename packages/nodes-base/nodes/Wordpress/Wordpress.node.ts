@@ -1,29 +1,42 @@
 import {
+	OptionsWithUri,
+} from 'request';
+
+import {
 	IExecuteFunctions,
 } from 'n8n-core';
+
 import {
+	ICredentialsDecrypted,
+	ICredentialTestFunctions,
 	IDataObject,
 	ILoadOptionsFunctions,
+	INodeCredentialTestResult,
 	INodeExecutionData,
 	INodePropertyOptions,
 	INodeType,
 	INodeTypeDescription,
 } from 'n8n-workflow';
+
 import {
 	wordpressApiRequest,
 	wordpressApiRequestAllItems,
 } from './GenericFunctions';
+
 import {
 	postFields,
 	postOperations,
 } from './PostDescription';
+
 import {
 	userFields,
 	userOperations,
 } from './UserDescription';
+
 import {
 	IPost,
 } from './PostInterface';
+
 import {
 	IUser,
 } from './UserInterface';
@@ -46,6 +59,7 @@ export class Wordpress implements INodeType {
 			{
 				name: 'wordpressApi',
 				required: true,
+				testedBy: 'wordpressApiTest',
 			},
 		],
 		properties: [
@@ -72,8 +86,40 @@ export class Wordpress implements INodeType {
 			...userFields,
 		],
 	};
-
 	methods = {
+		credentialTest: {
+			async wordpressApiTest(this: ICredentialTestFunctions, credential: ICredentialsDecrypted): Promise<INodeCredentialTestResult> {
+				const credentials = credential.data;
+
+				const options: OptionsWithUri = {
+					headers: {
+						Accept: 'application/json',
+						'Content-Type': 'application/json',
+						'User-Agent': 'n8n',
+					},
+					auth: {
+						user: credentials!.username as string,
+						password: credentials!.password as string,
+					},
+					method: 'GET',
+					uri: `${credentials!.url}/wp-json/wp/v2/`,
+					json: true,
+					timeout: 5000,
+				};
+				try {
+					await this.helpers.request!(options);
+				} catch (error) {
+					return {
+						status: 'Error',
+						message: `Connection details not valid: ${error.message}`,
+					};
+				}
+				return {
+					status: 'OK',
+					message: 'Authentication successful!',
+				};
+			},
+		},
 		loadOptions: {
 			// Get all the available categories to display them to user so that he can
 			// select them easily
@@ -123,6 +169,20 @@ export class Wordpress implements INodeType {
 				}
 				return returnData;
 			},
+			async getTypes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const types = await wordpressApiRequestAllItems.call(this, 'GET', '/types', {});
+
+				for (const type of types) {
+					const typeName = type[Object.keys(type)[0]].name;
+					const typeValue = type[Object.keys(type)[0]].rest_base;
+					returnData.push({
+						name: typeName,
+						value: typeValue,
+					});
+				}
+				return returnData;
+			},
 		},
 	};
 
@@ -142,6 +202,8 @@ export class Wordpress implements INodeType {
 					if (operation === 'create') {
 						const title = this.getNodeParameter('title', i) as string;
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						// tslint:disable-next-line: no-any
+						const meta: {[key: string]: any} = {};
 						const body: IPost = {
 							title,
 						};
@@ -178,12 +240,28 @@ export class Wordpress implements INodeType {
 						if (additionalFields.format) {
 							body.format = additionalFields.format as string;
 						}
-						responseData = await wordpressApiRequest.call(this, 'POST', '/posts', body);
+
+						const postType = additionalFields.postType ? additionalFields.postType as string : 'posts';
+
+						if (additionalFields.customFields) {
+							const customFields = additionalFields.customFields as IDataObject;
+							const values = customFields.customFieldsValues as IDataObject[];
+
+							values.forEach(value => {
+								const name = value.name as string;
+								meta[name] = value.value;
+							});
+							body.meta = meta as object;
+						}
+
+						responseData = await wordpressApiRequest.call(this, 'POST', `/${postType}`, body);
 					}
 					//https://developer.wordpress.org/rest-api/reference/posts/#update-a-post
 					if (operation === 'update') {
 						const postId = this.getNodeParameter('postId', i) as string;
 						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						// tslint:disable-next-line: no-any
+						const meta: {[key: string]: any} = {};
 						const body: IPost = {
 							id: parseInt(postId, 10),
 						};
@@ -223,6 +301,17 @@ export class Wordpress implements INodeType {
 						if (updateFields.format) {
 							body.format = updateFields.format as string;
 						}
+						if (updateFields.customFields) {
+							const customFields = updateFields.customFields as IDataObject;
+							const values = customFields.customFieldsValues as IDataObject[];
+
+							values.forEach(value => {
+								const name = value.name as string;
+								meta[name] = value.value;
+							});
+							body.meta = meta as object;
+						}
+
 						responseData = await wordpressApiRequest.call(this, 'POST', `/posts/${postId}`, body);
 					}
 					//https://developer.wordpress.org/rest-api/reference/posts/#retrieve-a-post
@@ -304,6 +393,8 @@ export class Wordpress implements INodeType {
 						const email = this.getNodeParameter('email', i) as string;
 						const password = this.getNodeParameter('password', i) as string;
 						const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+						// tslint:disable-next-line: no-any
+						const meta: {[key: string]: any} = {};
 						const body: IUser = {
 							name,
 							username,
@@ -324,12 +415,15 @@ export class Wordpress implements INodeType {
 						if (additionalFields.slug) {
 							body.slug = additionalFields.slug as string;
 						}
+
 						responseData = await wordpressApiRequest.call(this, 'POST', '/users', body);
 					}
 					//https://developer.wordpress.org/rest-api/reference/users/#update-a-user
 					if (operation === 'update') {
 						const userId = this.getNodeParameter('userId', i) as number;
 						const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
+						// tslint:disable-next-line: no-any
+						const meta: {[key: string]: any} = {};
 						const body: IUser = {
 							id: userId,
 						};
@@ -363,6 +457,7 @@ export class Wordpress implements INodeType {
 						if (updateFields.slug) {
 							body.slug = updateFields.slug as string;
 						}
+
 						responseData = await wordpressApiRequest.call(this, 'POST', `/users/${userId}`, body);
 					}
 					//https://developer.wordpress.org/rest-api/reference/users/#retrieve-a-user

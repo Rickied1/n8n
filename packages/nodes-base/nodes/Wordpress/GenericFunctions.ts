@@ -45,6 +45,8 @@ export async function wordpressApiRequest(this: IExecuteFunctions | IExecuteSing
 export async function wordpressApiRequestAllItems(this: IExecuteFunctions | ILoadOptionsFunctions, method: string, endpoint: string, body: any = {}, query: IDataObject = {}): Promise<any> { // tslint:disable-line:no-any
 
 	const returnData: IDataObject[] = [];
+	// tslint:disable-next-line: no-any array-type
+	const array: { [x: string]: any; }[] = [];
 
 	let responseData;
 
@@ -54,12 +56,22 @@ export async function wordpressApiRequestAllItems(this: IExecuteFunctions | ILoa
 	do {
 		query.page++;
 		responseData = await wordpressApiRequest.call(this, method, endpoint, body, query, undefined, { resolveWithFullResponse: true });
+		if (typeof responseData === 'object') {
+			const body = responseData.body;
+			Object.keys(body).map(key => {
+				array.push({[key]:body[key]});
+			});
+
+			returnData.push.apply(returnData, array);
+
+			break;
+		}
+
 		returnData.push.apply(returnData, responseData.body);
 	} while (
 		responseData.headers['x-wp-totalpages'] !== undefined &&
 		responseData.headers['x-wp-totalpages'] !== '0' &&
 		parseInt(responseData.headers['x-wp-totalpages'], 10) !== query.page
 	);
-
 	return returnData;
 }
