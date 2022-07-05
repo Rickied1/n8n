@@ -1,7 +1,9 @@
 export type FreshworksCrmApiCredentials = {
 	apiKey: string;
 	domain: string;
-}
+	host: string;
+	customHost: string;
+};
 
 export type FreshworksConfigResponse<T> = {
 	[key: string]: T[];
