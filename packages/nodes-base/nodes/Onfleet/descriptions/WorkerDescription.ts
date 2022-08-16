@@ -44,11 +44,12 @@ export const workerOperations: INodeProperties[] = [
 				description: 'Get a specific Onfleet worker schedule',
 				action: 'Get the schedule for a worker',
 			},
-			// {
-			// 	name: 'Set Worker\'s Schedule',
-			// 	value: 'setSchedule',
-			// 	description: 'Set the worker\'s schedule',
-			// },
+			{
+				name: 'Set Worker\'s Schedule',
+				value: 'setSchedule',
+				description: 'Set the worker\'s schedule',
+				action: 'Set Worker\'s Schedule a worker',
+			},
 			{
 				name: 'Update',
 				value: 'update',
@@ -159,7 +160,7 @@ const teamsField = {
 		loadOptionsMethod: 'getTeams',
 	},
 	default: [],
-	description: 'One or more teams of which the worker is a member. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+	description: 'One or more teams of which the worker is a member. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/nodes/expressions.html#expressions">expression</a>.',
 } as INodeProperties;
 
 const teamsFilterField = {
@@ -170,7 +171,7 @@ const teamsFilterField = {
 		loadOptionsMethod: 'getTeams',
 	},
 	default: [],
-	description: 'A list of the teams that workers must be part of. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+	description: 'A list of the teams that workers must be part of. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/nodes/expressions.html#expressions">expression</a>.',
 } as INodeProperties;
 
 const statesFilterField = {
@@ -339,23 +340,12 @@ const scheduleDateField = {
 	description: 'Schedule\'s date',
 } as INodeProperties;
 
-const scheduleTimezoneField = {
-	displayName: 'Timezone Name or ID',
-	name: 'timezone',
-	type: 'options',
-	typeOptions: {
-		loadOptionsMethod: 'getTimezones',
-	},
-	default: '',
-	description: 'A valid timezone. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
-} as INodeProperties;
-
 const scheduleStartField = {
 	displayName: 'Start',
 	name: 'start',
 	type: 'dateTime',
 	default: '',
-	description: 'Start time',
+	description: 'Start time. This should be according to the organization\'s timezone.',
 } as INodeProperties;
 
 const scheduleEndField = {
@@ -363,7 +353,7 @@ const scheduleEndField = {
 	name: 'end',
 	type: 'dateTime',
 	default: '',
-	description: 'End time',
+	description: 'End time. This should be according to the organization\'s timezone.',
 } as INodeProperties;
 
 export const workerFields: INodeProperties[] = [
@@ -721,10 +711,6 @@ export const workerFields: INodeProperties[] = [
 				values: [
 					{
 						...scheduleDateField,
-						required: true,
-					},
-					{
-						...scheduleTimezoneField,
 						required: true,
 					},
 					{

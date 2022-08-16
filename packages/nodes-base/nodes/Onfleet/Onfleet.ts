@@ -240,7 +240,7 @@ export class Onfleet {
 	 * @param operation Current worker operation
 	 * @returns {OnfleetWorker|OnfleetWorkerFilter|OnfleetWorkerSchedule|null} Worker information
 	 */
-	static getWorkerFields(this: IExecuteFunctions, item: number, operation: string): OnfleetWorker | OnfleetWorkerFilter | OnfleetWorkerSchedule | null {
+	static async getWorkerFields(this: IExecuteFunctions, item: number, operation: string): Promise<OnfleetWorker | OnfleetWorkerFilter | OnfleetWorkerSchedule | null> {
 		if (operation === 'create') {
 			/* -------------------------------------------------------------------------- */
 			/*                        Get fields for create worker                        */
@@ -319,12 +319,13 @@ export class Onfleet {
 			/* -------------------------------------------------------------------------- */
 			/*                            Set a worker schedule                           */
 			/* -------------------------------------------------------------------------- */
+			const organization = await onfleetApiRequest.call(this, 'GET', 'organization') as IDataObject;
 			const { scheduleProperties } = this.getNodeParameter('schedule', item) as IDataObject;
 			const entries = (scheduleProperties as IDataObject[] || []).map(entry => {
-				const { timezone, date, shifts } = entry as IDataObject;
+				const { date, shifts } = entry as IDataObject;
 				const { shiftsProperties } = shifts as IDataObject;
 				return {
-					timezone: timezone as string,
+					timezone: organization.timezone as string,
 					date: moment(date as Date).format('YYYY-MM-DD'),
 					shifts: (shiftsProperties as IDataObject[]).map(({ start, end }) => [
 						new Date(start as Date).getTime(),
@@ -1075,7 +1076,7 @@ export class Onfleet {
 						);
 						workers = workers.workers;
 					} else {
-						const workerFilters = Onfleet.getWorkerFields.call(this, 0, operation) as OnfleetWorkerFilter;
+						const workerFilters = await Onfleet.getWorkerFields.call(this, 0, operation) as OnfleetWorkerFilter;
 						workers = await onfleetApiRequest.call(this, 'GET', resource, {}, workerFilters);
 					}
 
@@ -1091,7 +1092,7 @@ export class Onfleet {
 					/*                                Get a worker                                */
 					/* -------------------------------------------------------------------------- */
 					const id = this.getNodeParameter('id', index) as string;
-					const workerFilters = Onfleet.getWorkerFields.call(this, index, operation) as OnfleetWorkerFilter;
+					const workerFilters = await Onfleet.getWorkerFields.call(this, index, operation) as OnfleetWorkerFilter;
 
 					const path = `${resource}/${id}`;
 					responseData.push(await onfleetApiRequest.call(this, 'GET', path, {}, workerFilters));
@@ -1099,14 +1100,14 @@ export class Onfleet {
 					/* -------------------------------------------------------------------------- */
 					/*                             Create a new worker                            */
 					/* -------------------------------------------------------------------------- */
-					const workerData = Onfleet.getWorkerFields.call(this, index, operation);
+					const workerData = await Onfleet.getWorkerFields.call(this, index, operation);
 					responseData.push(await onfleetApiRequest.call(this, 'POST', resource, workerData));
 				} else if (operation === 'update') {
 					/* -------------------------------------------------------------------------- */
 					/*                                Update worker                               */
 					/* -------------------------------------------------------------------------- */
 					const id = this.getNodeParameter('id', index) as string;
-					const workerData = Onfleet.getWorkerFields.call(this, index, operation);
+					const workerData = await Onfleet.getWorkerFields.call(this, index, operation);
 					const path = `${resource}/${id}`;
 					responseData.push(await onfleetApiRequest.call(this, 'PUT', path, workerData));
 				} else if (operation === 'delete') {
@@ -1129,7 +1130,7 @@ export class Onfleet {
 					/*                            Set a worker schedule                           */
 					/* -------------------------------------------------------------------------- */
 					const id = this.getNodeParameter('id', index) as string;
-					const workerSchedule = Onfleet.getWorkerFields.call(this, index, operation) as OnfleetWorkerSchedule;
+					const workerSchedule = await Onfleet.getWorkerFields.call(this, index, operation) as OnfleetWorkerSchedule;
 					const path = `${resource}/${id}/schedule`;
 					responseData.push(await onfleetApiRequest.call(this, 'POST', path, workerSchedule));
 				}
