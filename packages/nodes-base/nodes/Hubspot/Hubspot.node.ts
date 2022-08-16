@@ -70,6 +70,7 @@ import {
 import {
 	IAssociation,
 	IDeal,
+	INewDeal
 } from './DealInterface';
 
 import {
@@ -77,8 +78,14 @@ import {
 } from 'change-case';
 
 import {
+	detailingMethods,
+	detailingProperties
+} from './DealsDetailing';
+
+import {
 	validateCredentials
 } from './GenericFunctions';
+
 export class Hubspot implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'HubSpot',
@@ -625,6 +632,21 @@ export class Hubspot implements INodeType {
 					returnData.push({
 						name: stageName,
 						value: stageId,
+					});
+				}
+				return returnData;
+			},
+
+			// Get all the deal pipelines to display them to user so that he can
+			// select them easily
+			async getDealPipelines(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const endpoint = '/crm-pipelines/v1/pipelines/deals';
+				const {results: pipelines} = await hubspotApiRequest.call(this, 'GET', endpoint, {});
+				for (const pipeline of pipelines) {
+					returnData.push({
+						name: pipeline.label,
+						value: String(pipeline.pipelineId),
 					});
 				}
 				return returnData;
@@ -1953,7 +1975,7 @@ export class Hubspot implements INodeType {
 					//https://developers.hubspot.com/docs/methods/deals/deals_overview
 					if (resource === 'deal') {
 						if (operation === 'create') {
-							const body: IDeal = {};
+							const body: INewDeal = {};
 							body.properties = [];
 							const association: IAssociation = {};
 							const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
@@ -2022,7 +2044,7 @@ export class Hubspot implements INodeType {
 							responseData = await hubspotApiRequest.call(this, 'POST', endpoint, body);
 						}
 						if (operation === 'update') {
-							const body: IDeal = {};
+							const body: INewDeal = {};
 							body.properties = [];
 							const updateFields = this.getNodeParameter('updateFields', i) as IDataObject;
 							const dealId = this.getNodeParameter('dealId', i) as string;
@@ -2105,6 +2127,23 @@ export class Hubspot implements INodeType {
 								const propertiesWithHistory = filters.propertiesWithHistory as string | string[];
 								qs.propertiesWithHistory = (!Array.isArray(filters.propertiesWithHistory)) ? (propertiesWithHistory as string).split(',') : propertiesWithHistory;
 							}
+							if (filters.pipeline) {
+								if (qs.properties) {
+									qs.properties = new Array(0).concat(qs.properties, ['pipeline']);
+								} else {
+									qs.properties = ['pipeline'];
+								}
+							}
+							if (filters.includeDetails) {
+								for (const prop  of detailingProperties) {
+									if (qs.properties && Array.isArray(qs.properties)) {
+										if(!qs.properties?.includes(prop.name)) qs.properties.push(prop.name);
+									} else {
+										qs.properties = [prop.name];
+									}
+								}
+							}
+
 							const endpoint = `/deals/v1/deal/paged`;
 							if (returnAll) {
 								responseData = await hubspotApiRequestAllItems.call(this, 'deals', 'GET', endpoint, {}, qs);
@@ -2112,6 +2151,37 @@ export class Hubspot implements INodeType {
 								qs.limit = this.getNodeParameter('limit', 0) as number;
 								responseData = await hubspotApiRequest.call(this, 'GET', endpoint, {}, qs);
 								responseData = responseData.deals;
+							}
+							if (filters.pipeline) {
+								responseData = responseData.filter((deal: IDeal) => {
+									if (!deal.properties) return;
+									const pipeline = deal.properties['pipeline'] as IDataObject;
+									if (!pipeline) return;
+									return pipeline['value'] === filters.pipeline;
+								});
+							}
+
+							if (filters.includeDetails) {
+								// Get deals details using appropriate api methods
+								const detailingPropsMap = new Map();
+								for (const prop of detailingProperties) {
+									const propData = await detailingMethods[prop.method].call(this);
+									detailingPropsMap.set(prop.name, propData);
+								}
+
+								// Add detailed info for each deal
+								for (const deal of responseData) {
+									if (!deal.properties) break;
+									for (const prop of detailingProperties) {
+										if (!deal.properties[prop.name]) continue;
+										const propData = detailingPropsMap.get(prop.name);
+										deal.properties[prop.name][prop.additionName] = propData.get(deal.properties[prop.name].value);
+										if (!deal.properties[prop.name].versions || deal.properties[prop.name].versions.length <= 1) continue;
+										for (const propVersion of deal.properties[prop.name].versions) {
+											propVersion[prop.additionName] = propData.get(propVersion.value);
+										}
+									}
+								}
 							}
 						}
 						if (operation === 'getRecentlyCreated' || operation === 'getRecentlyModified') {

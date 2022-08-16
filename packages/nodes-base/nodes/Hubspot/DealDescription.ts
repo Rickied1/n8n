@@ -455,6 +455,24 @@ export const dealFields: INodeProperties[] = [
 				description: 'Whether to include the IDs of the associated contacts and companies in the results. This will also automatically include the num_associated_contacts property.',
 			},
 			{
+				displayName: 'Include Detailed Info',
+				name: 'includeDetails',
+				type: 'boolean',
+				default: false,
+				description: 'Include Deal Owner and Stage objects.',
+			},
+			{
+				displayName: 'Pipeline',
+				name: 'pipeline',
+				type: 'options',
+				typeOptions: {
+					loadOptionsMethod: 'getDealPipelines',
+				},
+				default: '',
+				description: `Used to choose a specific pipeline to get the Deals for.
+				This defaults to all pipelines.`,
+			},
+			{
 				displayName: 'Property Names or IDs',
 				name: 'properties',
 				type: 'multiOptions',
@@ -475,7 +493,6 @@ export const dealFields: INodeProperties[] = [
 				default: [],
 				description: 'Works similarly to properties=, but this parameter will include the history for the specified property, instead of just including the current value. Use this parameter when you need the full history of changes to a property\'s value. Choose from the list, or specify IDs using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
 			},
-
 		],
 	},
 
