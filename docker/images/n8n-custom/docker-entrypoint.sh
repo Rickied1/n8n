@@ -7,6 +7,7 @@ if [ -d /root/.n8n ] ; then
 fi
 
 chown -R node /home/node
+chown -R node /data
 
 if [ "$#" -gt 0 ]; then
   # Got started with arguments
