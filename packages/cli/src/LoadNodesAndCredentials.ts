@@ -493,7 +493,14 @@ class LoadNodesAndCredentialsClass {
 	 * @returns {Promise<void>}
 	 */
 	async loadDataFromDirectory(setPackageName: string, directory: string): Promise<void> {
-		const files = await glob(path.join(directory, '**/*.@(node|credentials).js'));
+		// Resolve relative path to absolute path
+		directory = path.resolve(directory);
+
+		// Fix windows path
+		let pattern = path.join(directory, '**/*.@(node|credentials).js');
+		pattern = pattern.replace(/\\/g, '/');
+
+		const files = await glob(pattern);
 
 		for (const filePath of files) {
 			const [fileName, type] = path.parse(filePath).name.split('.');
