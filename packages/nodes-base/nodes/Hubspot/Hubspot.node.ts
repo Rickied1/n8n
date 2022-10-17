@@ -12,6 +12,7 @@ import {
 	INodeType,
 	INodeTypeDescription,
 	JsonObject,
+	NodeApiError,
 	NodeOperationError,
 } from 'n8n-workflow';
 
@@ -32,6 +33,8 @@ import { contactListFields, contactListOperations } from './ContactListDescripti
 
 import { companyFields, companyOperations } from './CompanyDescription';
 
+import { customObjectFields, customObjectOperations } from './CustomObjectDescription';
+
 import { dealFields, dealOperations } from './DealDescription';
 
 import { engagementFields, engagementOperations } from './EngagementDescription';
@@ -47,6 +50,15 @@ import { IAssociation, IDeal } from './DealInterface';
 import { snakeCase } from 'change-case';
 
 import { validateCredentials } from './GenericFunctions';
+
+import { associationFields, associationOperations } from './AssociationDescription';
+
+import { propertyFields, propertyOperations } from './PropertyDescription';
+
+import { propertyGroupFields, propertyGroupOperations } from './PropertyGroupDescription';
+
+import { schemaFields, schemaOperations } from './SchemaDescription';
+
 export class Hubspot implements INodeType {
 	description: INodeTypeDescription = {
 		displayName: 'HubSpot',
@@ -65,7 +77,6 @@ export class Hubspot implements INodeType {
 			{
 				name: 'hubspotApi',
 				required: true,
-				testedBy: 'hubspotApiTest',
 				displayOptions: {
 					show: {
 						authentication: ['apiKey'],
@@ -75,7 +86,6 @@ export class Hubspot implements INodeType {
 			{
 				name: 'hubspotAppToken',
 				required: true,
-				testedBy: 'hubspotApiTest',
 				displayOptions: {
 					show: {
 						authentication: ['appToken'],
@@ -120,6 +130,10 @@ export class Hubspot implements INodeType {
 				noDataExpression: true,
 				options: [
 					{
+						name: 'Association',
+						value: 'association',
+					},
+					{
 						name: 'Company',
 						value: 'company',
 					},
@@ -132,6 +146,10 @@ export class Hubspot implements INodeType {
 						value: 'contactList',
 					},
 					{
+						name: 'Custom Object',
+						value: 'customObject',
+					},
+					{
 						name: 'Deal',
 						value: 'deal',
 					},
@@ -142,6 +160,18 @@ export class Hubspot implements INodeType {
 					{
 						name: 'Form',
 						value: 'form',
+					},
+					{
+						name: 'Property',
+						value: 'property',
+					},
+					{
+						name: 'Property Group',
+						value: 'propertyGroup',
+					},
+					{
+						name: 'Schema',
+						value: 'schema',
 					},
 					{
 						name: 'Ticket',
@@ -159,6 +189,18 @@ export class Hubspot implements INodeType {
 			// COMPANY
 			...companyOperations,
 			...companyFields,
+			// CUSTOM OBJECT
+			...customObjectOperations,
+			...customObjectFields,
+			// ASSOCIATION
+			...associationOperations,
+			...associationFields,
+			// PROPERTY
+			...propertyOperations,
+			...propertyFields,
+			// PROPERTY GROUP
+			...propertyGroupOperations,
+			...propertyGroupFields,
 			// DEAL
 			...dealOperations,
 			...dealFields,
@@ -171,6 +213,9 @@ export class Hubspot implements INodeType {
 			// TICKET
 			...ticketOperations,
 			...ticketFields,
+			// SCHEMA
+			...schemaOperations,
+			...schemaFields,
 		],
 	};
 
@@ -924,6 +969,310 @@ export class Hubspot implements INodeType {
 				}
 				return returnData.sort((a, b) => (a.name < b.name ? 0 : 1));
 			},
+
+			/* -------------------------------------------------------------------------- */
+			/*                               Associations                                 */
+			/* -------------------------------------------------------------------------- */
+			async getAssociationTypes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const objectType = this.getNodeParameter('objectType', '') as string;
+				const toObjectType = this.getNodeParameter('toObjectType', '') as string;
+
+				const endpoint = `/crm/v3/associations/${objectType}/${toObjectType}/types`;
+
+				const associationTypes = await hubspotApiRequest.call(this, 'GET', endpoint);
+
+				if (!associationTypes.results) {
+					return returnData;
+				}
+
+				for (const type of associationTypes.results) {
+					returnData.push({
+						name: type.name,
+						value: type.name,
+					});
+				}
+
+				return returnData;
+			},
+
+			/* -------------------------------------------------------------------------- */
+			/*                               Custom objects                               */
+			/* -------------------------------------------------------------------------- */
+
+			// Get all the custom object types to display them to user so that he can select them
+			async getCustomObjectTypes(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [
+					{
+						name: 'Contact',
+						value: '0-1',
+					},
+					{
+						name: 'Company',
+						value: '0-2',
+					},
+					{
+						name: 'Deal',
+						value: '0-3',
+					},
+					{
+						name: 'Engagement',
+						value: '0-4',
+					},
+					{
+						name: 'Ticket',
+						value: '0-5',
+					},
+					{
+						name: 'Product',
+						value: '0-7',
+					},
+					{
+						name: 'Line Item',
+						value: '0-8',
+					},
+					{
+						name: 'Quote',
+						value: '0-14',
+					},
+					{
+						name: 'Feedback Submission',
+						value: '0-19',
+					},
+					{
+						name: 'Task',
+						value: '0-27',
+					},
+					{
+						name: 'Note',
+						value: '0-46',
+					},
+					{
+						name: 'Meeting',
+						value: '0-47',
+					},
+					{
+						name: 'Call',
+						value: '0-48',
+					},
+					{
+						name: 'Email',
+						value: '0-49',
+					},
+					{
+						name: 'Quote Template',
+						value: '0-64',
+					},
+					{
+						name: 'Discount',
+						value: '0-84',
+					},
+					{
+						name: 'Fee',
+						value: '0-85',
+					},
+					{
+						name: 'Tax',
+						value: '0-86',
+					},
+					{
+						name: 'Payment',
+						value: '0-101',
+					},
+				];
+				const endpoint = '/crm/v3/schemas';
+				const properties = await hubspotApiRequest.call(this, 'GET', endpoint, {});
+				for (const objectType of properties.results) {
+					const objectLabel = objectType.labels.singular;
+					const objectTypeId = objectType.objectTypeId;
+					returnData.push({
+						name: objectLabel,
+						value: objectTypeId,
+					});
+				}
+				return returnData;
+			},
+			async getUserDefinedCustomObjectTypes(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const endpoint = '/crm/v3/schemas';
+				const properties = await hubspotApiRequest.call(this, 'GET', endpoint, {});
+				for (const objectType of properties.results) {
+					const objectLabel = objectType.labels.singular;
+					const objectTypeId = objectType.objectTypeId;
+					returnData.push({
+						name: objectLabel,
+						value: objectTypeId,
+					});
+				}
+				return returnData;
+			},
+			// Get the properties of a custom object type
+			async getCustomObjectProperties(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const objectType = this.getNodeParameter('objectType', 0) as string;
+				const endpoint = `/crm/v3/schemas/${objectType}`;
+				const result = await hubspotApiRequest.call(this, 'GET', endpoint, {});
+				const properties = result.properties;
+
+				for (const property of properties) {
+					const propertyLabel = property.label;
+					const propertyValue = property.name;
+					returnData.push({
+						name: propertyLabel,
+						value: propertyValue,
+						description: propertyValue,
+					});
+				}
+				return returnData;
+			},
+
+			// Get all properties that can be used as property id
+			async getCustomObjectIdProperties(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const objectType = this.getNodeParameter('objectType', 0) as string;
+				if (!objectType) {
+					return [];
+				}
+				const endpoint = `/crm/v3/schemas/${objectType}`;
+				const result = await hubspotApiRequest.call(this, 'GET', endpoint, {});
+				const properties = result.properties;
+
+				const idProperties = properties.filter(
+					(property: { hasUniqueValue?: boolean }) => property.hasUniqueValue === true,
+				);
+
+				returnData.push({
+					name: 'Hubspot Object ID',
+					value: 'objectId',
+				});
+
+				if (objectType === '0-1' || objectType === 'contact') {
+					returnData.push({
+						name: 'Email',
+						value: 'email',
+					});
+				}
+
+				for (const property of idProperties) {
+					const propertyLabel = property.label;
+					const propertyValue = property.name;
+					returnData.push({
+						name: propertyLabel,
+						value: propertyValue,
+					});
+				}
+
+
+
+				return returnData;
+			},
+
+			// Get all properties that can be used as property id
+			async getUpsertCustomObjectIdProperties(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const objectType = this.getNodeParameter('objectType', 0) as string;
+				if (!objectType) {
+					return [];
+				}
+				const endpoint = `/crm/v3/schemas/${objectType}`;
+				const result = await hubspotApiRequest.call(this, 'GET', endpoint, {});
+				const properties = result.properties;
+				const idProperties = properties.filter(
+					(property: { hasUniqueValue?: boolean }) => property.hasUniqueValue === true,
+				);
+
+				if (objectType === '0-1' || objectType === 'contact') {
+					returnData.push({
+						name: 'Email',
+						value: 'email',
+					});
+				}
+
+				for (const property of idProperties) {
+					const propertyLabel = property.label;
+					const propertyValue = property.name;
+					returnData.push({
+						name: propertyLabel,
+						value: propertyValue,
+					});
+				}
+				return returnData;
+			},
+
+			/* -------------------------------------------------------------------------- */
+			/*                                 Properties                                 */
+			/* -------------------------------------------------------------------------- */
+			// Get all property groups
+			async getAvailableProperties(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const objectType = this.getNodeParameter('objectType', 0) as string;
+				const archived = this.getNodeParameter('additionalFields.archived', false) as boolean;
+
+				if (!objectType) {
+					return [];
+				}
+
+				const qs: IDataObject = {};
+				if (archived) {
+					qs.archived = archived;
+				}
+
+				const endpoint = `/crm/v3/properties/${objectType}`;
+				const response = await hubspotApiRequest.call(this, 'GET', endpoint, {}, qs);
+				const properties = response?.results as Array<{ name: string; label: string }> | undefined;
+
+				if (!properties) {
+					return [];
+				}
+
+				for (const property of properties) {
+					returnData.push({
+						name: property.label,
+						value: property.name,
+						description: property.name,
+					});
+				}
+				return returnData;
+			},
+			/* -------------------------------------------------------------------------- */
+			/*                               Property Groups                              */
+			/* -------------------------------------------------------------------------- */
+			// Get all property groups
+			async getAvailablePropertyGroups(
+				this: ILoadOptionsFunctions,
+			): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const objectType = this.getNodeParameter('objectType', 0) as string;
+				if (!objectType) {
+					return [];
+				}
+				const endpoint = `/crm/v3/properties/${objectType}/groups`;
+				const response = await hubspotApiRequest.call(this, 'GET', endpoint, {});
+				const propertyGroups = response?.results as
+					| Array<{ name: string; label: string; displayOrder: number; archived: boolean }>
+					| undefined;
+
+				if (!propertyGroups) {
+					return [];
+				}
+
+				for (const propertyGroup of propertyGroups) {
+					returnData.push({
+						name: propertyGroup.label,
+						value: propertyGroup.name,
+						description: propertyGroup.name,
+					});
+				}
+				return returnData;
+			},
 		},
 	};
 
@@ -936,8 +1285,120 @@ export class Hubspot implements INodeType {
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
 
-		//https://legacydocs.hubspot.com/docs/methods/lists/contact-lists-overview
-		if (resource === 'contactList') {
+		if (resource === 'customObject' && operation.includes('batch')) {
+			const objectType = this.getNodeParameter('objectType', 0, '') as string;
+
+			// The maximum batch size is 10 for contacts and 100 for everything else.
+			// https://developers.hubspot.com/docs/api/crm/understanding-the-crm
+			const maxBatchSize = objectType === '0-1' || objectType === 'contact' ? 10 : 100;
+
+			const batches = Math.ceil(length / maxBatchSize);
+			const resultsPromises = [...new Array(batches)].map(async (_, batchNumber) => {
+				try {
+					const batchStart = batchNumber * maxBatchSize;
+					const batchSize = Math.min(length - batchStart, maxBatchSize);
+
+					if (operation === 'batchGet') {
+						const additionalFields = this.getNodeParameter('additionalFields', 0) as IDataObject;
+						let idProperty = this.getNodeParameter('idProperty', 0) as string | null;
+
+						if (idProperty === 'objectId') {
+							idProperty = '';
+						}
+
+						const requestBody = {
+							properties: (additionalFields.properties as string[]) || [],
+							propertiesWithHistory: (additionalFields.propertiesWithHistory as string[]) || [],
+							idProperty: idProperty || undefined,
+							inputs: [...new Array(batchSize)].map((_, index) => ({
+								id: this.getNodeParameter('objectId', index + batchStart) as string,
+							})),
+						};
+						const endpoint = `/crm/v3/objects/${objectType}/batch/read`;
+						const response = await hubspotApiRequest.call(this, 'POST', endpoint, requestBody);
+
+						const results = response.results;
+
+						if (response.errors && !this.continueOnFail()) {
+							throw new NodeApiError(this.getNode(), response.errors);
+						}
+						return [...results, ...(response.errors || [])];
+					}
+
+					if (operation === 'batchDelete') {
+						let idProperty = this.getNodeParameter('idProperty', 0) as string | null;
+
+						if (idProperty === 'objectId') {
+							idProperty = '';
+						}
+
+						// Resolve object ids, if a custom idPorperty is used
+						const idMap: Record<string, string | undefined> = {};
+						if (idProperty) {
+							const requestBody = {
+								idProperty,
+								inputs: [...new Array(batchSize)].map((_, index) => ({
+									id: this.getNodeParameter('objectId', index + batchStart) as string,
+								})),
+							};
+							const endpoint = `/crm/v3/objects/${objectType}/batch/read`;
+							const response = await hubspotApiRequest.call(this, 'POST', endpoint, requestBody);
+							response.results.forEach(
+								(result: { id: string; properties: Record<string, string> }) => {
+									// @ts-ignore
+									idMap[result.properties[idProperty]] = result.id;
+								},
+							);
+						} else {
+							[...new Array(batchSize)].forEach((_, index) => {
+								const id = this.getNodeParameter('objectId', index + batchStart) as string;
+								idMap[id] = id;
+							});
+						}
+
+						const idsToDelete = [...new Array(batchSize)]
+							.map(
+								(_, index) =>
+									idMap[this.getNodeParameter('objectId', index + batchStart) as string],
+							)
+							.filter((id) => id !== undefined) as string[];
+
+						const requestBody = {
+							inputs: idsToDelete.map((id) => ({
+								id,
+							})),
+						};
+						const endpoint = `/crm/v3/objects/${objectType}/batch/archive`;
+						const response = await hubspotApiRequest.call(this, 'POST', endpoint, requestBody);
+
+						if (response?.errors && !this.continueOnFail()) {
+							throw new NodeApiError(this.getNode(), response.errors);
+						}
+
+						return [...(response?.errors?.length ? response.errors : [{ success: true }])];
+					}
+					return [];
+				} catch (error) {
+					if (this.continueOnFail()) {
+						returnData.push({ error: (error as JsonObject).message });
+					} else {
+						throw error;
+					}
+				}
+			});
+
+			const results = (await Promise.all(resultsPromises)).flat();
+
+			results.forEach((result, index) =>
+				returnData.push(
+					...this.helpers.constructExecutionMetaData(this.helpers.returnJsonArray(result), {
+						itemData: { item: index },
+					}),
+				),
+			);
+
+			return [returnData as INodeExecutionData];
+		} else if (resource === 'contactList') {
 			try {
 				//https://legacydocs.hubspot.com/docs/methods/lists/add_contact_to_list
 				if (operation === 'add') {
@@ -2018,6 +2479,438 @@ export class Hubspot implements INodeType {
 							responseData = await hubspotApiRequest.call(this, 'DELETE', endpoint);
 						}
 					}
+					//https://developers.hubspot.com/docs/api/crm/crm-custom-objects
+					if (resource === 'customObject') {
+						const objectType = this.getNodeParameter('objectType', i, '') as string;
+
+						if (operation === 'create') {
+							const customObjectProperties = this.getNodeParameter(
+								'customObjectProperties.values',
+								i,
+								[],
+							) as IDataObject[];
+							const properties: IDataObject = {};
+
+							if (customObjectProperties.length) {
+								for (const objectProperty of customObjectProperties) {
+									properties[objectProperty.property as string] = objectProperty.value;
+								}
+							}
+
+							const endpoint = `/crm/v3/objects/${objectType}`;
+
+							responseData = await hubspotApiRequest.call(this, 'POST', endpoint, { properties });
+						}
+						if (operation === 'update') {
+							const idProperty = this.getNodeParameter('idProperty', i) as string;
+							const objectId = this.getNodeParameter('objectId', i) as string;
+							const customObjectProperties = this.getNodeParameter(
+								'customObjectProperties.values',
+								i,
+								[],
+							) as IDataObject[];
+							const properties: IDataObject = {};
+
+							if (customObjectProperties.length) {
+								for (const objectProperty of customObjectProperties) {
+									properties[objectProperty.property as string] = objectProperty.value;
+								}
+							}
+
+							const endpoint = `/crm/v3/objects/${objectType}/${objectId}`;
+							responseData = await hubspotApiRequest.call(
+								this,
+								'PATCH',
+								endpoint,
+								{ properties },
+								idProperty ? { idProperty } : {},
+							);
+						}
+						if (operation === 'upsert') {
+							let idProperty = this.getNodeParameter('idProperty', i) as string;
+							const objectId = this.getNodeParameter('objectId', i) as string;
+							const customObjectProperties = this.getNodeParameter('customObjectProperties.values', i, []) as IDataObject[];
+							const properties: IDataObject = {};
+
+							if (customObjectProperties.length) {
+								for (const objectProperty of customObjectProperties) {
+									properties[objectProperty.property as string] = objectProperty.value;
+								}
+							}
+
+							if (idProperty !== 'objectId') {
+								properties[idProperty] = objectId;
+							}
+
+							if (!Object.keys(properties).length) {
+								throw new NodeOperationError(this.getNode(), 'You need to provide at least one property to update');
+							}
+
+							try {
+								const endpoint = `/crm/v3/objects/${objectType}/${objectId}`;
+								responseData = await hubspotApiRequest.call(this, 'PATCH', endpoint, { properties }, idProperty ? { idProperty } : {});
+							} catch (error) {
+								// TODO error.httpCode = null ???
+								// if ((error as NodeApiError).httpCode !== '404') {
+								// 	throw error;
+								// }
+								const endpoint = `/crm/v3/objects/${objectType}`;
+								responseData = await hubspotApiRequest.call(this, 'POST', endpoint, { properties });
+							}
+						}
+						if (operation === 'get') {
+							const idProperty = this.getNodeParameter('idProperty', i) as string;
+							const objectId = this.getNodeParameter('objectId', i) as string;
+							const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+							if (additionalFields.formSubmissionMode) {
+								qs.formSubmissionMode = additionalFields.formSubmissionMode as string;
+							}
+							if (additionalFields.listMerberships) {
+								qs.showListMemberships = additionalFields.listMerberships as boolean;
+							}
+							if (additionalFields.properties) {
+								qs.properties = additionalFields.properties as string[];
+							}
+							if (additionalFields.propertiesWithHistory) {
+								qs.propertiesWithHistory = additionalFields.propertiesWithHistory as string[];
+							}
+							if (idProperty !== 'objectId') {
+								qs.idProperty = idProperty;
+							}
+							const endpoint = `/crm/v3/objects/${objectType}/${objectId}`;
+							responseData = await hubspotApiRequest.call(this, 'GET', endpoint, {}, qs);
+						}
+						if (operation === 'search') {
+							const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+							const limit = returnAll ? undefined : (this.getNodeParameter('limit', i) as number);
+							const additionalFields = this.getNodeParameter('additionalFields', i) as IDataObject;
+							const direction = additionalFields.direction || 'DESCENDING';
+
+							const filterGroups = this.getNodeParameter(
+								'filterGroups.filterGroupsValues',
+								i,
+								[],
+							) as IDataObject[];
+							const bodyFilterGroups = filterGroups?.map((filterGroup) => ({
+								filters: (
+									(filterGroup?.filtersUi as IDataObject)?.filterValues as IDataObject[]
+								)?.map((filter) => ({
+									...(filter.value !== undefined ? { value: filter.value } : {}),
+									...(filter.highValue !== undefined ? { highValue: filter.highValue } : {}),
+									...(filter.values !== undefined ? { values: filter.values } : {}),
+									propertyName: filter.propertyName,
+									operator: filter.operator,
+								})),
+							}));
+
+							const body = {
+								...(additionalFields.properties ? { properties: additionalFields.properties } : {}),
+								...(bodyFilterGroups ? { filterGroups: bodyFilterGroups } : {}),
+								...(limit ? { limit } : {}),
+								...(additionalFields.query ? { query: additionalFields.query } : {}),
+								...(additionalFields.sortBy
+									? {
+											sorts: [
+												{
+													propertyName: additionalFields.sortBy,
+													direction,
+												},
+											],
+									  }
+									: {}),
+							};
+
+							const endpoint = `/crm/v3/objects/${objectType}/search`;
+
+							if (returnAll) {
+								responseData = await hubspotApiRequestAllItems.call(
+									this,
+									'results',
+									'POST',
+									endpoint,
+									body,
+								);
+							} else {
+								const response = await hubspotApiRequest.call(this, 'POST', endpoint, body);
+								responseData = response.results;
+							}
+						}
+						if (operation === 'delete') {
+							const idProperty = this.getNodeParameter('idProperty', i) as string;
+							const objectId = this.getNodeParameter('objectId', i) as string;
+
+							let realObjectId = objectId;
+
+							if (idProperty !== 'objectId') {
+								const qs = {
+									idProperty,
+									properties: [idProperty],
+								};
+								const getEndpoint = `/crm/v3/objects/${objectType}/${objectId}`;
+								const idResponseData = await hubspotApiRequest
+									.call(this, 'GET', getEndpoint, {}, qs)
+									.catch((e) => {
+										if ((e as NodeApiError).httpCode !== '404') {
+											throw e;
+										}
+										return { id: undefined };
+									});
+								realObjectId = idResponseData.id;
+							}
+
+							const endpoint = `/crm/v3/objects/${objectType}/${realObjectId}`;
+							if (realObjectId) await hubspotApiRequest.call(this, 'DELETE', endpoint);
+
+							responseData = { success: true };
+						}
+					}
+					//https://developers.hubspot.com/docs/api/crm/crm-custom-objects
+					if (resource === 'association') {
+						if (operation === 'delete' || operation === 'create') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const objectId = this.getNodeParameter('objectId', i) as string;
+							const toObjectType = this.getNodeParameter('toObjectType', i) as string;
+							const toObjectId = this.getNodeParameter('toObjectId', i) as string;
+							const associationType = this.getNodeParameter('associationType', i) as string;
+
+							const endpoint = `/crm/v3/objects/${objectType}/${objectId}/associations/${toObjectType}/${toObjectId}/${associationType}`;
+							const method = operation === 'create' ? 'PUT' : 'DELETE';
+							responseData = await hubspotApiRequest.call(this, method, endpoint);
+
+							if (!responseData && operation === 'delete') {
+								responseData = [{ success: true }];
+							}
+						}
+						if (operation === 'get') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const objectId = this.getNodeParameter('objectId', i) as string;
+							const toObjectType = this.getNodeParameter('toObjectType', i) as string;
+
+							const returnAll = this.getNodeParameter('returnAll', i) as boolean;
+							const limit = returnAll
+								? undefined
+								: (this.getNodeParameter('limit', i, null) as number);
+
+							const endpoint = `/crm/v3/objects/${objectType}/${objectId}/associations/${toObjectType}`;
+
+							if (returnAll) {
+								let after: string | undefined;
+								responseData = [];
+								do {
+									const response = await hubspotApiRequestAllItems.call(
+										this,
+										'results',
+										'GET',
+										endpoint,
+										{},
+										after ? { after } : {},
+									);
+									responseData.push(...response.results);
+									after = response.paging.next?.after;
+								} while (after);
+							} else {
+								const response = await hubspotApiRequest.call(this, 'GET', endpoint, {}, { limit });
+								const results = response.results.flatMap((result: IDataObject) =>
+									typeof result === 'object'
+										? [
+												{
+													type: result.type,
+													fromId: objectId,
+													toId: result.id,
+												},
+										  ]
+										: [],
+								);
+								responseData = results;
+							}
+						}
+					}
+					//https://developers.hubspot.com/docs/api/crm/properties
+					if (resource === 'propertyGroup') {
+						if (operation === 'create') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const groupName = this.getNodeParameter('groupName', i) as string;
+							const label = this.getNodeParameter('label', i) as string;
+							const additionalFields = this.getNodeParameter(
+								'additionalFields',
+								i,
+								{},
+							) as IDataObject;
+							const displayOrder = additionalFields.displayOrder as string;
+
+							const parameters = {
+								name: groupName,
+								label,
+								...(displayOrder ? { displayOrder } : {}),
+							};
+
+							const endpoint = `/crm/v3/properties/${objectType}/groups`;
+							responseData = await hubspotApiRequest.call(this, 'POST', endpoint, parameters);
+						}
+						if (operation === 'update') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const groupName = this.getNodeParameter('groupName', i) as string;
+							const updateFields = this.getNodeParameter('updateFields', i, {}) as IDataObject;
+							const displayOrder = updateFields.displayOrder as number | undefined;
+							const label = updateFields.label as string | undefined;
+
+							const parameters = {
+								...(label != null ? { label } : {}),
+								...(displayOrder != null ? { displayOrder } : {}),
+							};
+
+							const endpoint = `/crm/v3/properties/${objectType}/groups/${groupName}`;
+							responseData = await hubspotApiRequest.call(this, 'PATCH', endpoint, parameters);
+						}
+						if (operation === 'get') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const groupName = this.getNodeParameter('groupName', i) as string;
+
+							const endpoint = `/crm/v3/properties/${objectType}/groups/${groupName}`;
+							responseData = await hubspotApiRequest.call(this, 'GET', endpoint);
+						}
+						if (operation === 'getAll') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+
+							const endpoint = `/crm/v3/properties/${objectType}/groups`;
+							const response = await hubspotApiRequest.call(this, 'GET', endpoint);
+							responseData = response?.results || [];
+						}
+						if (operation === 'delete') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const groupName = this.getNodeParameter('groupName', i) as string;
+
+							const endpoint = `/crm/v3/properties/${objectType}/groups/${groupName}`;
+							responseData = await hubspotApiRequest.call(this, 'DELETE', endpoint);
+							if (!responseData?.length) {
+								responseData = [{ success: true }];
+							}
+						}
+					}
+					//https://developers.hubspot.com/docs/api/crm/properties
+					if (resource === 'property') {
+						if (operation === 'create') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const propertyName = this.getNodeParameter('propertyName', i) as string;
+							const label = this.getNodeParameter('label', i) as string;
+							const type = this.getNodeParameter('type', i) as string;
+							const fieldType = this.getNodeParameter('fieldType', i) as string;
+							const groupName = this.getNodeParameter('groupName', i) as string;
+							const optionsJson = this.getNodeParameter('optionsJson', i, null) as string;
+							const additionalFields = this.getNodeParameter(
+								'additionalFields',
+								i,
+								{},
+							) as IDataObject;
+							const description = additionalFields.description as string;
+							const displayOrder = additionalFields.displayOrder as string;
+							const hasUniqueValue = additionalFields.hasUniqueValue as string;
+							const hidden = additionalFields.hidden as string;
+							const formField = additionalFields.formField as string;
+
+							const options = optionsJson && JSON.parse(optionsJson);
+
+							const parameters = {
+								name: propertyName,
+								label,
+								type,
+								fieldType,
+								groupName,
+								...(options ? { options } : {}),
+								...(description ? { description } : {}),
+								...(displayOrder ? { displayOrder } : {}),
+								...(hasUniqueValue ? { hasUniqueValue } : {}),
+								...(hidden ? { hidden } : {}),
+								...(formField ? { formField } : {}),
+							};
+
+							const endpoint = `/crm/v3/properties/${objectType}`;
+							responseData = await hubspotApiRequest.call(this, 'POST', endpoint, parameters);
+						}
+						if (operation === 'update') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const propertyName = this.getNodeParameter('propertyName', i) as string;
+							const updateFields = this.getNodeParameter('updateFields', i, {}) as Record<
+								string,
+								unknown
+							>;
+							const label = updateFields.label as string;
+							const type = updateFields.type as string;
+							const fieldType = updateFields.fieldType as string;
+							const groupName = updateFields.groupName as string;
+							const optionsJson = updateFields.optionsJson as string;
+							const description = updateFields.description as string;
+							const displayOrder = updateFields.displayOrder as string;
+							const hidden = updateFields.hidden as string;
+							const formField = updateFields.formField as string;
+
+							const options = optionsJson && JSON.parse(optionsJson);
+
+							const parameters = {
+								...(label ? { label } : {}),
+								...(type ? { type } : {}),
+								...(fieldType ? { fieldType } : {}),
+								...(groupName ? { groupName } : {}),
+								...(options ? { options } : {}),
+								...(description ? { description } : {}),
+								...(displayOrder ? { displayOrder } : {}),
+								...(hidden ? { hidden } : {}),
+								...(formField ? { formField } : {}),
+							};
+
+							const endpoint = `/crm/v3/properties/${objectType}/${propertyName}`;
+							responseData = await hubspotApiRequest.call(this, 'PATCH', endpoint, parameters);
+						}
+						if (operation === 'get') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const propertyName = this.getNodeParameter('propertyName', i) as string;
+							const additionalFields = this.getNodeParameter(
+								'additionalFields',
+								i,
+								{},
+							) as IDataObject;
+							const archived = additionalFields.archived as boolean;
+
+							const endpoint = `/crm/v3/properties/${objectType}/${propertyName}`;
+							responseData = await hubspotApiRequest.call(
+								this,
+								'GET',
+								endpoint,
+								{},
+								archived != null ? { archived } : {},
+							);
+						}
+						if (operation === 'getAll') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const additionalFields = this.getNodeParameter(
+								'additionalFields',
+								i,
+								{},
+							) as IDataObject;
+							const archived = additionalFields.archived as boolean;
+
+							const endpoint = `/crm/v3/properties/${objectType}`;
+							const response = await hubspotApiRequest.call(
+								this,
+								'GET',
+								endpoint,
+								{},
+								archived != null ? { archived } : {},
+							);
+
+							responseData = response?.results || [];
+						}
+						if (operation === 'delete') {
+							const objectType = this.getNodeParameter('objectType', i) as string;
+							const propertyName = this.getNodeParameter('propertyName', i) as string;
+
+							const endpoint = `/crm/v3/properties/${objectType}/${propertyName}`;
+							responseData = await hubspotApiRequest.call(this, 'DELETE', endpoint);
+							if (!responseData?.length) {
+								responseData = [{ success: true }];
+							}
+						}
+					}
 					//https://developers.hubspot.com/docs/methods/deals/deals_overview
 					if (resource === 'deal') {
 						if (operation === 'create') {
@@ -2723,20 +3616,159 @@ export class Hubspot implements INodeType {
 							}
 						}
 					}
+					if (resource === 'schema') {
+						const schemaType = this.getNodeParameter('schemaType', i) as string;
+						if (schemaType === 'typeCustomObject') {
+							if (operation === 'create') {
+								const name = this.getNodeParameter('name', i) as string;
+								const labels = this.getNodeParameter('objectLabels', i) as IDataObject;
+								const properties = (
+									this.getNodeParameter('properties.values', i, []) as IDataObject[]
+								).map((property) => {
+									if (!property.options) return property;
+									return {
+										name: property.name,
+										label: property.label,
+										...(property.options as IDataObject),
+									};
+								});
+								const additionalFields = this.getNodeParameter(
+									'additionalFields',
+									i,
+								) as IDataObject;
+								const primaryDisplayProperty = this.getNodeParameter(
+									'primaryDisplayProperty',
+									i,
+								) as string;
+
+								const body: IDataObject = {
+									name,
+									primaryDisplayProperty,
+									...labels,
+									properties,
+								};
+
+								Object.keys(additionalFields).forEach(
+									(key) => (body[key] = (additionalFields[key] as string).split(',')),
+								);
+
+								const endpoint = `/crm/v3/schemas`;
+								responseData = await hubspotApiRequest.call(this, 'POST', endpoint, body);
+							}
+							if (operation === 'delete') {
+								const objectType = this.getNodeParameter('objectType', i) as string;
+
+								const endpoint = `/crm/v3/schemas/${objectType}`;
+
+								await hubspotApiRequest.call(this, 'DELETE', endpoint);
+								responseData = { success: true };
+							}
+							if (operation === 'get') {
+								const objectType = this.getNodeParameter('objectType', i) as string;
+
+								const endpoint = `/crm/v3/schemas/${objectType}`;
+
+								responseData = await hubspotApiRequest.call(this, 'GET', endpoint);
+							}
+							if (operation === 'getAll') {
+								const returnAll = this.getNodeParameter('returnAll', 0) as boolean;
+								const qs: IDataObject = {};
+
+								const endpoint = `/crm/v3/schemas`;
+
+								if (returnAll) {
+									responseData = await hubspotApiRequestAllItems.call(
+										this,
+										'results',
+										'GET',
+										endpoint,
+										{},
+										qs,
+									);
+								} else {
+									qs.limit = this.getNodeParameter('limit', i) as number;
+									responseData = await hubspotApiRequestAllItems.call(
+										this,
+										'results',
+										'GET',
+										endpoint,
+										{},
+										qs,
+									);
+									responseData = responseData.splice(0, qs.limit);
+								}
+							}
+							if (operation === 'update') {
+								const objectType = this.getNodeParameter('objectType', i) as string;
+								const additionalFields = this.getNodeParameter(
+									'additionalFields',
+									i,
+								) as IDataObject;
+
+								const body: IDataObject = {};
+
+								if (additionalFields.objectLabels) {
+									const { labels } = additionalFields.objectLabels as IDataObject;
+									body['labels'] = labels;
+									delete additionalFields.objectLabels;
+								}
+
+								Object.keys(additionalFields).forEach(
+									(key) => (body[key] = (additionalFields[key] as string).split(',')),
+								);
+
+								const endpoint = `/crm/v3/schemas/${objectType}`;
+								responseData = await hubspotApiRequest.call(this, 'PATCH', endpoint, body);
+							}
+						}
+
+						if (schemaType === 'typeAssociation') {
+							if (operation === 'create') {
+								const objectType = this.getNodeParameter('objectType', i) as string;
+								const toObjectType = this.getNodeParameter('toObjectType', i) as string;
+								const associationName = this.getNodeParameter('associationName', i) as string;
+
+								const endpoint = `/crm/v3/schemas/${objectType}/associations`;
+
+								const body = {
+									fromObjectTypeId: objectType,
+									toObjectTypeId: toObjectType,
+									name: associationName,
+								};
+
+								responseData = await hubspotApiRequest.call(this, 'POST', endpoint, body);
+							}
+							if (operation === 'delete') {
+								const objectType = this.getNodeParameter('objectType', i) as string;
+								const associationID = this.getNodeParameter('associationID', i) as string;
+
+								const endpoint = `/crm/v3/schemas/${objectType}/associations/${associationID}`;
+
+								await hubspotApiRequest.call(this, 'DELETE', endpoint);
+								responseData = { success: true };
+							}
+						}
+					}
+
 					const executionData = this.helpers.constructExecutionMetaData(
 						this.helpers.returnJsonArray(responseData),
 						{ itemData: { item: i } },
 					);
+
 					returnData.push(...executionData);
 				} catch (error) {
 					if (this.continueOnFail()) {
-						returnData.push({ json: { error: (error as JsonObject).message } });
+						const executionErrorData = this.helpers.constructExecutionMetaData(
+							this.helpers.returnJsonArray({ error: error.message }),
+							{ itemData: { item: i } },
+						);
+						returnData.push(...executionErrorData);
 						continue;
 					}
 					throw error;
 				}
 			}
 		}
-		return this.prepareOutputData(returnData);
+		return [returnData as INodeExecutionData];
 	}
 }

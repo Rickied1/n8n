@@ -1,4 +1,9 @@
-import { ICredentialType, INodeProperties } from 'n8n-workflow';
+import {
+	IAuthenticateGeneric,
+	ICredentialTestRequest,
+	ICredentialType,
+	INodeProperties,
+} from 'n8n-workflow';
 
 export class HubspotApi implements ICredentialType {
 	name = 'hubspotApi';
@@ -12,4 +17,18 @@ export class HubspotApi implements ICredentialType {
 			default: '',
 		},
 	];
+	authenticate: IAuthenticateGeneric = {
+		type: 'generic',
+		properties: {
+			qs: {
+				hapikey: '={{$credentials.apiKey}}',
+			},
+		},
+	};
+	test: ICredentialTestRequest = {
+		request: {
+			baseURL: 'https://api.hubapi.com/deals/v1',
+			url: '/deal/paged',
+		},
+	};
 }

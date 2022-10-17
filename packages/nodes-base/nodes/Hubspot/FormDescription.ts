@@ -116,13 +116,6 @@ export const formFields: INodeProperties[] = [
 						description: 'The IP address of the visitor filling out the form',
 					},
 					{
-						displayName: 'Page URI',
-						name: 'pageUri',
-						type: 'string',
-						default: '',
-						description: 'The URI of the page the submission happened on',
-					},
-					{
 						displayName: 'Page Name',
 						name: 'pageName',
 						type: 'string',

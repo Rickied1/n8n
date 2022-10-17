@@ -397,7 +397,7 @@ export const dealFields: INodeProperties[] = [
 			minValue: 1,
 			maxValue: 250,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{
@@ -562,7 +562,7 @@ export const dealFields: INodeProperties[] = [
 			minValue: 1,
 			maxValue: 250,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{
@@ -674,8 +674,7 @@ export const dealFields: INodeProperties[] = [
 				],
 			},
 		],
-		description:
-			'When multiple filters are provided within a filterGroup, they will be combined using a logical AND operator. When multiple filterGroups are provided, they will be combined using a logical OR operator. The system supports a maximum of three filterGroups with up to three filters each. More info <a href="https://developers.hubspot.com/docs/api/crm/search">here</a>',
+		description: 'When multiple filters are provided within a filterGroup, they will be combined using a logical AND operator. When multiple filterGroups are provided, they will be combined using a logical OR operator. The system supports a maximum of three filterGroups with up to three filters each. More info <a href="https://developers.hubspot.com/docs/api/crm/search">here</a>.',
 	},
 	{
 		displayName: 'Additional Fields',

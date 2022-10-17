@@ -17,21 +17,23 @@ import {
 
 import moment from 'moment';
 
-export async function hubspotApiRequest(
-	this: IHookFunctions | IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions,
-	method: string,
-	endpoint: string,
-	// tslint:disable-next-line:no-any
-	body: any = {},
-	query: IDataObject = {},
-	uri?: string,
-	// tslint:disable-next-line:no-any
-): Promise<any> {
-	let authenticationMethod = this.getNodeParameter('authentication', 0);
+const hubspotCredentialType = {
+	apiKey: 'hubspotApi',
+	appToken: 'hubspotAppToken',
+	oAuth2: 'hubspotOAuth2Api',
+	developerApi: 'hubspotDeveloperApi',
+};
+
+type hubspotAuthMethods = 'apiKey' | 'appToken' | 'oAuth2' | 'developerApi';
+
+export async function hubspotApiRequest(this: IHookFunctions | IExecuteFunctions | IExecuteSingleFunctions | ILoadOptionsFunctions, method: string, endpoint: string, body: any = {}, query: IDataObject = {}, uri?: string): Promise<any> { // tslint:disable-line:no-any
+
+	let authenticationMethod = this.getNodeParameter('authentication', 0) as hubspotAuthMethods;
 
 	if (this.getNode().type.includes('Trigger')) {
 		authenticationMethod = 'developerApi';
 	}
+	const credentialsType = hubspotCredentialType[authenticationMethod];
 
 	const options: OptionsWithUri = {
 		method,
@@ -44,17 +46,7 @@ export async function hubspotApiRequest(
 	};
 
 	try {
-		if (authenticationMethod === 'apiKey') {
-			const credentials = await this.getCredentials('hubspotApi');
-
-			options.qs.hapikey = credentials.apiKey as string;
-			return await this.helpers.request!(options);
-		} else if (authenticationMethod === 'appToken') {
-			const credentials = await this.getCredentials('hubspotAppToken');
-
-			options.headers!['Authorization'] = `Bearer ${credentials.appToken}`;
-			return await this.helpers.request!(options);
-		} else if (authenticationMethod === 'developerApi') {
+		if (authenticationMethod === 'developerApi') {
 			if (endpoint.includes('webhooks')) {
 				const credentials = await this.getCredentials('hubspotDeveloperApi');
 				options.qs.hapikey = credentials.apiKey as string;
@@ -66,10 +58,8 @@ export async function hubspotApiRequest(
 				});
 			}
 		} else {
-			return await this.helpers.requestOAuth2!.call(this, 'hubspotOAuth2Api', options, {
-				tokenType: 'Bearer',
-				includeCredentialsOnRefreshOnBody: true,
-			});
+			console.log(JSON.stringify(options, undefined, 2));
+			return await this.helpers.requestWithAuthentication.call(this, credentialsType, options);
 		}
 	} catch (error) {
 		throw new NodeApiError(this.getNode(), error as JsonObject);

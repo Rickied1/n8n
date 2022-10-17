@@ -863,7 +863,7 @@ export const companyFields: INodeProperties[] = [
 			minValue: 1,
 			maxValue: 250,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{
@@ -958,7 +958,7 @@ export const companyFields: INodeProperties[] = [
 			minValue: 1,
 			maxValue: 250,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{
@@ -987,9 +987,7 @@ export const companyFields: INodeProperties[] = [
 				type: 'boolean',
 				default: false,
 				// eslint-disable-next-line n8n-nodes-base/node-param-description-boolean-without-whether
-				description:
-					'By default, you will only get data for the most recent version of a property in the "versions" data. If you include this parameter, you will get data for all previous versions.',
-			},
+				description: 'By default, you will only get data for the most recent version of a property in the "versions" data. If you include this parameter, you will get data for all previous versions.',			},
 		],
 	},
 
@@ -1037,7 +1035,7 @@ export const companyFields: INodeProperties[] = [
 			minValue: 1,
 			maxValue: 250,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{

@@ -232,8 +232,7 @@ export const contactFields: INodeProperties[] = [
 				name: 'fieldOfStudy',
 				type: 'string',
 				default: '',
-				description:
-					"A contact's field of study. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s field of study. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 			{
 				displayName: 'First Name',
@@ -259,8 +258,7 @@ export const contactFields: INodeProperties[] = [
 				name: 'graduationDate',
 				type: 'dateTime',
 				default: '',
-				description:
-					"A contact's graduation date. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s graduation date. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 			{
 				displayName: 'Industry',
@@ -274,8 +272,7 @@ export const contactFields: INodeProperties[] = [
 				name: 'jobFunction',
 				type: 'string',
 				default: '',
-				description:
-					"A contact's job function. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s job function. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 			{
 				displayName: 'Job Title',
@@ -329,8 +326,7 @@ export const contactFields: INodeProperties[] = [
 				name: 'maritalStatus',
 				type: 'string',
 				default: '',
-				description:
-					"A contact's marital status. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s marital status. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 			{
 				displayName: 'Membership Note',
@@ -429,8 +425,7 @@ export const contactFields: INodeProperties[] = [
 				name: 'relationshipStatus',
 				type: 'string',
 				default: '',
-				description:
-					"A contact's relationship status. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s relationship status. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 			{
 				displayName: 'Salutation',
@@ -444,24 +439,21 @@ export const contactFields: INodeProperties[] = [
 				name: 'school',
 				type: 'string',
 				default: '',
-				description:
-					"A contact's school. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s school. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 			{
 				displayName: 'Seniority',
 				name: 'seniority',
 				type: 'string',
 				default: '',
-				description:
-					"A contact's seniority. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s seniority. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 			{
 				displayName: 'Start Date',
 				name: 'startDate',
 				type: 'dateTime',
 				default: '',
-				description:
-					"A contact's start date. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s start date. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 			{
 				displayName: 'State/Region',
@@ -509,8 +501,7 @@ export const contactFields: INodeProperties[] = [
 				name: 'workEmail',
 				type: 'string',
 				default: '',
-				description:
-					"A contact's work email. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool",
+				description: 'A contact\'s work email. This property is required for the Facebook Ads Integration. This property will be automatically synced via the Lead Ads tool.',
 			},
 		],
 	},
@@ -640,7 +631,7 @@ export const contactFields: INodeProperties[] = [
 			minValue: 1,
 			maxValue: 250,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{
@@ -769,7 +760,7 @@ export const contactFields: INodeProperties[] = [
 			minValue: 1,
 			maxValue: 250,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{
@@ -880,7 +871,7 @@ export const contactFields: INodeProperties[] = [
 			minValue: 1,
 			maxValue: 250,
 		},
-		default: 100,
+		default: 50,
 		description: 'Max number of results to return',
 	},
 	{
@@ -992,8 +983,7 @@ export const contactFields: INodeProperties[] = [
 				],
 			},
 		],
-		description:
-			'When multiple filters are provided within a filterGroup, they will be combined using a logical AND operator. When multiple filterGroups are provided, they will be combined using a logical OR operator. The system supports a maximum of three filterGroups with up to three filters each. More info <a href="https://developers.hubspot.com/docs/api/crm/search">here</a>',
+		description: 'When multiple filters are provided within a filterGroup, they will be combined using a logical AND operator. When multiple filterGroups are provided, they will be combined using a logical OR operator. The system supports a maximum of three filterGroups with up to three filters each. More info <a href="https://developers.hubspot.com/docs/api/crm/search">here</a>.',
 	},
 	{
 		displayName: 'Additional Fields',
