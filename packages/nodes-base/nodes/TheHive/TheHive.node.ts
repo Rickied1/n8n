@@ -88,6 +88,17 @@ export class TheHive implements INodeType {
 				],
 				default: 'alert',
 			},
+			{
+				displayName: 'TheHive Organisations',
+				name: 'org',
+				type: 'options',
+				noDataExpression: true,
+				required: false,
+				typeOptions: {
+					loadOptionsMethod: 'loadOrganisations',
+				},
+				default: "",
+			},
 			// Alert
 			...alertOperations,
 			...alertFields,
@@ -306,6 +317,33 @@ export class TheHive implements INodeType {
 				];
 				return options;
 			},
+			async loadOrganisations(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const endpoint = "/v1/user/current"
+				const organisations = await theHiveApiRequest.call(this, 'GET', endpoint as string);
+				let returnData: INodePropertyOptions[] = [];
+				returnData = organisations.organisations.map((organisation: IDataObject) => {
+					return {
+						name: organisation.organisation as string,
+						value: organisation.organisation as string,
+					};
+				});
+				// Sort the array by option name
+				returnData.sort((a, b) => {
+					if (a.name < b.name) {
+						return -1;
+					}
+					if (a.name > b.name) {
+						return 1;
+					}
+					return 0;
+				});
+				returnData.unshift({
+					name: "Default Org",
+					value: ""
+				})
+
+				return returnData
+			}
 		},
 	};
 
@@ -317,7 +355,9 @@ export class TheHive implements INodeType {
 		let responseData;
 		const resource = this.getNodeParameter('resource', 0) as string;
 		const operation = this.getNodeParameter('operation', 0) as string;
-
+		const headers: any = {
+			"X-Organisation": this.getNodeParameter('org', 0) as string
+		};
 		for (let i = 0; i < length; i++) {
 			try {
 				if (resource === 'alert') {
@@ -367,7 +407,7 @@ export class TheHive implements INodeType {
 
 						qs.name = 'count-Alert';
 
-						responseData = await theHiveApiRequest.call(this, 'POST', '/v1/query', body, qs);
+						responseData = await theHiveApiRequest.call(this, 'POST', '/v1/query', body, qs, headers);
 
 						responseData = { count: responseData };
 					}
@@ -456,7 +496,7 @@ export class TheHive implements INodeType {
 							}
 						}
 
-						responseData = await theHiveApiRequest.call(this, 'POST', '/alert' as string, body);
+						responseData = await theHiveApiRequest.call(this, 'POST', '/alert' as string, body, headers);
 					}
 
 					/*
@@ -480,6 +520,7 @@ export class TheHive implements INodeType {
 							'POST',
 							'/connector/cortex/action' as string,
 							body,
+							headers
 						);
 						body = {
 							query: [
@@ -507,7 +548,7 @@ export class TheHive implements INodeType {
 						};
 						qs.name = 'log-actions';
 						do {
-							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs);
+							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs, headers);
 						} while (response.status === 'Waiting' || response.status === 'InProgress');
 
 						responseData = response;
@@ -526,7 +567,7 @@ export class TheHive implements INodeType {
 							qs.similarity = true;
 						}
 
-						responseData = await theHiveApiRequest.call(this, 'GET', `/alert/${alertId}`, {}, qs);
+						responseData = await theHiveApiRequest.call(this, 'GET', `/alert/${alertId}`, {}, qs, headers);
 					}
 					if (operation === 'getAll') {
 						const credentials = await this.getCredentials('theHiveApi');
@@ -615,7 +656,7 @@ export class TheHive implements INodeType {
 							Object.assign(qs, prepareOptional(options));
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'markAsRead') {
@@ -625,6 +666,7 @@ export class TheHive implements INodeType {
 							this,
 							'POST',
 							`/alert/${alertId}/markAsRead`,
+							headers
 						);
 					}
 
@@ -635,6 +677,7 @@ export class TheHive implements INodeType {
 							this,
 							'POST',
 							`/alert/${alertId}/markAsUnread`,
+							headers
 						);
 					}
 
@@ -648,6 +691,7 @@ export class TheHive implements INodeType {
 							'POST',
 							`/alert/${alertId}/merge/${caseId}`,
 							{},
+							headers
 						);
 					}
 
@@ -665,6 +709,7 @@ export class TheHive implements INodeType {
 							'POST',
 							`/alert/${alertId}/createCase`,
 							body,
+							headers
 						);
 					}
 
@@ -739,6 +784,7 @@ export class TheHive implements INodeType {
 							'PATCH',
 							`/alert/${alertId}` as string,
 							body,
+							headers
 						);
 					}
 				}
@@ -793,7 +839,7 @@ export class TheHive implements INodeType {
 
 						qs.name = 'count-observables';
 
-						responseData = await theHiveApiRequest.call(this, 'POST', '/v1/query', body, qs);
+						responseData = await theHiveApiRequest.call(this, 'POST', '/v1/query', body, qs, headers);
 
 						responseData = { count: responseData };
 					}
@@ -824,6 +870,7 @@ export class TheHive implements INodeType {
 								'/connector/cortex/job' as string,
 								body,
 								qs,
+								headers
 							);
 							const jobId = response.id;
 							qs.name = 'observable-jobs';
@@ -835,6 +882,7 @@ export class TheHive implements INodeType {
 									`/connector/cortex/job/${jobId}`,
 									body,
 									qs,
+									headers
 								);
 							} while (responseData.status === 'Waiting' || responseData.status === 'InProgress');
 						}
@@ -856,6 +904,7 @@ export class TheHive implements INodeType {
 							'POST',
 							'/connector/cortex/action' as string,
 							body,
+							headers
 						);
 						body = {
 							query: [
@@ -883,7 +932,7 @@ export class TheHive implements INodeType {
 						};
 						qs.name = 'log-actions';
 						do {
-							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs);
+							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs, headers);
 						} while (response.status === 'Waiting' || response.status === 'InProgress');
 
 						responseData = response;
@@ -950,6 +999,7 @@ export class TheHive implements INodeType {
 							`/case/${caseId}/artifact` as string,
 							body,
 							qs,
+							headers,
 							'',
 							options,
 						);
@@ -989,7 +1039,7 @@ export class TheHive implements INodeType {
 							endpoint = `/case/artifact/${observableId}`;
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'getAll') {
@@ -1055,7 +1105,7 @@ export class TheHive implements INodeType {
 							Object.assign(qs, prepareOptional(options));
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'search') {
@@ -1150,7 +1200,7 @@ export class TheHive implements INodeType {
 							Object.assign(qs, prepareOptional(options));
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'update') {
@@ -1166,6 +1216,7 @@ export class TheHive implements INodeType {
 							`/case/artifact/${id}` as string,
 							body,
 							qs,
+							headers
 						);
 
 						responseData = { success: true };
@@ -1219,7 +1270,7 @@ export class TheHive implements INodeType {
 
 						qs.name = 'count-cases';
 
-						responseData = await theHiveApiRequest.call(this, 'POST', '/v1/query', body, qs);
+						responseData = await theHiveApiRequest.call(this, 'POST', '/v1/query', body, qs, headers);
 
 						responseData = { count: responseData };
 					}
@@ -1240,6 +1291,7 @@ export class TheHive implements INodeType {
 							'POST',
 							'/connector/cortex/action' as string,
 							body,
+							headers
 						);
 						body = {
 							query: [
@@ -1267,7 +1319,7 @@ export class TheHive implements INodeType {
 						};
 						qs.name = 'log-actions';
 						do {
-							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs);
+							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs, headers);
 						} while (response.status === 'Waiting' || response.status === 'InProgress');
 
 						responseData = response;
@@ -1296,7 +1348,7 @@ export class TheHive implements INodeType {
 							});
 						}
 
-						responseData = await theHiveApiRequest.call(this, 'POST', '/case' as string, body);
+						responseData = await theHiveApiRequest.call(this, 'POST', '/case' as string, body, headers);
 					}
 
 					if (operation === 'get') {
@@ -1333,7 +1385,7 @@ export class TheHive implements INodeType {
 							endpoint = `/case/${caseId}`;
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'getAll') {
@@ -1424,7 +1476,7 @@ export class TheHive implements INodeType {
 							Object.assign(qs, prepareOptional(options));
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'update') {
@@ -1444,6 +1496,7 @@ export class TheHive implements INodeType {
 							'PATCH',
 							`/case/${id}` as string,
 							body,
+							headers
 						);
 					}
 				}
@@ -1487,7 +1540,7 @@ export class TheHive implements INodeType {
 
 						qs.name = 'count-tasks';
 
-						responseData = await theHiveApiRequest.call(this, 'POST', '/v1/query', body, qs);
+						responseData = await theHiveApiRequest.call(this, 'POST', '/v1/query', body, qs, headers);
 
 						responseData = { count: responseData };
 					}
@@ -1507,6 +1560,7 @@ export class TheHive implements INodeType {
 							'POST',
 							`/case/${caseId}/task` as string,
 							body,
+							headers
 						);
 					}
 
@@ -1526,6 +1580,7 @@ export class TheHive implements INodeType {
 							'POST',
 							'/connector/cortex/action' as string,
 							body,
+							headers
 						);
 						body = {
 							query: [
@@ -1553,7 +1608,7 @@ export class TheHive implements INodeType {
 						};
 						qs.name = 'task-actions';
 						do {
-							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs);
+							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs, headers);
 						} while (response.status === 'Waiting' || response.status === 'InProgress');
 
 						responseData = response;
@@ -1593,7 +1648,7 @@ export class TheHive implements INodeType {
 							endpoint = `/case/task/${taskId}`;
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'getAll') {
@@ -1660,7 +1715,7 @@ export class TheHive implements INodeType {
 							Object.assign(qs, prepareOptional(options));
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'search') {
@@ -1743,7 +1798,7 @@ export class TheHive implements INodeType {
 							Object.assign(qs, prepareOptional(options));
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'update') {
@@ -1758,6 +1813,7 @@ export class TheHive implements INodeType {
 							'PATCH',
 							`/case/task/${id}` as string,
 							body,
+							headers
 						);
 					}
 				}
@@ -1824,6 +1880,7 @@ export class TheHive implements INodeType {
 							`/case/task/${taskId}/log` as string,
 							body,
 							qs,
+							headers,
 							'',
 							options,
 						);
@@ -1845,6 +1902,7 @@ export class TheHive implements INodeType {
 							'POST',
 							'/connector/cortex/action' as string,
 							body,
+							headers
 						);
 						body = {
 							query: [
@@ -1872,7 +1930,7 @@ export class TheHive implements INodeType {
 						};
 						qs.name = 'log-actions';
 						do {
-							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs);
+							response = await theHiveApiRequest.call(this, 'POST', `/v1/query`, body, qs, headers);
 						} while (response.status === 'Waiting' || response.status === 'InProgress');
 
 						responseData = response;
@@ -1914,7 +1972,7 @@ export class TheHive implements INodeType {
 							body.query = { _id: logId };
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 
 					if (operation === 'getAll') {
@@ -1973,7 +2031,7 @@ export class TheHive implements INodeType {
 							body.query = And(Parent('task', Id(taskId)));
 						}
 
-						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs);
+						responseData = await theHiveApiRequest.call(this, method, endpoint as string, body, qs, headers);
 					}
 				}
 
@@ -1993,3 +2051,4 @@ export class TheHive implements INodeType {
 		return [this.helpers.returnJsonArray(returnData)];
 	}
 }
+
