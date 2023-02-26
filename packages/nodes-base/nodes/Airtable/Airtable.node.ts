@@ -39,39 +39,52 @@ export class Airtable implements INodeType {
 					{
 						name: 'Append',
 						value: 'append',
-						description: 'Append the data to a table',
-						action: 'Append data to a table',
+						description: 'Append the data to a table (requires data.records:write scope)',
+						action: 'Append data to a table (requires data.records:write scope)',
 					},
 					{
 						name: 'Delete',
 						value: 'delete',
-						description: 'Delete data from a table',
-						action: 'Delete data from a table',
+						description: 'Delete data from a table (requires data.records:write scope)',
+						action: 'Delete data from a table (requires data.records:write scope)',
 					},
 					{
 						name: 'List',
 						value: 'list',
-						description: 'List data from a table',
-						action: 'List data from a table',
+						description: 'List data from a table (requires data.records:read scope)',
+						action: 'List data from a table (requires data.records:read scope)',
+					},
+					{
+						name: 'List Bases',
+						value: 'listBases',
+						description:
+							'List bases the credentials have access to (requires schema.bases:read scope)',
+						action: 'List bases the credentials have access to (requires schema.bases:read scope)',
 					},
 					{
 						name: 'Read',
 						value: 'read',
-						description: 'Read data from a table',
-						action: 'Read data from a table',
+						description: 'Read data from a table (requires data.records:read scope)',
+						action: 'Read data from a table (requires data.records:read scope)',
+					},
+					{
+						name: 'Read Base Schema',
+						value: 'readBaseSchema',
+						description: 'Read schema of a base (requires schema.bases:read scope)',
+						action: 'Read schema of a base (requires schema.bases:read scope)',
 					},
 					{
 						name: 'Update',
 						value: 'update',
-						description: 'Update data in a table',
-						action: 'Update data in a table',
+						description: 'Update data in a table (requires data.records:write scope)',
+						action: 'Update data in a table (requires data.records:write scope)',
 					},
 				],
 				default: 'read',
 			},
 
 			// ----------------------------------
-			//         All
+			//         All record actions
 			// ----------------------------------
 
 			{
@@ -81,6 +94,9 @@ export class Airtable implements INodeType {
 				default: { mode: 'url', value: '' },
 				required: true,
 				description: 'The Airtable Base in which to operate on',
+				displayOptions: {
+					show: { operation: ['append', 'delete', 'list', 'read', 'readBaseSchema', 'update'] },
+				},
 				modes: [
 					{
 						displayName: 'By URL',
@@ -125,6 +141,9 @@ export class Airtable implements INodeType {
 				type: 'resourceLocator',
 				default: { mode: 'url', value: '' },
 				required: true,
+				displayOptions: {
+					show: { operation: ['append', 'delete', 'list', 'read', 'update'] },
+				},
 				modes: [
 					{
 						displayName: 'By URL',
@@ -217,7 +236,7 @@ export class Airtable implements INodeType {
 			},
 
 			// ----------------------------------
-			//         list
+			//         list records
 			// ----------------------------------
 			{
 				displayName: 'Return All',
@@ -277,8 +296,8 @@ export class Airtable implements INodeType {
 					"Name of the fields of type 'attachment' that should be downloaded. Multiple ones can be defined separated by comma. Case sensitive and cannot include spaces after a comma.",
 			},
 			{
-				displayName: 'Additional Options',
-				name: 'additionalOptions',
+				displayName: 'Additional Options (for List Records)',
+				name: 'additionalListRecordsOptions',
 				type: 'collection',
 				displayOptions: {
 					show: {
@@ -301,7 +320,7 @@ export class Airtable implements INodeType {
 						default: [],
 						placeholder: 'Name',
 						description:
-							'Only data for fields whose names are in this list will be included in the records',
+							'Only data for fields whose names or IDs are in this list will be included in the records',
 					},
 					{
 						displayName: 'Filter By Formula',
@@ -366,6 +385,67 @@ export class Airtable implements INodeType {
 						description:
 							'The name or ID of a view in the Stories table. If set, only the records in that view will be returned. The records will be sorted according to the order of the view.',
 					},
+					{
+						displayName: 'Return Fields by Field ID',
+						name: 'returnFieldsByFieldId',
+						type: 'boolean',
+						default: false,
+						description:
+							'Whether to return field IDs (fldXXXX) instead of the default human-readable/defined field names',
+					},
+					{
+						displayName: 'Record Metadata',
+						name: 'recordMetadata',
+						description: 'Additional record metadata to include',
+						type: 'multiOptions',
+						options: [
+							{
+								name: 'Record Comment Count',
+								value: 'commentCount',
+								description:
+									'Includes the number of comments on a record in the `commentCount` attribute',
+							},
+						],
+						default: [],
+					},
+					{
+						displayName: 'Cell Format',
+						name: 'cellFormat',
+						description: 'The format that should be used for cell values',
+						type: 'options',
+						options: [
+							{
+								name: 'JSON',
+								value: 'json',
+								description: 'Cells will be formatted as JSON, depending on the field type',
+							},
+							{
+								name: 'String',
+								value: 'string',
+								description:
+									'Cells will be formatted as user-facing strings, regardless of the field type. The timeZone and userLocale parameters are required when using string as the cellFormat. Note: You should not rely on the format of these strings, as it is subject to change.',
+							},
+						],
+						default: 'json',
+					},
+					{
+						displayName: 'Time Zone',
+						name: 'timeZone',
+						type: 'string',
+						default: 'America/Los_Angeles',
+						placeholder: 'America/Los_Angeles',
+						description:
+							'The time zone that should be used to format dates when using string as the cellFormat. This parameter is required when using string as the cellFormat. Visit https://airtable.com/developers/web/api/list-records for details valid values.',
+					},
+					{
+						displayName: 'User Locale',
+						name: 'userLocale',
+						type: 'string',
+						default: 'en',
+						placeholder: 'en',
+						description:
+							'The user locale that should be used to format dates when using string as the cellFormat. This parameter is required when using string as the cellFormat. Visit https://airtable.com/developers/web/api/list-records for details valid values.',
+					},
 				],
 			},
 
@@ -384,6 +464,40 @@ export class Airtable implements INodeType {
 				default: '',
 				required: true,
 				description: 'ID of the record to return',
+			},
+
+			// ----------------------------------
+			//         read base schema
+			// ----------------------------------
+			{
+				displayName: 'Additional Options (for Read Base Schema)',
+				name: 'additionalReadBaseSchemaOptions',
+				type: 'collection',
+				displayOptions: {
+					show: {
+						operation: ['readBaseSchema'],
+					},
+				},
+				default: {},
+				description: 'Additional options which decide what should be returned',
+				placeholder: 'Add Option',
+				options: [
+					{
+						displayName: 'Include',
+						name: 'include',
+						description: 'Additional metadata to include',
+						type: 'multiOptions',
+						options: [
+							{
+								name: 'Visible Field IDs',
+								value: 'visibleFieldIds',
+								description:
+									'Includes a list of the visible (non-hidden) field IDs in the `commentCount` attribute (for grid views only)',
+							},
+						],
+						default: [],
+					},
+				],
 			},
 
 			// ----------------------------------
@@ -500,15 +614,19 @@ export class Airtable implements INodeType {
 
 		const operation = this.getNodeParameter('operation', 0);
 
-		const application = this.getNodeParameter('application', 0, undefined, {
-			extractValue: true,
-		}) as string;
-
-		const table = encodeURI(
-			this.getNodeParameter('table', 0, undefined, {
+		let application, table;
+		if (['append', 'delete', 'list', 'read', 'readBaseSchema', 'update'].includes(operation)) {
+			application = this.getNodeParameter('application', 0, undefined, {
 				extractValue: true,
-			}) as string,
-		);
+			}) as string;
+		}
+		if (['append', 'delete', 'list', 'read', 'update'].includes(operation)) {
+			table = encodeURI(
+				this.getNodeParameter('table', 0, undefined, {
+					extractValue: true,
+				}) as string,
+			);
+		}
 
 		let returnAll = false;
 		let endpoint = '';
@@ -627,7 +745,7 @@ export class Airtable implements INodeType {
 			}
 		} else if (operation === 'list') {
 			// ----------------------------------
-			//         list
+			//         list records
 			// ----------------------------------
 			try {
 				requestMethod = 'GET';
@@ -637,18 +755,32 @@ export class Airtable implements INodeType {
 
 				const downloadAttachments = this.getNodeParameter('downloadAttachments', 0);
 
-				const additionalOptions = this.getNodeParameter('additionalOptions', 0, {}) as IDataObject;
+				const additionalOptions = this.getNodeParameter(
+					'additionalListRecordsOptions',
+					0,
+					{},
+				) as IDataObject;
 
 				for (const key of Object.keys(additionalOptions)) {
 					if (key === 'sort' && (additionalOptions.sort as IDataObject).property !== undefined) {
 						qs[key] = (additionalOptions[key] as IDataObject).property;
+					} else if (key === 'returnFieldsByFieldId' && additionalOptions[key] === false) {
+						// do nothing (exclude the query parameter): Airtable will return fields by Field ID if "false" is provided
 					} else {
 						qs[key] = additionalOptions[key];
 					}
 				}
 
 				if (returnAll) {
-					responseData = await apiRequestAllItems.call(this, requestMethod, endpoint, body, qs);
+					qs.pageSize = 100;
+					responseData = await apiRequestAllItems.call(
+						this,
+						requestMethod,
+						endpoint,
+						body,
+						'records',
+						qs,
+					);
 				} else {
 					qs.maxRecords = this.getNodeParameter('limit', 0);
 					responseData = await apiRequest.call(this, requestMethod, endpoint, body, qs);
@@ -667,6 +799,29 @@ export class Airtable implements INodeType {
 					);
 					return [data];
 				}
+
+				// We can return from here
+				return [
+					this.helpers.constructExecutionMetaData(this.helpers.returnJsonArray(returnData), {
+						itemData: { item: 0 },
+					}),
+				];
+			} catch (error) {
+				if (this.continueOnFail()) {
+					returnData.push({ json: { error: error.message } });
+				} else {
+					throw error;
+				}
+			}
+		} else if (operation === 'listBases') {
+			// ----------------------------------
+			//         list bases
+			// ----------------------------------
+			try {
+				requestMethod = 'GET';
+				endpoint = 'meta/bases';
+				responseData = await apiRequestAllItems.call(this, requestMethod, endpoint, body, 'bases');
+				returnData.push.apply(returnData, responseData.bases);
 
 				// We can return from here
 				return [
@@ -714,6 +869,41 @@ export class Airtable implements INodeType {
 						returnData.push({ json: { error: error.message } });
 						continue;
 					}
+					throw error;
+				}
+			}
+		} else if (operation === 'readBaseSchema') {
+			// ----------------------------------
+			//         read base schema
+			// ----------------------------------
+
+			try {
+				requestMethod = 'GET';
+				endpoint = `meta/bases/${application}/tables`;
+
+				const additionalOptions = this.getNodeParameter(
+					'additionalReadBaseSchemaOptions',
+					0,
+					{},
+				) as IDataObject;
+
+				for (const key of Object.keys(additionalOptions)) {
+					qs[key] = additionalOptions[key];
+				}
+
+				responseData = await apiRequest.call(this, requestMethod, endpoint, body, qs);
+				returnData.push.apply(returnData, responseData.tables);
+
+				// We can return from here
+				return [
+					this.helpers.constructExecutionMetaData(this.helpers.returnJsonArray(returnData), {
+						itemData: { item: 0 },
+					}),
+				];
+			} catch (error) {
+				if (this.continueOnFail()) {
+					returnData.push({ json: { error: error.message } });
+				} else {
 					throw error;
 				}
 			}
