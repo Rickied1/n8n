@@ -61,6 +61,18 @@
 				<span class="activator">
 					<WorkflowActivator :workflow-active="isWorkflowActive" :workflow-id="currentWorkflowId" />
 				</span>
+				<n8n-tooltip>
+					<n8n-button
+						type="primary"
+						icon="magic"
+						:square="true"
+						class="mr-2xs"
+						@click="onJanGPTClick"
+					/>
+					<template #content>
+						<span>Ask JanGPT</span>
+					</template>
+				</n8n-tooltip>
 				<enterprise-edition :features="[EnterpriseEditionFeature.Sharing]">
 					<n8n-button
 						type="secondary"
@@ -126,6 +138,7 @@
 import Vue from 'vue';
 import mixins from 'vue-typed-mixins';
 import {
+CHAT_GPT_MODAL_KEY,
 	DUPLICATE_MODAL_KEY,
 	EnterpriseEditionFeature,
 	MAX_WORKFLOW_NAME_LENGTH,
@@ -295,6 +308,9 @@ export default mixins(workflowHelpers, titleChange).extend({
 		},
 	},
 	methods: {
+		onJanGPTClick() {
+			this.uiStore.openModal(CHAT_GPT_MODAL_KEY);
+		},
 		async onSaveButtonClick() {
 			let currentId = undefined;
 			if (this.currentWorkflowId !== PLACEHOLDER_EMPTY_WORKFLOW_ID) {

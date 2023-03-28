@@ -10,6 +10,7 @@ import {
 	COMMUNITY_PACKAGE_INSTALL_MODAL_KEY,
 	COMMUNITY_PACKAGE_MANAGE_ACTIONS,
 	CONTACT_PROMPT_MODAL_KEY,
+	CHAT_GPT_MODAL_KEY,
 	CREDENTIAL_EDIT_MODAL_KEY,
 	CREDENTIAL_SELECT_MODAL_KEY,
 	DELETE_USER_MODAL_KEY,
@@ -53,6 +54,9 @@ export const useUIStore = defineStore(STORES.UI, {
 		activeCredentialType: null,
 		modals: {
 			[ABOUT_MODAL_KEY]: {
+				open: false,
+			},
+			[CHAT_GPT_MODAL_KEY]: {
 				open: false,
 			},
 			[CHANGE_PASSWORD_MODAL_KEY]: {

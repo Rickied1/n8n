@@ -15,6 +15,10 @@
 			<AboutModal />
 		</ModalRoot>
 
+		<ModalRoot :name="CHAT_GPT_MODAL_KEY">
+			<ChatGPTModal />
+		</ModalRoot>
+
 		<ModalRoot :name="CREDENTIAL_SELECT_MODAL_KEY">
 			<CredentialsSelectModal />
 		</ModalRoot>
@@ -118,6 +122,7 @@ import {
 	COMMUNITY_PACKAGE_CONFIRM_MODAL_KEY,
 	COMMUNITY_PACKAGE_INSTALL_MODAL_KEY,
 	CONTACT_PROMPT_MODAL_KEY,
+	CHAT_GPT_MODAL_KEY,
 	CREDENTIAL_EDIT_MODAL_KEY,
 	CREDENTIAL_SELECT_MODAL_KEY,
 	DELETE_USER_MODAL_KEY,
@@ -158,6 +163,7 @@ import ActivationModal from './ActivationModal.vue';
 import ImportCurlModal from './ImportCurlModal.vue';
 import WorkflowShareModal from './WorkflowShareModal.ee.vue';
 import EventDestinationSettingsModal from '@/components/SettingsLogStreaming/EventDestinationSettingsModal.ee.vue';
+import ChatGPTModal from './ChatGPTModal.vue';
 
 export default Vue.extend({
 	name: 'Modals',
@@ -168,6 +174,7 @@ export default Vue.extend({
 		CommunityPackageManageConfirmModal,
 		ContactPromptModal,
 		ChangePasswordModal,
+		ChatGPTModal,
 		CredentialEdit,
 		CredentialsSelectModal,
 		DeleteUserModal,
@@ -189,6 +196,7 @@ export default Vue.extend({
 		COMMUNITY_PACKAGE_CONFIRM_MODAL_KEY,
 		COMMUNITY_PACKAGE_INSTALL_MODAL_KEY,
 		CONTACT_PROMPT_MODAL_KEY,
+		CHAT_GPT_MODAL_KEY,
 		CREDENTIAL_EDIT_MODAL_KEY,
 		CREDENTIAL_SELECT_MODAL_KEY,
 		ABOUT_MODAL_KEY,
