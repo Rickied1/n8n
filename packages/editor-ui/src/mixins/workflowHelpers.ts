@@ -1018,6 +1018,9 @@ export const workflowHelpers = mixins(externalHooks, nodeHelpers, restApi, showM
 			// Find most top-left node
 			const minPosition = [99999999, 99999999];
 			for (const node of workflowData.nodes) {
+				if (node.position === undefined) {
+					node.position = [0, 0];
+				}
 				if (node.position[1] < minPosition[1]) {
 					minPosition[0] = node.position[0];
 					minPosition[1] = node.position[1];
