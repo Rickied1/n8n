@@ -11,10 +11,14 @@ export type Resource =
 	| 'signature'
 	| 'tag';
 
+export type LinkedResource = 'self' | 'osdi:person' | 'osdi:tagging' | 'osdi:tag';
+
 export type Operation = 'create' | 'delete' | 'get' | 'getAll' | 'update' | 'add' | 'remove';
 
 // @ts-ignore
 export type LanguageCodes = (typeof LanguageOptions)[number]['value'];
+
+type CustomFieldUi = CustomFieldInput;
 
 // ----------------------------------------
 //              UI fields
@@ -27,6 +31,9 @@ export type AllFieldsUi = {
 	languages_spoken: LanguageCodes;
 	target: string;
 	location: LocationUi;
+	custom_fields: {
+		customFieldValues: CustomFieldUi[];
+	};
 };
 
 export type EmailAddressUi = {
@@ -79,11 +86,18 @@ type LatitudeLongitude = {
 
 export type FieldWithPrimaryField = EmailAddressField | PhoneNumberField | PostalAddressField;
 
+export type CustomFieldInput = {
+	name: string;
+	value: string;
+};
+
+export type CustomField = { [key: string]: string };
+
 // ----------------------------------------
 //                 responses
 // ----------------------------------------
 
-export type LinksFieldContainer = { _links: { self: { href: string } } };
+export type LinksFieldContainer = { _links: { [resourceName: string]: { href: string } } };
 
 export type Response = JsonObject & LinksFieldContainer;
 

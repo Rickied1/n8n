@@ -13,6 +13,8 @@ import type {
 	PetitionResponse,
 	Resource,
 	Response,
+	LinkedResource,
+	CustomField,
 } from './types';
 
 export async function actionNetworkApiRequest(
@@ -42,6 +44,14 @@ export async function actionNetworkApiRequest(
 }
 
 /**
+ * Check if resource is OSDI compatible.
+ */
+const isOsdiResource = (resourceName: string) => {
+	const actionNetworkOnly = ['custom_fields', 'campaigns', 'event_campaigns'];
+
+	return !actionNetworkOnly.includes(resourceName);
+};
+/**
  * Convert an endpoint to the key needed to access data in the response.
  */
 const toItemsKey = (endpoint: string) => {
@@ -49,12 +59,16 @@ const toItemsKey = (endpoint: string) => {
 	if (
 		endpoint.includes('/signatures') ||
 		endpoint.includes('/attendances') ||
-		endpoint.includes('/taggings')
+		endpoint.includes('/taggings') ||
+		endpoint.includes('/custom_fields')
 	) {
 		endpoint = endpoint.split('/').pop()!;
 	}
 
-	return `osdi:${endpoint.replace(/\//g, '')}`;
+	const resourceName = endpoint.replace(/\//g, '');
+	const prefix = isOsdiResource(resourceName) ? 'osdi' : 'action_network';
+
+	return `${prefix}:${resourceName}`;
 };
 
 export async function handleListing(
@@ -100,8 +114,8 @@ export async function handleListing(
 //              helpers
 // ----------------------------------------
 
-export const extractId = (response: LinksFieldContainer) => {
-	return response._links.self.href.split('/').pop() ?? 'No ID';
+export const extractId = (response: LinksFieldContainer, resource: LinkedResource = 'self') => {
+	return response._links[resource].href.split('/').pop() ?? 'No ID';
 };
 
 export const makeOsdiLink = (personId: string) => {
@@ -188,6 +202,20 @@ function adjustLocation(allFields: AllFieldsUi) {
 	};
 }
 
+function adjustCustomFields(allFields: AllFieldsUi) {
+	if (!allFields.custom_fields) return allFields;
+
+	const customFields: CustomField = {};
+	for (const customField of allFields.custom_fields.customFieldValues) {
+		customFields[customField.name] = customField.value;
+	}
+
+	return {
+		...omit(allFields, 'custom_fields'),
+		custom_fields: customFields,
+	};
+}
+
 function adjustTargets(allFields: AllFieldsUi) {
 	if (!allFields.target) return allFields;
 
@@ -207,6 +235,7 @@ export const adjustPersonPayload = flow(
 	adjustLanguagesSpoken,
 	adjustPhoneNumbers,
 	adjustPostalAddresses,
+	adjustCustomFields,
 );
 
 export const adjustPetitionPayload = adjustTargets;
@@ -250,6 +279,22 @@ export const resourceLoaders = {
 			return {
 				name: taggingId,
 				value: taggingId,
+			};
+		});
+	},
+
+	async getCustomFieldOptions(this: ILoadOptionsFunctions) {
+		const endpoint = '/metadata/custom_fields';
+
+		const customFieldsResponse = await actionNetworkApiRequest.call(this, 'GET', endpoint);
+		const customFields = customFieldsResponse['action_network:custom_fields'] as Array<{
+			name: string;
+		}>;
+
+		return customFields.map((field) => {
+			return {
+				name: field.name,
+				value: field.name,
 			};
 		});
 	},
@@ -297,11 +342,24 @@ const simplifyPetitionResponse = (response: PetitionResponse) => {
 	};
 };
 
+const simplifyPersonTagResponse = (response: Response) => {
+	const fieldsToSimplify = ['identifiers', '_links', 'item_type'];
+
+	return {
+		id: extractId(response),
+		person_id: extractId(response, 'osdi:person'),
+		tag_id: extractId(response, 'osdi:tag'),
+		...omit(response, fieldsToSimplify),
+	};
+};
+
 export const simplifyResponse = (response: Response, resource: Resource) => {
 	if (resource === 'person') {
 		return simplifyPersonResponse(response as PersonResponse);
 	} else if (resource === 'petition') {
 		return simplifyPetitionResponse(response as PetitionResponse);
+	} else if (resource === 'personTag') {
+		return simplifyPersonTagResponse(response);
 	}
 
 	const fieldsToSimplify = ['identifiers', '_links', 'action_network:sponsor', 'reminders'];
