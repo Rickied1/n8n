@@ -321,7 +321,10 @@ export const equalityTest = async (testData: WorkflowTestData, types: INodeTypes
 	const resultNodeData = getResultNodeData(result, testData);
 	resultNodeData.forEach(({ nodeName, resultData }) => {
 		const msg = `Equality failed for "${testData.description}" at node "${nodeName}"`;
-		return expect(resultData, msg).toEqual(testData.output.nodeData[nodeName]);
+		// eslint-disable-next-line n8n-local-rules/no-json-parse-json-stringify
+		return expect(JSON.parse(JSON.stringify(resultData)), msg).toEqual(
+			testData.output.nodeData[nodeName],
+		);
 	});
 
 	expect(result.finished).toEqual(true);
