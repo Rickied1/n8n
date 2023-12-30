@@ -36,6 +36,14 @@ export class InvoiceNinjaApi implements ICredentialType {
 			default: '',
 			hint: 'This is optional, enter only if you did set a secret in your app and only if you are using v5',
 		},
+		{
+			displayName: 'Password',
+			name: 'password',
+			type: 'string',
+			typeOptions: { password: true },
+			default: '',
+			hint: 'This is optional, only enter if you are using v5. Used for destructive operations like purging clients or deleting documents.',
+		},
 	];
 
 	test: ICredentialTestRequest = {

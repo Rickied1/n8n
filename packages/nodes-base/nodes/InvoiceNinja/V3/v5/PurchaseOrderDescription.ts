@@ -1,0 +1,1111 @@
+import type { INodeProperties } from 'n8n-workflow';
+
+export const purchaseOrderOperations: INodeProperties[] = [
+	{
+		displayName: 'Operation',
+		name: 'operation',
+		type: 'options',
+		noDataExpression: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+			},
+		},
+		options: [
+			{
+				name: 'Action',
+				value: 'action',
+				description: 'Performs an action to an Purchase Order',
+				action: 'Action to an purchaseOrder',
+			},
+			{
+				name: 'Create',
+				value: 'create',
+				description: 'Create a new Purchase Order',
+				action: 'Create a Purchase Order',
+			},
+			{
+				name: 'Delete',
+				value: 'delete',
+				description: 'Delete a Purchase Order',
+				action: 'Delete a Purchase Order',
+			},
+			{
+				name: 'Get',
+				value: 'get',
+				description: 'Get data of a Purchase Order',
+				action: 'Get a Purchase Order',
+			},
+			{
+				name: 'Get Many',
+				value: 'getAll',
+				description: 'Get data of many Purchase Orders',
+				action: 'Get many Purchase Orders',
+			},
+			{
+				name: 'Update',
+				value: 'update',
+				description: 'Update an existing Purchase Order',
+				action: 'Update a Purchase Order',
+			},
+		],
+		default: 'getAll',
+	},
+];
+
+export const purchaseOrderFields: INodeProperties[] = [
+	/* -------------------------------------------------------------------------- */
+	/*                                  purchaseOrder:get                         */
+	/* -------------------------------------------------------------------------- */
+	{
+		displayName: 'Purchase Order ID',
+		name: 'purchaseOrderId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['get'],
+			},
+		},
+	},
+	{
+		displayName: 'Include',
+		name: 'include',
+		type: 'multiOptions',
+		description: 'Additional resources to fetch related to this resource',
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['get'],
+			},
+		},
+		options: [
+			{
+				name: 'Client',
+				value: 'client',
+			},
+			{
+				name: 'Vendor',
+				value: 'vendor',
+			},
+			{
+				name: 'Expense',
+				value: 'expense',
+			},
+		],
+		default: [],
+	},
+	{
+		displayName: 'Download PDF',
+		name: 'download',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['get'],
+			},
+		},
+		default: false,
+	},
+	/* -------------------------------------------------------------------------- */
+	/*                                  purchaseOrder:getAll                      */
+	/* -------------------------------------------------------------------------- */
+	{
+		displayName: 'Filters',
+		name: 'filters',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['getAll'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Search',
+				name: 'filter',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Number',
+				name: 'number',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Client Status',
+				name: 'clientStatus',
+				type: 'multiOptions',
+				options: [
+					{
+						name: 'Accepted',
+						value: 'accepted',
+					},
+					{
+						name: 'All',
+						value: 'all',
+					},
+					{
+						name: 'Canceled',
+						value: 'canceled',
+					},
+					{
+						name: 'Draft',
+						value: 'draft',
+					},
+					{
+						name: 'Sent',
+						value: 'sent',
+					},
+				],
+				default: [],
+			},
+		],
+	},
+	{
+		displayName: 'Include',
+		name: 'include',
+		type: 'multiOptions',
+		description: 'Additional resources to fetch related to this resource',
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['getAll'],
+			},
+		},
+		options: [
+			{
+				name: 'Client',
+				value: 'client',
+			},
+			{
+				name: 'Vendor',
+				value: 'vendor',
+			},
+			{
+				name: 'Expense',
+				value: 'expense',
+			},
+		],
+		default: [],
+	},
+	{
+		displayName: 'Return All',
+		name: 'returnAll',
+		type: 'boolean',
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['getAll'],
+			},
+		},
+		default: true,
+		description: 'Whether to return all results or only up to a given limit',
+	},
+	{
+		displayName: 'Limit',
+		name: 'perPage',
+		type: 'number',
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['getAll'],
+			},
+			hide: {
+				returnAll: [true],
+			},
+		},
+		typeOptions: {
+			minValue: 1,
+			maxValue: 100,
+		},
+		default: 50,
+		description: 'Max number of results to return',
+	},
+	/* -------------------------------------------------------------------------- */
+	/*                                 purchaseOrder:create                       */
+	/* -------------------------------------------------------------------------- */
+	{
+		displayName: 'Vendor Name or ID',
+		name: 'vendorId',
+		type: 'options',
+		description:
+			'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+		typeOptions: {
+			loadOptionsMethod: 'getVendorsV5',
+		},
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['create'],
+			},
+		},
+		default: '',
+	},
+	{
+		displayName: 'Purchase Order Items',
+		name: 'lineItemsUi',
+		placeholder: 'Add Purchase Order Item',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['create'],
+			},
+		},
+		default: {},
+		options: [
+			{
+				name: 'lineItemsValues',
+				displayName: 'Purchase Order Item',
+				values: [
+					{
+						displayName: 'Cost',
+						name: 'cost',
+						type: 'number',
+						default: 0,
+					},
+					{
+						displayName: 'Anzahl',
+						name: 'quantity',
+						type: 'number',
+						typeOptions: {
+							minValue: 0,
+						},
+						default: 1,
+					},
+					{
+						displayName: 'Product Key / Article Name',
+						description: 'Name of the Article / Product to invoice',
+						name: 'productKey',
+						type: 'string',
+						typeOptions: {
+							alwaysOpenEditWindow: true,
+						},
+						default: '',
+					},
+					{
+						displayName: 'Notes / Description',
+						description: 'An extended Description for the invoice line',
+						name: 'notes',
+						type: 'string',
+						typeOptions: {
+							alwaysOpenEditWindow: true,
+						},
+						default: '',
+					},
+					{
+						displayName: 'Tax Name 1',
+						name: 'taxName1',
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Tax Name 2',
+						name: 'taxName2',
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Tax Name 3',
+						name: 'taxName3',
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Tax Rate 1',
+						name: 'taxRate1',
+						type: 'number',
+						default: 0,
+					},
+					{
+						displayName: 'Tax Rate 2',
+						name: 'taxRate2',
+						type: 'number',
+						default: 0,
+					},
+					{
+						displayName: 'Tax Rate 3',
+						name: 'taxRate3',
+						type: 'number',
+						default: 0,
+					},
+					{
+						displayName: 'Custom Value 1',
+						name: 'customValue1',
+						type: 'string',
+						typeOptions: {},
+						default: '',
+					},
+					{
+						displayName: 'Custom Value 2',
+						name: 'customValue2',
+						type: 'string',
+						typeOptions: {},
+						default: '',
+					},
+					{
+						displayName: 'Custom Value 3',
+						name: 'customValue3',
+						type: 'string',
+						typeOptions: {},
+						default: '',
+					},
+					{
+						displayName: 'Custom Value 4',
+						name: 'customValue4',
+						type: 'string',
+						typeOptions: {},
+						default: '',
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['create'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Client Name or ID',
+				name: 'clientId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getClientsV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Project Name or ID',
+				name: 'projectId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>Only the last 100 entries will be displayed here. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				typeOptions: {
+					loadOptionsMethod: 'getProjectsV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'User (Assigned) Name or ID',
+				name: 'assignedUserId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getUsersV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Design Name or ID',
+				name: 'designId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getDesignsV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Number',
+				name: 'number',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Discount',
+				name: 'discount',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'PO Number',
+				name: 'poNumber',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Date',
+				name: 'date',
+				type: 'dateTime',
+				default: '',
+			},
+			{
+				displayName: 'Due Date',
+				name: 'dueDate',
+				type: 'dateTime',
+				default: '',
+			},
+			{
+				displayName: 'Terms',
+				name: 'terms',
+				type: 'string',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+				},
+				default: '',
+			},
+			{
+				displayName: 'Footer',
+				name: 'footer',
+				type: 'string',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+				},
+				default: '',
+			},
+			{
+				displayName: 'Uses Inclusive Taxes',
+				name: 'usesInclusiveTaxes',
+				type: 'boolean',
+				default: false,
+			},
+			{
+				displayName: 'Is Amount Discount',
+				name: 'isAmountDiscount',
+				type: 'boolean',
+				default: false,
+			},
+			{
+				displayName: 'Tax Name 1',
+				name: 'taxName1',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Tax Name 2',
+				name: 'taxName2',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Tax Name 3',
+				name: 'taxName3',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Tax Rate 1',
+				name: 'taxRate1',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'Tax Rate 2',
+				name: 'taxRate2',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'Tax Rate 3',
+				name: 'taxRate3',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'Exchange Rate',
+				name: 'exchangeRate',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'Currency Name or ID',
+				name: 'currencyId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getCurrenciesV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Private Notes',
+				name: 'privateNotes',
+				type: 'string',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+				},
+				default: '',
+			},
+			{
+				displayName: 'Public Notes',
+				name: 'publicNotes',
+				type: 'string',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+				},
+				default: '',
+			},
+			{
+				displayName: 'Custom Value 1',
+				name: 'customValue1',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Custom Value 2',
+				name: 'customValue2',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Custom Value 3',
+				name: 'customValue3',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Custom Value 4',
+				name: 'customValue4',
+				type: 'string',
+				default: '',
+			},
+		],
+	},
+	/* -------------------------------------------------------------------------- */
+	/*                                 purchaseOrder:update                       */
+	/* -------------------------------------------------------------------------- */
+	{
+		displayName: 'Purchase Order ID',
+		name: 'purchaseOrderId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['update'],
+			},
+		},
+	},
+	{
+		displayName: 'Purchase Order Items',
+		name: 'lineItemsUi',
+		placeholder: 'Add Purchase Order Item',
+		type: 'fixedCollection',
+		typeOptions: {
+			multipleValues: true,
+		},
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['update'],
+			},
+		},
+		default: {},
+		options: [
+			{
+				name: 'lineItemsValues',
+				displayName: 'Purchase Order Item',
+				values: [
+					{
+						displayName: 'Cost',
+						name: 'cost',
+						type: 'number',
+						default: 0,
+					},
+					{
+						displayName: 'Anzahl',
+						name: 'quantity',
+						type: 'number',
+						typeOptions: {
+							minValue: 0,
+						},
+						default: 1,
+					},
+					{
+						displayName: 'Product Key / Article Name',
+						description: 'Name of the Article / Product to invoice',
+						name: 'productKey',
+						type: 'string',
+						typeOptions: {
+							alwaysOpenEditWindow: true,
+						},
+						default: '',
+					},
+					{
+						displayName: 'Notes / Description',
+						description: 'An extended Description for the invoice line',
+						name: 'notes',
+						type: 'string',
+						typeOptions: {
+							alwaysOpenEditWindow: true,
+						},
+						default: '',
+					},
+					{
+						displayName: 'Tax Name 1',
+						name: 'taxName1',
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Tax Name 2',
+						name: 'taxName2',
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Tax Name 3',
+						name: 'taxName3',
+						type: 'string',
+						default: '',
+					},
+					{
+						displayName: 'Tax Rate 1',
+						name: 'taxRate1',
+						type: 'number',
+						default: 0,
+					},
+					{
+						displayName: 'Tax Rate 2',
+						name: 'taxRate2',
+						type: 'number',
+						default: 0,
+					},
+					{
+						displayName: 'Tax Rate 3',
+						name: 'taxRate3',
+						type: 'number',
+						default: 0,
+					},
+					{
+						displayName: 'Custom Value 1',
+						name: 'customValue1',
+						type: 'string',
+						typeOptions: {},
+						default: '',
+					},
+					{
+						displayName: 'Custom Value 2',
+						name: 'customValue2',
+						type: 'string',
+						typeOptions: {},
+						default: '',
+					},
+					{
+						displayName: 'Custom Value 3',
+						name: 'customValue3',
+						type: 'string',
+						typeOptions: {},
+						default: '',
+					},
+					{
+						displayName: 'Custom Value 4',
+						name: 'customValue4',
+						type: 'string',
+						typeOptions: {},
+						default: '',
+					},
+				],
+			},
+		],
+	},
+	{
+		displayName: 'Additional Fields',
+		name: 'additionalFields',
+		type: 'collection',
+		placeholder: 'Add Field',
+		default: {},
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['update'],
+			},
+		},
+		options: [
+			{
+				displayName: 'Client Name or ID',
+				name: 'clientId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getClientsV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Project Name or ID',
+				name: 'projectId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>Only the last 100 entries will be displayed here. Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>.',
+				typeOptions: {
+					loadOptionsMethod: 'getProjectsV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Vendor Name or ID',
+				name: 'vendorId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getVendorsV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'User (Assigned) Name or ID',
+				name: 'assignedUserId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getUsersV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Design Name or ID',
+				name: 'designId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getDesignsV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Number',
+				name: 'number',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Discount',
+				name: 'discount',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'PO Number',
+				name: 'poNumber',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Date',
+				name: 'date',
+				type: 'dateTime',
+				default: '',
+			},
+			{
+				displayName: 'Due Date',
+				name: 'dueDate',
+				type: 'dateTime',
+				default: '',
+			},
+			{
+				displayName: 'Terms',
+				name: 'terms',
+				type: 'string',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+				},
+				default: '',
+			},
+			{
+				displayName: 'Footer',
+				name: 'footer',
+				type: 'string',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+				},
+				default: '',
+			},
+			{
+				displayName: 'Uses Inclusive Taxes',
+				name: 'usesInclusiveTaxes',
+				type: 'boolean',
+				default: false,
+			},
+			{
+				displayName: 'Is Amount Discount',
+				name: 'isAmountDiscount',
+				type: 'boolean',
+				default: false,
+			},
+			{
+				displayName: 'Tax Name 1',
+				name: 'taxName1',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Tax Name 2',
+				name: 'taxName2',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Tax Name 3',
+				name: 'taxName3',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Tax Rate 1',
+				name: 'taxRate1',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'Tax Rate 2',
+				name: 'taxRate2',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'Tax Rate 3',
+				name: 'taxRate3',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'Exchange Rate',
+				name: 'exchangeRate',
+				type: 'number',
+				default: 0,
+			},
+			{
+				displayName: 'Currency Name or ID',
+				name: 'currencyId',
+				type: 'options',
+				description:
+					'Choose from the list, or specify an ID using an <a href="https://docs.n8n.io/code-examples/expressions/">expression</a>',
+				typeOptions: {
+					loadOptionsMethod: 'getCurrenciesV5',
+				},
+				default: '',
+			},
+			{
+				displayName: 'Private Notes',
+				name: 'privateNotes',
+				type: 'string',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+				},
+				default: '',
+			},
+			{
+				displayName: 'Public Notes',
+				name: 'publicNotes',
+				type: 'string',
+				typeOptions: {
+					alwaysOpenEditWindow: true,
+				},
+				default: '',
+			},
+			{
+				displayName: 'Custom Value 1',
+				name: 'customValue1',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Custom Value 2',
+				name: 'customValue2',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Custom Value 3',
+				name: 'customValue3',
+				type: 'string',
+				default: '',
+			},
+			{
+				displayName: 'Custom Value 4',
+				name: 'customValue4',
+				type: 'string',
+				default: '',
+			},
+		],
+	},
+	/* -------------------------------------------------------------------------- */
+	/*                                 purchaseOrder:delete                       */
+	/* -------------------------------------------------------------------------- */
+	{
+		displayName: 'Purchase Order ID',
+		name: 'purchaseOrderId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['delete'],
+			},
+		},
+	},
+	/* -------------------------------------------------------------------------- */
+	/*                                  purchaseOrder:action                      */
+	/* -------------------------------------------------------------------------- */
+	{
+		displayName: 'Purchase Order ID',
+		name: 'purchaseOrderId',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['action'],
+			},
+		},
+	},
+	{
+		displayName: 'Action',
+		name: 'action',
+		type: 'options',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchaseOrder'],
+				operation: ['action'],
+			},
+		},
+		options: [
+			{
+				name: 'Add to Inventory',
+				value: 'add_to_inventory',
+				action: 'Add to Inventory a purchase order',
+			},
+			{
+				name: 'Archive',
+				value: 'archive',
+				action: 'Archive a purchase order',
+			},
+			{
+				name: 'Cancel',
+				value: 'cancel',
+				action: 'Cancel a purchase order',
+			},
+			{
+				name: 'Expense',
+				value: 'expense',
+				action: 'Expense a purchase order',
+			},
+			{
+				name: 'Mark Sent',
+				value: 'mark_sent',
+				action: 'Mark Sent a purchase order',
+			},
+			{
+				name: 'Restore',
+				value: 'restore',
+				action: 'Restore a purchase order',
+			},
+			{
+				name: 'Send Email',
+				value: 'email',
+				action: 'Send an email',
+			},
+		],
+	},
+	{
+		displayName: 'Subject',
+		name: 'customEmailSubject',
+		description:
+			'Use HTML with variables within this input. see: <a href="https://invoiceninja.github.io/docs/custom-fields/#custom-fields">https://invoiceninja.github.io/docs/custom-fields/#custom-fields</a>.',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchase_order'],
+				operation: ['action'],
+				action: ['custom_email'],
+			},
+		},
+	},
+	{
+		displayName: 'Body',
+		name: 'customEmailBody',
+		description:
+			'Use HTML with variables within this input. see: <a href="https://invoiceninja.github.io/docs/custom-fields/#custom-fields">https://invoiceninja.github.io/docs/custom-fields/#custom-fields</a>.',
+		type: 'string',
+		default: '',
+		required: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchase_order'],
+				operation: ['action'],
+				action: ['custom_email'],
+			},
+		},
+	},
+	{
+		displayName: 'Template',
+		name: 'customEmailTemplate',
+		description:
+			'Use HTML with variables within this input. see: <a href="https://invoiceninja.github.io/docs/custom-fields/#custom-fields">https://invoiceninja.github.io/docs/custom-fields/#custom-fields</a>.',
+		type: 'options',
+		default: 'email_template_purchase_order',
+		required: true,
+		displayOptions: {
+			show: {
+				apiVersion: ['v5'],
+				resource: ['purchase_order'],
+				operation: ['action'],
+				action: ['custom_email'],
+			},
+		},
+		options: [
+			{
+				name: 'Initial',
+				value: 'email_template_purchase_order',
+			},
+			{
+				name: 'Custom 1',
+				value: 'email_template_custom1',
+			},
+		],
+	},
+];

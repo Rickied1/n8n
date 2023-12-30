@@ -1,29 +1,20 @@
-import { VersionedNodeType, INodeTypeBaseDescription, IVersionedNodeType } from 'n8n-workflow';
+import type {
+	IExecuteFunctions,
+	IDataObject,
+	ILoadOptionsFunctions,
+	INodeExecutionData,
+	INodePropertyOptions,
+	INodeType,
+	INodeTypeBaseDescription,
+	INodeTypeDescription,
+} from 'n8n-workflow';
 
-import { InvoiceNinjaV1u2 } from './V1u2/InvoiceNinjaV1u2.node';
-import { InvoiceNinjaV3 } from './V3/InvoiceNinjaV3.node';
+import { invoiceNinjaApiRequest, invoiceNinjaApiRequestAllItems } from './GenericFunctions';
 
-export class InvoiceNinja extends VersionedNodeType {
-	constructor() {
-		const baseDescription: INodeTypeBaseDescription = {
-			displayName: 'Invoice Ninja',
-			name: 'invoiceNinja',
-			icon: 'file:invoiceNinja.svg',
-			group: ['output'],
-			subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-			description: 'Consume Invoice Ninja API',
-			defaultVersion: 3,
-		};
+import { clientFields, clientOperations } from './ClientDescription';
 
-		const nodeVersions: IVersionedNodeType['nodeVersions'] = {
-			1: new InvoiceNinjaV1u2(baseDescription),
-			2: new InvoiceNinjaV1u2(baseDescription),
-			3: new InvoiceNinjaV3(baseDescription),
-		};
+import { invoiceFields, invoiceOperations } from './InvoiceDescription';
 
-<<<<<<< HEAD
-		super(nodeVersions, baseDescription);
-=======
 import type { IClient, IContact } from './ClientInterface';
 
 import { countryCodes } from './ISOCountryCodes';
@@ -46,118 +37,130 @@ import { quoteFields, quoteOperations } from './QuoteDescription';
 
 import type { IQuote } from './QuoteInterface';
 
-export class InvoiceNinja implements INodeType {
-	description: INodeTypeDescription = {
-		displayName: 'Invoice Ninja',
-		name: 'invoiceNinja',
-		icon: 'file:invoiceNinja.svg',
-		group: ['output'],
-		version: [1, 2],
-		subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
-		description: 'Consume Invoice Ninja API',
-		defaults: {
-			name: 'Invoice Ninja',
-		},
-		inputs: ['main'],
-		outputs: ['main'],
-		credentials: [
-			{
-				name: 'invoiceNinjaApi',
-				required: true,
+export class InvoiceNinjaV1u2 implements INodeType {
+	description: INodeTypeDescription;
+
+	constructor(baseDescription: INodeTypeBaseDescription) {
+		this.description = {
+			...baseDescription,
+			subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+			version: [1, 2],
+			defaults: {
+				name: 'Invoice Ninja',
 			},
-		],
-		properties: [
-			{
-				displayName: 'API Version',
-				name: 'apiVersion',
-				type: 'options',
-				isNodeSetting: true,
-				displayOptions: {
-					show: {
-						'@version': [1],
-					},
+			inputs: ['main'],
+			outputs: ['main'],
+			credentials: [
+				{
+					name: 'invoiceNinjaApi',
+					required: true,
 				},
-				options: [
-					{
-						name: 'Version 4',
-						value: 'v4',
+			],
+			properties: [
+				{
+					displayName:
+						'<strong>You are using V4 of InvoiceNinja</strong><br />Considder migrating to V5 to have even more resources and operations supported for this node.<br /><br /><a href="https://invoiceninja.com/migrate-to-invoice-ninja-v5/">https://invoiceninja.com/migrate-to-invoice-ninja-v5/</a>',
+					name: 'notice',
+					type: 'notice',
+					displayOptions: {
+						show: {
+							apiVersion: ['v4'],
+						},
 					},
-					{
-						name: 'Version 5',
-						value: 'v5',
-					},
-				],
-				default: 'v4',
-			},
-			{
-				displayName: 'API Version',
-				name: 'apiVersion',
-				type: 'options',
-				isNodeSetting: true,
-				displayOptions: {
-					show: {
-						'@version': [2],
-					},
+					default: '',
 				},
-				options: [
-					{
-						name: 'Version 4',
-						value: 'v4',
+				{
+					displayName: 'API Version',
+					name: 'apiVersion',
+					type: 'options',
+					isNodeSetting: true,
+					displayOptions: {
+						show: {
+							'@version': [1],
+						},
 					},
-					{
-						name: 'Version 5',
-						value: 'v5',
+					options: [
+						{
+							name: 'Version 4',
+							value: 'v4',
+						},
+						{
+							name: 'Version 5',
+							value: 'v5',
+						},
+					],
+					default: 'v4',
+				},
+				{
+					displayName: 'API Version',
+					name: 'apiVersion',
+					type: 'options',
+					isNodeSetting: true,
+					displayOptions: {
+						show: {
+							'@version': [2],
+						},
 					},
-				],
-				default: 'v5',
-			},
-			{
-				displayName: 'Resource',
-				name: 'resource',
-				type: 'options',
-				noDataExpression: true,
-				options: [
-					{
-						name: 'Client',
-						value: 'client',
-					},
-					{
-						name: 'Expense',
-						value: 'expense',
-					},
-					{
-						name: 'Invoice',
-						value: 'invoice',
-					},
-					{
-						name: 'Payment',
-						value: 'payment',
-					},
-					{
-						name: 'Quote',
-						value: 'quote',
-					},
-					{
-						name: 'Task',
-						value: 'task',
-					},
-				],
-				default: 'client',
-			},
-			...clientOperations,
-			...clientFields,
-			...invoiceOperations,
-			...invoiceFields,
-			...taskOperations,
-			...taskFields,
-			...paymentOperations,
-			...paymentFields,
-			...expenseOperations,
-			...expenseFields,
-			...quoteOperations,
-			...quoteFields,
-		],
-	};
+					options: [
+						{
+							name: 'Version 4',
+							value: 'v4',
+						},
+						{
+							name: 'Version 5',
+							value: 'v5',
+						},
+					],
+					default: 'v5',
+				},
+				{
+					displayName: 'Resource',
+					name: 'resource',
+					type: 'options',
+					noDataExpression: true,
+					options: [
+						{
+							name: 'Client',
+							value: 'client',
+						},
+						{
+							name: 'Expense',
+							value: 'expense',
+						},
+						{
+							name: 'Invoice',
+							value: 'invoice',
+						},
+						{
+							name: 'Payment',
+							value: 'payment',
+						},
+						{
+							name: 'Quote',
+							value: 'quote',
+						},
+						{
+							name: 'Task',
+							value: 'task',
+						},
+					],
+					default: 'client',
+				},
+				...clientOperations,
+				...clientFields,
+				...invoiceOperations,
+				...invoiceFields,
+				...taskOperations,
+				...taskFields,
+				...paymentOperations,
+				...paymentFields,
+				...expenseOperations,
+				...expenseFields,
+				...quoteOperations,
+				...quoteFields,
+			],
+		};
+	}
 
 	methods = {
 		loadOptions: {
@@ -1033,7 +1036,6 @@ export class InvoiceNinja implements INodeType {
 			}
 		}
 
-		return [returnData];
->>>>>>> 7b49cf2a2c750d685af6cff464401f38482dac5a
+		return this.prepareOutputData(returnData);
 	}
 }

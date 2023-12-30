@@ -1,223 +1,26 @@
-import type {
-	IHookFunctions,
-	IWebhookFunctions,
-	INodeType,
-	INodeTypeDescription,
-	IWebhookResponseData,
-} from 'n8n-workflow';
+import { VersionedNodeType, INodeTypeBaseDescription, IVersionedNodeType } from 'n8n-workflow';
 
-import {
-	eventID,
-	invoiceNinjaApiRequest,
-	invoiceNinjaApiRequestAllItems,
-} from './GenericFunctions';
+import { InvoiceNinjaTriggerV1u2 } from './V1u2/InvoiceNinjaTriggerV1u2.node';
+import { InvoiceNinjaTriggerV3 } from './V3/InvoiceNinjaTriggerV3.node';
 
-export class InvoiceNinjaTrigger implements INodeType {
-	description: INodeTypeDescription = {
-		displayName: 'Invoice Ninja Trigger',
-		name: 'invoiceNinjaTrigger',
-		icon: 'file:invoiceNinja.svg',
-		group: ['trigger'],
-		version: [1, 2],
-		description: 'Starts the workflow when Invoice Ninja events occur',
-		defaults: {
-			name: 'Invoice Ninja Trigger',
-		},
-		inputs: [],
-		outputs: ['main'],
-		credentials: [
-			{
-				name: 'invoiceNinjaApi',
-				required: true,
-			},
-		],
-		webhooks: [
-			{
-				name: 'default',
-				httpMethod: 'POST',
-				responseMode: 'onReceived',
-				path: 'webhook',
-			},
-		],
-		properties: [
-			{
-				displayName: 'API Version',
-				name: 'apiVersion',
-				type: 'options',
-				isNodeSetting: true,
-				displayOptions: {
-					show: {
-						'@version': [1],
-					},
-				},
-				options: [
-					{
-						name: 'Version 4',
-						value: 'v4',
-					},
-					{
-						name: 'Version 5',
-						value: 'v5',
-					},
-				],
-				default: 'v4',
-			},
-			{
-				displayName: 'API Version',
-				name: 'apiVersion',
-				type: 'options',
-				isNodeSetting: true,
-				displayOptions: {
-					show: {
-						'@version': [2],
-					},
-				},
-				options: [
-					{
-						name: 'Version 4',
-						value: 'v4',
-					},
-					{
-						name: 'Version 5',
-						value: 'v5',
-					},
-				],
-				default: 'v5',
-			},
-			{
-				displayName: 'Event',
-				name: 'event',
-				type: 'options',
-				options: [
-					{
-						name: 'Client Created',
-						value: 'create_client',
-					},
-					{
-						name: 'Invoice Created',
-						value: 'create_invoice',
-					},
-					{
-						name: 'Payment Created',
-						value: 'create_payment',
-					},
-					{
-						name: 'Quote Created',
-						value: 'create_quote',
-					},
-					{
-						name: 'Vendor Created',
-						value: 'create_vendor',
-					},
-				],
-				default: '',
-				required: true,
-			},
-		],
-	};
-
-	webhookMethods = {
-		default: {
-			async checkExists(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData('node');
-				const webhookUrl = this.getNodeWebhookUrl('default') as string;
-				const event = this.getNodeParameter('event') as string;
-				const apiVersion = this.getNodeParameter('apiVersion', 0) as string;
-
-				if (webhookData.webhookId === undefined) {
-					return false;
-				}
-
-				if (apiVersion === 'v5') {
-					const registeredWebhooks = await invoiceNinjaApiRequestAllItems.call(
-						this,
-						'data',
-						'GET',
-						'/webhooks',
-					);
-
-					for (const webhook of registeredWebhooks) {
-						if (
-							webhook.target_url === webhookUrl &&
-							webhook.is_deleted === false &&
-							webhook.event_id === eventID[event]
-						) {
-							webhookData.webhookId = webhook.id;
-							return true;
-						}
-					}
-				}
-
-				return false;
-			},
-			async create(this: IHookFunctions): Promise<boolean> {
-				const webhookUrl = this.getNodeWebhookUrl('default');
-				const webhookData = this.getWorkflowStaticData('node');
-				const event = this.getNodeParameter('event') as string;
-				const apiVersion = this.getNodeParameter('apiVersion', 0) as string;
-
-				let responseData;
-
-				if (apiVersion === 'v4') {
-					const endpoint = '/hooks';
-
-					const body = {
-						target_url: webhookUrl,
-						event,
-					};
-
-					responseData = await invoiceNinjaApiRequest.call(this, 'POST', endpoint, body);
-					webhookData.webhookId = responseData.id as string;
-				}
-
-				if (apiVersion === 'v5') {
-					const endpoint = '/webhooks';
-
-					const body = {
-						target_url: webhookUrl,
-						event_id: eventID[event],
-					};
-
-					responseData = await invoiceNinjaApiRequest.call(this, 'POST', endpoint, body);
-					webhookData.webhookId = responseData.data.id as string;
-				}
-
-				if (webhookData.webhookId === undefined) {
-					// Required data is missing so was not successful
-					return false;
-				}
-
-				return true;
-			},
-			async delete(this: IHookFunctions): Promise<boolean> {
-				const webhookData = this.getWorkflowStaticData('node');
-
-				const apiVersion = this.getNodeParameter('apiVersion', 0) as string;
-				const hooksEndpoint = apiVersion === 'v4' ? '/hooks' : '/webhooks';
-
-				if (webhookData.webhookId !== undefined) {
-					const endpoint = `${hooksEndpoint}/${webhookData.webhookId}`;
-
-					try {
-						await invoiceNinjaApiRequest.call(this, 'DELETE', endpoint);
-					} catch (error) {
-						return false;
-					}
-
-					// Remove from the static workflow data so that it is clear
-					// that no webhooks are registered anymore
-					delete webhookData.webhookId;
-				}
-
-				return true;
-			},
-		},
-	};
-
-	async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
-		const bodyData = this.getBodyData();
-		return {
-			workflowData: [this.helpers.returnJsonArray(bodyData)],
+export class InvoiceNinjaTrigger extends VersionedNodeType {
+	constructor() {
+		const baseDescription: INodeTypeBaseDescription = {
+			displayName: 'Invoice Ninja Trigger',
+			name: 'invoiceNinjaTrigger',
+			icon: 'file:invoiceNinja.svg',
+			group: ['trigger'],
+			subtitle: '={{$parameter["operation"] + ": " + $parameter["resource"]}}',
+			description: 'Consume Invoice Ninja API',
+			defaultVersion: 3,
 		};
+
+		const nodeVersions: IVersionedNodeType['nodeVersions'] = {
+			1: new InvoiceNinjaTriggerV1u2(baseDescription),
+			2: new InvoiceNinjaTriggerV1u2(baseDescription),
+			3: new InvoiceNinjaTriggerV3(baseDescription),
+		};
+
+		super(nodeVersions, baseDescription);
 	}
 }
