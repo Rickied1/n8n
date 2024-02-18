@@ -13,6 +13,8 @@ import { googleApiRequest, googleApiRequestAllItems } from './GenericFunctions';
 
 import { userFields, userOperations } from './UserDescription';
 
+import { deviceFields, deviceOperations } from './DeviceDescription';
+
 import { groupFields, groupOperations } from './GroupDescripion';
 
 export class GSuiteAdmin implements INodeType {
@@ -51,6 +53,10 @@ export class GSuiteAdmin implements INodeType {
 						name: 'User',
 						value: 'user',
 					},
+					{
+						name: 'Device',
+						value: 'device',
+					},
 				],
 				default: 'user',
 			},
@@ -58,6 +64,8 @@ export class GSuiteAdmin implements INodeType {
 			...groupFields,
 			...userOperations,
 			...userFields,
+			...deviceOperations,
+			...deviceFields,
 		],
 	};
 
@@ -99,6 +107,22 @@ export class GSuiteAdmin implements INodeType {
 					returnData.push({
 						name: schemaName,
 						value: schemaId,
+					});
+				}
+				return returnData;
+			},
+			async getOrgUnits(this: ILoadOptionsFunctions): Promise<INodePropertyOptions[]> {
+				const returnData: INodePropertyOptions[] = [];
+				const orgUnits = await googleApiRequest.call(
+					this,
+					'GET',
+					'/directory/v1/customer/my_customer/orgunits?orgUnitPath=/&type=all',
+				);
+				for (const orgUnit of orgUnits.organizationUnits) {
+					const orgUnitName = orgUnit.orgUnitPath;
+					returnData.push({
+						name: orgUnitName,
+						value: orgUnitName,
 					});
 				}
 				return returnData;
@@ -411,6 +435,83 @@ export class GSuiteAdmin implements INodeType {
 						'PUT',
 						`/directory/v1/users/${userId}`,
 						body,
+						qs,
+					);
+				}
+			}
+
+			if (resource === 'device') {
+				//https://developers.google.com/admin-sdk/directory/v1/customer/my_customer/devices/chromeos/uuid
+				if (operation === 'get') {
+					const uuid = this.getNodeParameter('uuid', i) as string;
+					const projection = this.getNodeParameter('projection', 1);
+					responseData = await googleApiRequest.call(
+						this,
+						'GET',
+						`/directory/v1/customer/my_customer/devices/chromeos/${uuid}?projection=${projection}`,
+						{},
+					);
+				}
+
+				//https://developers.google.com/admin-sdk/directory/v1/customer/my_customer/devices/chromeos/
+				if (operation === 'getAll') {
+					const returnAll = this.getNodeParameter('returnAll', i);
+					const projection = this.getNodeParameter('projection', 1);
+
+					const options = this.getNodeParameter('options', 2);
+
+					qs.projection = projection;
+					Object.assign(qs, options);
+
+					if (qs.customer === undefined) {
+						qs.customer = 'my_customer';
+					}
+
+					if (returnAll) {
+						responseData = await googleApiRequestAllItems.call(
+							this,
+							'chromeosdevices',
+							'GET',
+							`/directory/v1/customer/${qs.customer}/devices/chromeos/`,
+							{},
+							qs,
+						);
+					} else {
+						qs.maxResults = this.getNodeParameter('limit', i);
+
+						responseData = await googleApiRequest.call(
+							this,
+							'GET',
+							`/directory/v1/customer/${qs.customer}/devices/chromeos/`,
+							{},
+							qs,
+						);
+					}
+				}
+
+				if (operation === 'update') {
+					const uuid = this.getNodeParameter('uuid', i) as string;
+					const projection = this.getNodeParameter('projection', 1);
+					const updateOptions = this.getNodeParameter('updateOptions', 1);
+
+					Object.assign(qs, updateOptions);
+					responseData = await googleApiRequest.call(
+						this,
+						'PUT',
+						`/directory/v1/customer/my_customer/devices/chromeos/${uuid}?projection=${projection}`,
+						qs,
+					);
+				}
+
+				if (operation === 'changeStatus') {
+					const uuid = this.getNodeParameter('uuid', i) as string;
+					const action = this.getNodeParameter('action', 1);
+
+					qs.action = action;
+					responseData = await googleApiRequest.call(
+						this,
+						'POST',
+						`/directory/v1/customer/my_customer/devices/chromeos/${uuid}/action`,
 						qs,
 					);
 				}
