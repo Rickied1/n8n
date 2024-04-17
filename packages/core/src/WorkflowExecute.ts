@@ -1296,6 +1296,7 @@ export class WorkflowExecute {
 						startTime,
 						executionTime: new Date().getTime() - startTime,
 						source: !executionData.source ? [] : executionData.source.main,
+						metadata: executionData.metadata,
 						executionStatus: 'success',
 					};
 

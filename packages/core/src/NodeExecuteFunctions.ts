@@ -31,6 +31,7 @@ import { access as fsAccess, writeFile as fsWriteFile } from 'fs/promises';
 import { IncomingMessage, type IncomingHttpHeaders } from 'http';
 import { Agent, type AgentOptions } from 'https';
 import get from 'lodash/get';
+import set from 'lodash/set';
 import isEmpty from 'lodash/isEmpty';
 import pick from 'lodash/pick';
 import { DateTime } from 'luxon';
@@ -41,6 +42,7 @@ import type {
 	ConnectionTypes,
 	ContextType,
 	EventNamesAiNodesType,
+	ExecuteWorkflowData,
 	FieldType,
 	FileSystemHelperFunctions,
 	FunctionsBase,
@@ -82,6 +84,7 @@ import type {
 	ISourceData,
 	ITaskData,
 	ITaskDataConnections,
+	ITaskMetadata,
 	ITriggerFunctions,
 	IWebhookData,
 	IWebhookDescription,
@@ -2513,6 +2516,7 @@ const addExecutionDataFunctions = async (
 	sourceNodeName: string,
 	sourceNodeRunIndex: number,
 	currentNodeRunIndex: number,
+	metadata?: ITaskMetadata,
 ): Promise<void> => {
 	if (connectionType === 'main') {
 		throw new ApplicationError('Setting type is not supported for main connection', {
@@ -2538,6 +2542,7 @@ const addExecutionDataFunctions = async (
 		if (taskData === undefined) {
 			return;
 		}
+		taskData.metadata = metadata;
 	}
 	taskData = taskData!;
 
@@ -3441,6 +3446,13 @@ export function getExecuteTriggerFunctions(
 	})(workflow, node);
 }
 
+function setMetadata(executeData: IExecuteData, key: string, value: string) {
+	if (!executeData.metadata) {
+		executeData.metadata = {};
+	}
+	set(executeData.metadata, key, value);
+}
+
 /**
  * Returns the execute functions regular nodes have access to.
  */
@@ -3476,6 +3488,9 @@ export function getExecuteFunctions(
 					itemIndex,
 				),
 			getExecuteData: () => executeData,
+			setMetadata: (key: string, value: string): void => {
+				return setMetadata(executeData, key, value);
+			},
 			continueOnFail: () => continueOnFail(node),
 			evaluateExpression: (expression: string, itemIndex: number) => {
 				return workflow.expression.resolveSimpleParameterValue(
@@ -3495,23 +3510,28 @@ export function getExecuteFunctions(
 				workflowInfo: IExecuteWorkflowInfo,
 				inputData?: INodeExecutionData[],
 				parentCallbackManager?: CallbackManager,
-			): Promise<any> {
+				options?: {
+					doNotWaitToFinish?: boolean;
+					startMetadata?: ITaskMetadata;
+				},
+			): Promise<ExecuteWorkflowData> {
 				return await additionalData
 					.executeWorkflow(workflowInfo, additionalData, {
+						...options,
 						parentWorkflowId: workflow.id?.toString(),
 						inputData,
 						parentWorkflowSettings: workflow.settings,
 						node,
 						parentCallbackManager,
 					})
-					.then(
-						async (result) =>
-							await Container.get(BinaryDataService).duplicateBinaryData(
-								workflow.id,
-								additionalData.executionId!,
-								result,
-							),
-					);
+					.then(async (result) => {
+						const data = await Container.get(BinaryDataService).duplicateBinaryData(
+							workflow.id,
+							additionalData.executionId!,
+							result.data,
+						);
+						return { ...result, data };
+					});
 			},
 			getContext(type: ContextType): IContextObject {
 				return NodeHelpers.getContext(runExecutionData, type, node);
@@ -3683,6 +3703,7 @@ export function getExecuteFunctions(
 				connectionType: ConnectionTypes,
 				currentNodeRunIndex: number,
 				data: INodeExecutionData[][] | ExecutionBaseError,
+				metadata?: ITaskMetadata,
 			): void {
 				addExecutionDataFunctions(
 					'output',
@@ -3694,6 +3715,7 @@ export function getExecuteFunctions(
 					node.name,
 					runIndex,
 					currentNodeRunIndex,
+					metadata,
 				).catch((error) => {
 					Logger.warn(
 						`There was a problem logging output data of node "${this.getNode().name}": ${
@@ -3858,6 +3880,9 @@ export function getExecuteSingleFunctions(
 					executeData,
 				);
 				return dataProxy.getDataProxy();
+			},
+			setMetadata: (key: string, value: string): void => {
+				return setMetadata(executeData, key, value);
 			},
 			helpers: {
 				createDeferredPromise,

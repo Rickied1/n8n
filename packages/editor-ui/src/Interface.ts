@@ -185,6 +185,7 @@ export interface IAiDataContent {
 	metadata: {
 		executionTime: number;
 		startTime: number;
+		executionId?: string;
 	};
 }
 
