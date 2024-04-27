@@ -43,21 +43,77 @@
 					}}</n8n-link>
 				</n8n-input-label>
 			</div>
+
 			<div v-if="isMfaFeatureEnabled">
-				<div class="mb-xs">
-					<n8n-input-label :label="$locale.baseText('settings.personal.mfa.section.title')" />
-					<n8n-text :bold="false" :class="$style.infoText">
-						{{
-							mfaDisabled
-								? $locale.baseText('settings.personal.mfa.button.disabled.infobox')
-								: $locale.baseText('settings.personal.mfa.button.enabled.infobox')
-						}}
-						<n8n-link :to="mfaDocsUrl" size="small" :bold="true">
-							{{ $locale.baseText('generic.learnMore') }}
-						</n8n-link>
-					</n8n-text>
+				<n8n-input-label :label="$locale.baseText('settings.personal.mfa.section.title')" />
+
+				<div :class="$style.mfa">
+					<n8n-card>
+						<template #prepend><n8n-icon icon="mobile" size="large" /></template>
+						<template #header>
+							<div :class="$style.headerpapa">
+								<n8n-text bold="true">Authenticator app</n8n-text>
+								<n8n-badge theme="primary">configured</n8n-badge>
+							</div>
+						</template>
+						<n8n-text color="text-light" size="xsmall" class="mt-2xs mb-2xs">
+							Use an authentication app or browser extension to get two-factor authentication codes
+							when prompted.
+						</n8n-text>
+						<template #append>
+							<n8n-action-toggle
+								:actions="{
+									0: { label: 'Disable', value: 'disable' },
+									1: { label: 'Configure', value: 'configure' },
+									2: { label: 'Set as default', value: 'default' },
+									3: { label: 'Enabled', value: 'enable' },
+								}"
+								@action="(action: string) => onActionDropdownClick('totp', action)"
+						/></template>
+					</n8n-card>
+					<n8n-card>
+						<template #prepend><n8n-icon icon="user-shield" size="large" /></template>
+						<template #header>
+							<div :class="$style.headerpapa">
+								<n8n-text bold="true">Security keys</n8n-text>
+								<n8n-badge v-if="securityKeys.length > 0" theme="primary">configured</n8n-badge>
+								<n8n-badge v-if="securityKeys.length > 0" theme="secondary"
+									>{{ securityKeys.length }} keys</n8n-badge
+								>
+							</div>
+						</template>
+						<n8n-text color="text-light" size="xsmall" class="mt-2xs mb-2xs">
+							Security keys are hardware devices that can be used as your second factor of
+							authentication.
+						</n8n-text>
+						<template #append>
+							<n8n-action-toggle
+								:actions="{
+									0: { label: 'Edit', value: 'edit' },
+									1: { label: 'Set as default', value: 'default' },
+									2: { label: 'Register security key', value: 'register' },
+								}"
+								@action="(action: string) => onActionDropdownClick('securityKeys', action)"
+						/></template>
+					</n8n-card>
 				</div>
-				<n8n-button
+				<!-- <div :class="$style.list">
+					<div :class="$style.listItem">
+						<n8n-icon icon="mobile" size="xsmall" class="mr-5xs" />
+						<div :class="$style.listItemDescription">
+							<n8n-text bold="true">Authenticator app</n8n-text>
+							<p>
+								Use an authentication app or browser extension to get two-factor authentication
+								codes when prompted.
+							</p>
+						</div>
+					</div>
+					<div :class="$style.listItem">
+						<div>Security keys</div>
+					</div>
+				</div> -->
+
+				<!-- <n8n-button
 					v-if="mfaDisabled"
 					:class="$style.button"
 					type="tertiary"
@@ -72,7 +128,7 @@
 					:label="$locale.baseText('settings.personal.mfa.button.disabled')"
 					data-test-id="disable-mfa-button"
 					@click="onMfaDisableClick"
-				/>
+				/> -->
 			</div>
 		</div>
 		<div>
@@ -119,7 +175,12 @@
 import { useI18n } from '@/composables/useI18n';
 import { useToast } from '@/composables/useToast';
 import type { IFormInputs, IUser, ThemeOption } from '@/Interface';
-import { CHANGE_PASSWORD_MODAL_KEY, MFA_DOCS_URL, MFA_SETUP_MODAL_KEY } from '@/constants';
+import {
+	CHANGE_PASSWORD_MODAL_KEY,
+	MFA_DOCS_URL,
+	MFA_SETUP_MODAL_KEY,
+	SECURITY_KEYS_MODAL_KEY,
+} from '@/constants';
 import { useUIStore } from '@/stores/ui.store';
 import { useUsersStore } from '@/stores/users.store';
 import { useSettingsStore } from '@/stores/settings.store';
@@ -139,6 +200,7 @@ export default defineComponent({
 	},
 	data() {
 		return {
+			securityKeys: [] as Array<{ id: string; label: string }>,
 			hasAnyChanges: false,
 			formInputs: null as null | IFormInputs,
 			formBus: createEventBus(),
@@ -160,7 +222,7 @@ export default defineComponent({
 			] as Array<{ name: ThemeOption; label: string }>,
 		};
 	},
-	mounted() {
+	async mounted() {
 		this.formInputs = [
 			{
 				name: 'firstName',
@@ -200,6 +262,8 @@ export default defineComponent({
 				},
 			},
 		];
+
+		this.securityKeys = await this.usersStore.getSecurityKeys();
 	},
 	computed: {
 		...mapStores(useUIStore, useUsersStore, useSettingsStore),
@@ -230,6 +294,30 @@ export default defineComponent({
 	methods: {
 		selectTheme(theme: ThemeOption) {
 			this.uiStore.setTheme(theme);
+		},
+		async onActionDropdownClick(method: string, action: string) {
+			console.log(method, action);
+			if (method === 'totp') {
+				if (action === 'disable') {
+					this.onMfaDisableClick();
+				} else if (action === 'enable') {
+					this.onMfaEnableClick();
+				}
+			} else if (method === 'securityKeys') {
+				switch (action) {
+					// case 'register':
+					// 	const registrationOptions = await this.usersStore.getChallenge();
+					// 	const registration = await startRegistration(registrationOptions);
+					// 	await this.usersStore.registerDevice(registration);
+					// 	break;
+					case 'edit':
+						this.uiStore.openModal(SECURITY_KEYS_MODAL_KEY);
+						break;
+					case 'default':
+						this.uiStore.openModal(SECURITY_KEYS_MODAL_KEY);
+						break;
+				}
+			}
 		},
 		onInput() {
 			this.hasAnyChanges = true;
@@ -288,6 +376,33 @@ export default defineComponent({
 </script>
 
 <style lang="scss" module>
+.headerpapa {
+	display: flex;
+	gap: 5px;
+}
+
+.list {
+	display: flex;
+	flex-direction: column;
+}
+
+.listItem {
+	display: flex;
+	flex-direction: row;
+	// background-color: white;
+}
+
+.mfa {
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+}
+
+.listItemDescription {
+	display: flex;
+	flex-direction: column;
+}
+
 .container {
 	> * {
 		margin-bottom: var(--spacing-2xl);

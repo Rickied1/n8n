@@ -30,6 +30,7 @@ import type {
 	IUsersState,
 	CurrentUserResponse,
 	InvitableRoleName,
+	SecurityKey,
 } from '@/Interface';
 import { getCredentialPermissions } from '@/permissions';
 import { getPersonalizedNodeTypes } from '@/utils/userUtils';
@@ -39,7 +40,20 @@ import { usePostHog } from './posthog.store';
 import { useSettingsStore } from './settings.store';
 import { useUIStore } from './ui.store';
 import { useCloudPlanStore } from './cloudPlan.store';
-import { disableMfa, enableMfa, getMfaQR, verifyMfaToken } from '@/api/mfa';
+import {
+	disableMfa,
+	enableMfa,
+	getMfaQR,
+	verifyMfaToken,
+	getChallenge,
+	registerDevice,
+	startAuthentication,
+	verifyAuthentication,
+	getSecurityKeys,
+	deleteSecurityKey,
+	updateSecurityKeyName,
+	updateSecurityKeyLabel,
+} from '@/api/mfa';
 import { confirmEmail, getCloudUserInfo } from '@/api/cloudPlans';
 import { useRBACStore } from '@/stores/rbac.store';
 import type { Scope } from '@n8n/permissions';
@@ -358,6 +372,34 @@ export const useUsersStore = defineStore(STORES.USERS, {
 				currentUser.mfaEnabled = true;
 			}
 		},
+		async getChallenge() {
+			const rootStore = useRootStore();
+			return await getChallenge(rootStore.getRestApiContext);
+		},
+		async registerDevice(data: any) {
+			const rootStore = useRootStore();
+			return await registerDevice(rootStore.getRestApiContext, data);
+		},
+		async getSecurityKeys(): Promise<SecurityKey[]> {
+			const rootStore = useRootStore();
+			return await getSecurityKeys(rootStore.getRestApiContext);
+		},
+		async deleteSecurityKey(id: string) {
+			const rootStore = useRootStore();
+			return await deleteSecurityKey(rootStore.getRestApiContext, id);
+		},
+		async updateSecurityKeyLabel(id: string, name: string) {
+			const rootStore = useRootStore();
+			return await updateSecurityKeyLabel(rootStore.getRestApiContext, id, name);
+		},
+		async verifyAuthentication(data: any) {
+			const rootStore = useRootStore();
+			const user = await verifyAuthentication(rootStore.getRestApiContext, data);
+			console.log(user);
+			if (!user) return;
+			this.setCurrentUser(user);
+			return;
+		},
 		async disabledMfa() {
 			const rootStore = useRootStore();
 			const usersStore = useUsersStore();
@@ -366,6 +408,10 @@ export const useUsersStore = defineStore(STORES.USERS, {
 			if (currentUser) {
 				currentUser.mfaEnabled = false;
 			}
+		},
+		async startAuthentication() {
+			const rootStore = useRootStore();
+			return await startAuthentication(rootStore.getRestApiContext);
 		},
 		async fetchUserCloudAccount() {
 			let cloudUser: Cloud.UserAccount | null = null;
