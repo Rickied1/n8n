@@ -53,6 +53,90 @@ export const debugError = async (
 	);
 };
 
+export const askAssistant = async (
+	context: IRestApiContext,
+	onChunk: (chunk: string) => void,
+): Promise<void> => {
+	const headers = {
+		'Content-Type': 'application/json',
+	};
+	const response = await fetch(`${context.baseUrl}/ai/ai-assistant`, {
+		headers,
+		method: 'POST',
+		credentials: 'include',
+	});
+	if (response.ok && response.body) {
+		// Handle the streaming response
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder('utf-8');
+
+		async function readStream() {
+			const { done, value } = await reader.read();
+			if (done) {
+				// console.log('Stream finished');
+				// waitingForResponse.value = false;
+				return;
+			}
+
+			const chunk = decoder.decode(value);
+			const splitChunks = chunk.split('\n');
+
+			for (const splitChunk of splitChunks) {
+				if (splitChunk) {
+					onChunk(splitChunk);
+				}
+			}
+			await readStream();
+		}
+		// Start reading the stream
+		await readStream();
+	} else {
+		console.error('Error:', response.status);
+	}
+};
+
+export const askPinecone = async (
+	context: IRestApiContext,
+	onChunk: (chunk: string) => void,
+): Promise<void> => {
+	const headers = {
+		'Content-Type': 'application/json',
+	};
+	const response = await fetch(`${context.baseUrl}/ai/ask-pinecone`, {
+		headers,
+		method: 'POST',
+		credentials: 'include',
+	});
+	if (response.ok && response.body) {
+		// Handle the streaming response
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder('utf-8');
+
+		async function readStream() {
+			const { done, value } = await reader.read();
+			if (done) {
+				// console.log('Stream finished');
+				// waitingForResponse.value = false;
+				return;
+			}
+
+			const chunk = decoder.decode(value);
+			const splitChunks = chunk.split('\n');
+
+			for (const splitChunk of splitChunks) {
+				if (splitChunk) {
+					onChunk(splitChunk);
+				}
+			}
+			await readStream();
+		}
+		// Start reading the stream
+		await readStream();
+	} else {
+		console.error('Error:', response.status);
+	}
+};
+
 export const debugChat = async (
 	context: IRestApiContext,
 	payload: DebugChatPayload,

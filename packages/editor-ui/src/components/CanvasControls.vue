@@ -42,6 +42,15 @@
 				@click="zoomOut"
 			/>
 		</KeyboardShortcutTooltip>
+		<KeyboardShortcutTooltip label="Test assistant" :shortcut="{ keys: ['c'] }">
+			<n8n-icon-button
+				type="tertiary"
+				size="large"
+				icon="robot"
+				data-test-id="zoom-out-button"
+				@click="testAssistant"
+			/>
+		</KeyboardShortcutTooltip>
 		<KeyboardShortcutTooltip
 			:label="$locale.baseText('nodeView.resetZoom')"
 			:shortcut="{ keys: ['0'] }"
@@ -63,6 +72,7 @@ import { storeToRefs } from 'pinia';
 import { useCanvasStore } from '@/stores/canvas.store';
 import KeyboardShortcutTooltip from '@/components/KeyboardShortcutTooltip.vue';
 import { useDeviceSupport } from 'n8n-design-system';
+import { useAIStore } from '@/stores/ai.store';
 
 const canvasStore = useCanvasStore();
 const { zoomToFit, zoomIn, zoomOut, resetZoom } = canvasStore;
@@ -89,12 +99,16 @@ onBeforeMount(() => {
 onBeforeUnmount(() => {
 	document.removeEventListener('keydown', keyDown);
 });
+
+const testAssistant = async () => {
+	// await useAIStore().askAssistant();
+	await useAIStore().askPinecone();
+};
 </script>
 
 <style lang="scss" module>
 .zoomMenu {
 	position: absolute;
-	width: 210px;
 	bottom: var(--spacing-l);
 	left: var(--spacing-l);
 	line-height: 25px;

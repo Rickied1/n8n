@@ -93,7 +93,8 @@ export const useAIStore = defineStore('ai', () => {
 	const isErrorDebuggingEnabled = computed(() => settingsStore.settings.ai.errorDebugging);
 
 	async function debugError(payload: DebugErrorPayload) {
-		return await aiApi.debugError(rootStore.getRestApiContext, payload);
+		// return await aiApi.debugError(rootStore.getRestApiContext, payload);
+		return await aiApi.askAssistant(rootStore.getRestApiContext, payload);
 	}
 	function getLastMessage() {
 		return messages.value[messages.value.length - 1];
@@ -232,6 +233,23 @@ export const useAIStore = defineStore('ai', () => {
 		return await aiApi.debugChat(rootStore.getRestApiContext, payload, onMessageSuggestionReceived);
 	}
 
+	async function onAssistantResponseReceived(messageChunk: string) {
+		if (messageChunk.length === 0) return;
+		if (messageChunk === '__END__') {
+			console.log('End of response', messageChunk);
+		} else {
+			console.log('onAssistantResponseReceived', messageChunk);
+		}
+	}
+
+	async function askAssistant() {
+		await aiApi.askAssistant(rootStore.getRestApiContext, onAssistantResponseReceived);
+	}
+
+	async function askPinecone() {
+		await aiApi.askPinecone(rootStore.getRestApiContext, onMessageReceived);
+	}
+
 	async function startNewDebugSession(error: NodeError) {
 		const currentNode = useNDVStore().activeNode;
 		const workflowNodes = useWorkflowsStore().allNodes;
@@ -283,5 +301,7 @@ export const useAIStore = defineStore('ai', () => {
 		messages,
 		initialMessages,
 		waitingForResponse,
+		askAssistant,
+		askPinecone,
 	};
 });
