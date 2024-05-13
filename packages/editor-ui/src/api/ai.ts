@@ -55,6 +55,7 @@ export const debugError = async (
 
 export const askAssistant = async (
 	context: IRestApiContext,
+	payload: { message?: string; error?: Error },
 	onChunk: (chunk: string) => void,
 ): Promise<void> => {
 	const headers = {
@@ -64,8 +65,10 @@ export const askAssistant = async (
 		headers,
 		method: 'POST',
 		credentials: 'include',
+		body: JSON.stringify(payload),
 	});
 	if (response.ok && response.body) {
+		console.log('Response:', response);
 		// Handle the streaming response
 		const reader = response.body.getReader();
 		const decoder = new TextDecoder('utf-8');
@@ -73,7 +76,7 @@ export const askAssistant = async (
 		async function readStream() {
 			const { done, value } = await reader.read();
 			if (done) {
-				// console.log('Stream finished');
+				console.log('Stream finished');
 				// waitingForResponse.value = false;
 				return;
 			}

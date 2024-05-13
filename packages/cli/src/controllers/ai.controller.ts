@@ -150,6 +150,8 @@ export class AIController {
 	 */
 	@Post('/ai-assistant')
 	async aiAssistant(req: AIRequest.DebugChat, res: express.Response) {
+		const message = req.body.message;
+		const error = req.body.error;
 		// ----------------- model -----------------
 		const model = new ChatOpenAI({
 			temperature: 0,
@@ -227,7 +229,7 @@ export class AIController {
 
 		// ----------------- Conversation -----------------
 		// TODO: How can this be a custom system message?
-		const userMessagePre = `
+		const userMessage = `
 			I need to solve the following problem with n8n.
 			Please use 'get_n8n_info' tool to get information from the official n8n documentation
 			and the 'internet_search' tool to get more info from the internet.
@@ -237,7 +239,7 @@ export class AIController {
 			Always reply with an answer that is actionable and easy to follow for users that are just starting with n8n.
 			It the solution is found using the 'get_n8n_info' tool, include steps to solve the problem by taking them directly from the tool response.
 			If you can't find the answer, just say that you don't know.
-			The problem is:\n
+			The problem is: ${message}
 		`;
 
 		// TODO: Use this to test the memory once it's implemented
@@ -277,14 +279,9 @@ export class AIController {
 		// });
 		// console.log(">> 🤖 <<", result5.output);
 
-		const input6 = userMessagePre + `
-			Webhooks in my workflows are unresponsive.
-			I am running n8n via docker compose on n8n.example.com subdomain. I have cloudflare pointed to proxy traffic to the server and I have nginx set up as a reverse proxy
-			This works and I can access the interface from my browser. Setting a webhook trigger works until I go to test it. Sending a test request doesn’t get registered by n8n and pressing “Stop listening” for test events also does not work.
-			`;
-		console.log("\n>> 🤷 <<", input6.trim());
+		console.log("\n>> 🤷 <<", userMessage.trim());
 		const result6 = await agentExecutor.invoke({
-			input: input6,
+			input: userMessage,
 			verbose: true,
 		});
 		console.log(">> 🤖 <<", result6.output);
@@ -293,6 +290,7 @@ export class AIController {
 		// res.write(`${result2.output}\n`);
 		// res.write(`${result3.output}\n`);
 		// res.write(`${result4.output}\n`);
+		res.write(`${result6.output}\n`);
 		res.end('__END__');
 	}
 

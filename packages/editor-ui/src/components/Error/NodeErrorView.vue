@@ -127,24 +127,12 @@ const prepareRawMessages = computed(() => {
 });
 
 async function onDebugError() {
-	try {
-		isLoadingErrorDebugging.value = true;
-		telemetry.track(
-			'User clicked AI error helper button',
-			{
-				node_type: props.error.node?.type,
-				error_title: props.error.message,
-			},
-			{ withPostHog: true },
-		);
-
-		await aiStore.startNewDebugSession(props.error);
-		// errorDebuggingMessage.value = message;
-	} catch (error) {
-		toast.showError(error, i18n.baseText('generic.error'));
-	} finally {
-		isLoadingErrorDebugging.value = false;
-	}
+	const nodeType = useNodeTypesStore().getNodeType(
+		props.error.node?.type,
+		props.error.node?.typeVersion,
+	);
+	const message = `I am having the following error in my ${nodeType?.displayName ?? props.error.node.type} node: ${props.error.message} ${getErrorDescription()}`;
+	await aiStore.debugWithAssistant(message);
 }
 
 async function onDebugErrorRegenerate() {

@@ -42,15 +42,6 @@
 				@click="zoomOut"
 			/>
 		</KeyboardShortcutTooltip>
-		<KeyboardShortcutTooltip label="Test assistant" :shortcut="{ keys: ['c'] }">
-			<n8n-icon-button
-				type="tertiary"
-				size="large"
-				icon="robot"
-				data-test-id="zoom-out-button"
-				@click="testAssistant"
-			/>
-		</KeyboardShortcutTooltip>
 		<KeyboardShortcutTooltip
 			:label="$locale.baseText('nodeView.resetZoom')"
 			:shortcut="{ keys: ['0'] }"
@@ -100,10 +91,6 @@ onBeforeUnmount(() => {
 	document.removeEventListener('keydown', keyDown);
 });
 
-const testAssistant = async () => {
-	await useAIStore().askAssistant();
-	// await useAIStore().askPinecone();
-};
 </script>
 
 <style lang="scss" module>

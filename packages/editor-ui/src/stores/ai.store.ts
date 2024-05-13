@@ -32,50 +32,11 @@ export const useAIStore = defineStore('ai', () => {
 			type: 'text',
 			sender: 'bot',
 			createdAt: new Date().toISOString(),
-			text: `Hi ${userName.value}! I have a few ideas on what the issue might be. Here's my top suggestion 👇`,
+			text: `Hi ${userName.value}! I am an AI n8n expert here to help you with your n8n workflows! Ask me anything or just paste your error message here and I will help you debug it.`,
 		},
-		// {
-		// 	id: '1',
-		// 	type: 'component',
-		// 	key: 'MessageWithActions',
-		// 	sender: 'bot',
-		// 	createdAt: new Date().toISOString(),
-		// 	arguments: {
-		// 		message: 'Hello, I am a bot. How can I help you?',
-		// 		actions: [
-		// 			{ label: 'Fix issues', action: 'fix_issues' },
-		// 			{ label: 'Generate node', action: 'generate_node' },
-		// 		],
-		// 		onActionSelected({ action, label }: { action: string; label: string }) {
-		// 			// console.log('🚀 ~ onActionSelected ~ action:', action);
-		// 			void sendMessage(label);
-		// 		},
-		// 	},
-		// },
 	]);
 
-	const messages = ref<ChatMessage[]>([
-		{
-			id: '2',
-			type: 'component',
-			key: 'QuickReplies',
-			sender: 'user',
-			createdAt: new Date().toISOString(),
-			transparent: true,
-			arguments: {
-				suggestions: [
-					{ label: 'Give me more suggestions', key: 'get_more' },
-					{ label: 'Ask a question about my node issues', key: 'ask_question' },
-				],
-				onReplySelected: ({ label, key }: { key: string; label: string }) => {
-					messages.value = messages.value.filter(
-						(message) => message.type !== 'component' || message.key !== 'QuickReplies',
-					);
-					void sendMessage(label);
-				},
-			},
-		},
-	]);
+	const messages = ref<ChatMessage[]>([]);
 
 	async function sendMessage(text: string) {
 		messages.value.push({
@@ -87,14 +48,16 @@ export const useAIStore = defineStore('ai', () => {
 
 		chatEventBus.emit('scrollToBottom');
 
-		void debugChat({ error: new Error('Whatever'), text, sessionId: currentSessionId.value });
+		// void debugChat({ error: new Error('Whatever'), text, sessionId: currentSessionId.value });
+		waitingForResponse.value = true;
+		await askAssistant(text);
+		waitingForResponse.value = false;
 	}
 
 	const isErrorDebuggingEnabled = computed(() => settingsStore.settings.ai.errorDebugging);
 
 	async function debugError(payload: DebugErrorPayload) {
-		// return await aiApi.debugError(rootStore.getRestApiContext, payload);
-		return await aiApi.askAssistant(rootStore.getRestApiContext, payload);
+		return await aiApi.debugError(rootStore.getRestApiContext, payload);
 	}
 	function getLastMessage() {
 		return messages.value[messages.value.length - 1];
@@ -233,17 +196,22 @@ export const useAIStore = defineStore('ai', () => {
 		return await aiApi.debugChat(rootStore.getRestApiContext, payload, onMessageSuggestionReceived);
 	}
 
-	async function onAssistantResponseReceived(messageChunk: string) {
-		if (messageChunk.length === 0) return;
-		if (messageChunk === '__END__') {
-			console.log('End of response', messageChunk);
-		} else {
-			console.log('onAssistantResponseReceived', messageChunk);
-		}
+	async function debugWithAssistant(message: string) {
+		chatEventBus.emit('open');
+		messages.value.push({
+			createdAt: new Date().toISOString(),
+			sender: 'user',
+			type: 'text',
+			id: Math.random().toString(),
+			text: message,
+		});
+		waitingForResponse.value = true;
+		await aiApi.askAssistant(rootStore.getRestApiContext, { message }, onMessageReceived);
+		waitingForResponse.value = false;
 	}
 
-	async function askAssistant() {
-		await aiApi.askAssistant(rootStore.getRestApiContext, onAssistantResponseReceived);
+	async function askAssistant(message: string) {
+		await aiApi.askAssistant(rootStore.getRestApiContext, { message }, onMessageReceived);
 	}
 
 	async function askPinecone() {
@@ -303,5 +271,6 @@ export const useAIStore = defineStore('ai', () => {
 		waitingForResponse,
 		askAssistant,
 		askPinecone,
+		debugWithAssistant,
 	};
 });
