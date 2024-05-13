@@ -7,24 +7,18 @@ import express from 'express';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import {
 	ChatPromptTemplate,
-	MessagesPlaceholder,
+	PromptTemplate,
 	SystemMessagePromptTemplate,
 } from '@langchain/core/prompts';
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
-import { RunnableSequence, RunnableWithMessageHistory } from '@langchain/core/runnables';
 import { z } from 'zod';
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 import { DynamicTool } from '@langchain/core/tools';
-import { convertToOpenAIFunction } from '@langchain/core/utils/function_calling';
-import { AgentExecutor, type AgentStep } from 'langchain/agents';
-import { formatToOpenAIFunctionMessages } from "langchain/agents/format_scratchpad";
-import { OpenAIFunctionsAgentOutputParser } from "langchain/agents/openai/output_parser";
-import { AIMessage, BaseMessage, HumanMessage } from '@langchain/core/messages';
+import { AgentExecutor, createReactAgent } from 'langchain/agents';
 import { PineconeStore } from "@langchain/pinecone";
-import { VectorDBQAChain } from "langchain/chains";
-import { ChainTool } from "langchain/tools";
 import { Pinecone } from '@pinecone-database/pinecone';
+import { pull } from "langchain/hub";
 
 const memorySessions = new Map<string, ChatMessageHistory>();
 
@@ -95,6 +89,10 @@ export class AIController {
 	async askPinecone(req: AIRequest.DebugChat, res: express.Response) {
 		const question = 'How to submit new workflows to n8n templates library?';
 		console.log("\n>> 🤷 <<", question);
+		return this.askPineconeChain(question);
+	}
+
+	async askPineconeChain(question: string) {
 		// ----------------- Model -----------------
 		const model = new ChatOpenAI({
 			temperature: 0,
@@ -112,7 +110,7 @@ export class AIController {
 		})
 		// ----------------- Get top chunks matching query -----------------
 		const results = await vectorStore.similaritySearch(question, 3);
-		console.log(">> 🤖 << GOT THESE DOCUMENTS:");
+		console.log(">> 🧰 << GOT THESE DOCUMENTS:");
 		// Prepare chunks
 		let out = ""
 		results.forEach((result, i) => {
@@ -162,7 +160,10 @@ export class AIController {
 		const wordLengthTool = new DynamicTool({
 			name: "get_word_length",
 			description: "Returns the length of a word.",
-			func: async (input: string) => input.length.toString(),
+			func: async (input: string) => {
+				console.log(">> 🧰 << wordLengthTool:", input);
+				return input.length.toString();
+			},
 		});
 
 		const myInfoTool = new DynamicTool({
@@ -175,121 +176,73 @@ export class AIController {
 					age: 30,
 					height: 180,
 				}
+				console.log(">> 🧰 << myInfoTool:", input);
 				return `My first name is ${info.firstName}, my last name is ${info.lastName}, I am ${info.age} years old and I am ${info.height} cm tall.`
 			}
 		});
 
-		const pc = new Pinecone({
-			apiKey: process.env.N8N_AI_PINECONE_API_KEY ?? ''
-		});
-		const index = pc.index('n8n-docs');
-		const vectorStore = await PineconeStore.fromExistingIndex(new OpenAIEmbeddings(), {
-			pineconeIndex: index,
-		})
-		const chain = VectorDBQAChain.fromLLM(model, vectorStore);
-		const n8nDocsTool = new ChainTool({
-			name: "n8n-docs-qa",
-			description:
-				"Useful tool to search for information in the n8n documentation.",
-			chain: chain,
+		const n8nInfoTool = new DynamicTool({
+			name: "get_n8n_info",
+			description: "Returns information about n8n. Use this tool to answer questions and solve problems related to n8n, the workflow automation tool.",
+			func: async (input: string) => {
+				console.log(">> 🧰 << n8nInfoTool:", input);
+				return (await this.askPineconeChain(input)).toString();
+			}
 		});
 
 		const tools = [
 			wordLengthTool,
 			myInfoTool,
-			n8nDocsTool
+			n8nInfoTool
 		];
-
-		const modelWithFunctions = model.bind({
-			functions: tools.map((tool) => convertToOpenAIFunction(tool)),
-		});
 		// ----------------- Agent -----------------
-		const MEMORY_KEY = "chat_history";
-		const chatHistory: BaseMessage[] = [];
-		const memoryPrompt = ChatPromptTemplate.fromMessages([
-			[
-				"system",
-				"You are very powerful assistant, but bad at calculating lengths of words.",
-			],
-			new MessagesPlaceholder(MEMORY_KEY),
-			["user", "{input}"],
-			new MessagesPlaceholder("agent_scratchpad"),
-		]);
+		const prompt = await pull<PromptTemplate>("hwchase17/react");
+		const agent = await createReactAgent({
+			llm: model,
+			tools,
+			prompt,
+		});
 
-		const agentWithMemory = RunnableSequence.from([
-			{
-				input: (i) => i.input,
-				agent_scratchpad: (i) => formatToOpenAIFunctionMessages(i.steps),
-				chat_history: (i) => i.chat_history,
-			},
-			memoryPrompt,
-			modelWithFunctions,
-			new OpenAIFunctionsAgentOutputParser(),
-		]);
-
-		const executorWithMemory = AgentExecutor.fromAgentAndTools({
-			agent: agentWithMemory,
+		const agentExecutor = new AgentExecutor({
+			agent,
 			tools,
 		});
 
 		// ----------------- Conversation -----------------
+		const input1 = "How many letters in the word 'education'?";
+		console.log("\n>> 🤷 <<", input1);
+		const result1 = await agentExecutor.invoke({
+			input: input1,
+		});
+		console.log(">> 🤖 <<", result1.output);
 
-		// const input1 = "How many letters in the word 'education'?";
-		// console.log("\n>> 🤷 <<", input1);
-		// const result1 = await executorWithMemory.invoke({
-		// 	input: input1,
-		// 	chat_history: chatHistory,
-		// });
-
-		// console.log(">> 🤖 <<", result1.output);
-
-		// chatHistory.push(new HumanMessage(input1));
-		// chatHistory.push(new AIMessage(result1.output));
-
-		// const input2 = "Is that a real English word? Answer with just 'yes' or 'no'";
+		// const input2 = "Is that a real English word?";
 		// console.log("\n>> 🤷 <<", input2);
-		// const result2 = await executorWithMemory.invoke({
+		// const result2 = await agentExecutor.invoke({
 		// 	input: input2,
-		// 	chat_history: chatHistory,
 		// });
-
 		// console.log(">> 🤖 <<", result2.output);
 
-		// chatHistory.push(new HumanMessage(input2));
-		// chatHistory.push(new AIMessage(result2.output));
+		const input3 = "Can you tell me my first name, last name and my age?";
+		console.log("\n>> 🤷 <<", input3);
+		const result3 = await agentExecutor.invoke({
+			input: input3,
+		});
+		console.log(">> 🤖 <<", result3.output);
 
-		// const input3 = "Can you tell me my first name, last name and my age?";
-		// console.log("\n>> 🤷 <<", input3);
-		// const result3 = await executorWithMemory.invoke({
-		// 	input: input3,
-		// 	chat_history: chatHistory,
-		// });
+		const input4 = "And how tall am I?";
+		console.log("\n>> 🤷 <<", input4);
+		const result4 = await agentExecutor.invoke({
+			input: input4,
+		});
+		console.log(">> 🤖 <<", result4.output);
 
-		// console.log(">> 🤖 <<", result3.output);
-
-		// chatHistory.push(new HumanMessage(input3));
-		// chatHistory.push(new AIMessage(result3.output));
-
-		// const input4 = "And how tall am I?";
-		// console.log("\n>> 🤷 <<", input4);
-		// const result4 = await executorWithMemory.invoke({
-		// 	input: input4,
-		// 	chat_history: chatHistory,
-		// });
-
-		// console.log(">> 🤖 <<", result4.output);
-
-		// chatHistory.push(new HumanMessage(input4));
-		// chatHistory.push(new AIMessage(result4.output));
-
-		const input5 = "Can you tell me the steps to set up Airtable credentials in n8n?";
+		const input5 = "Can you tell me how to access workflow templates in n8n?";
 		console.log("\n>> 🤷 <<", input5);
-		const result = await executorWithMemory.invoke({
+		const result = await agentExecutor.invoke({
 			input: input5,
-			chat_history: chatHistory,
 		});
 		console.log(">> 🤖 <<", result.output);
-
 
 		// res.write(`${result1.output}\n`);
 		// res.write(`${result2.output}\n`);

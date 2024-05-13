@@ -101,8 +101,8 @@ onBeforeUnmount(() => {
 });
 
 const testAssistant = async () => {
-	// await useAIStore().askAssistant();
-	await useAIStore().askPinecone();
+	await useAIStore().askAssistant();
+	// await useAIStore().askPinecone();
 };
 </script>
 
