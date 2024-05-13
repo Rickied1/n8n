@@ -19,6 +19,8 @@ import { AgentExecutor, createReactAgent } from 'langchain/agents';
 import { PineconeStore } from "@langchain/pinecone";
 import { Pinecone } from '@pinecone-database/pinecone';
 import { pull } from "langchain/hub";
+import { DuckDuckGoSearch } from "@langchain/community/tools/duckduckgo_search";
+import { Calculator } from 'langchain/tools/calculator';
 
 const memorySessions = new Map<string, ChatMessageHistory>();
 
@@ -137,7 +139,7 @@ export class AIController {
 		// ----------------- Chain -----------------
 		const chain = prompt.pipe(model);
 		const response = await chain.invoke({ question });
-		console.log(">> 🤖 << Final answer:\n", response.content);
+		console.log(">> 🧰 << Final answer:\n", response.content);
 		return response.content;
 	}
 
@@ -157,29 +159,30 @@ export class AIController {
 		});
 
 		// ----------------- Tools -----------------
-		const wordLengthTool = new DynamicTool({
-			name: "get_word_length",
-			description: "Returns the length of a word.",
+		// const myInfoTool = new DynamicTool({
+		// 	name: "get_my_info",
+		// 	description: "Returns information about myself (the human).",
+		// 	func: async (input: string) => {
+		// 		const info = {
+		// 			firstName: "Ricardo",
+		// 			lastName: "Espinoza",
+		// 			age: 30,
+		// 			height: 180,
+		// 		}
+		// 		console.log(">> 🧰 << myInfoTool:", input);
+		// 		return `My first name is ${info.firstName}, my last name is ${info.lastName}, I am ${info.age} years old and I am ${info.height} cm tall.`
+		// 	}
+		// });
+		const calculatorTool = new DynamicTool({
+			name: "calculator",
+			description: "Performs arithmetic operations. Use this tool whenever you need to perform calculations.",
 			func: async (input: string) => {
-				console.log(">> 🧰 << wordLengthTool:", input);
-				return input.length.toString();
-			},
-		});
-
-		const myInfoTool = new DynamicTool({
-			name: "get_my_info",
-			description: "Returns information about myself (the human).",
-			func: async (input: string) => {
-				const info = {
-					firstName: "Ricardo",
-					lastName: "Espinoza",
-					age: 30,
-					height: 180,
-				}
-				console.log(">> 🧰 << myInfoTool:", input);
-				return `My first name is ${info.firstName}, my last name is ${info.lastName}, I am ${info.age} years old and I am ${info.height} cm tall.`
+				console.log(">> 🧰 << calculatorTool:", input);
+				const calculator = new Calculator();
+				return await calculator.invoke(input);
 			}
 		});
+
 
 		const n8nInfoTool = new DynamicTool({
 			name: "get_n8n_info",
@@ -190,10 +193,24 @@ export class AIController {
 			}
 		});
 
+		const internetSearchTool = new DynamicTool({
+			name: "internet_search",
+			description: "Searches the n8n community forum for the answer to a question. Use this tool to find answers to questions that are not in the n8n documentation.",
+			func: async (input: string) => {
+				const communityQuery = `${input} site:https://community.n8n.io/`
+				console.log(">> 🧰 << internetSearchTool:", communityQuery);
+				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 3 });
+				const response = await duckDuckGoSearchTool.invoke(communityQuery);
+				console.log(">> 🧰 << duckDuckGoSearchTool:", response);
+				return response;
+			}
+		});
+
 		const tools = [
-			wordLengthTool,
-			myInfoTool,
-			n8nInfoTool
+			// myInfoTool,
+			calculatorTool,
+			n8nInfoTool,
+			internetSearchTool,
 		];
 		// ----------------- Agent -----------------
 		const prompt = await pull<PromptTemplate>("hwchase17/react");
@@ -209,12 +226,27 @@ export class AIController {
 		});
 
 		// ----------------- Conversation -----------------
-		const input1 = "How many letters in the word 'education'?";
-		console.log("\n>> 🤷 <<", input1);
-		const result1 = await agentExecutor.invoke({
-			input: input1,
-		});
-		console.log(">> 🤖 <<", result1.output);
+		// TODO: How can this be a custom system message?
+		const userMessagePre = `
+			I need to solve the following problem with n8n.
+			Please use 'get_n8n_info' tool to get information from the official n8n documentation
+			and the 'internet_search' tool to get more info from the internet.
+			Use the 'calculator' tool to perform any arithmetic operations, if necessary.
+			Use this knowledge to solve my problem.
+			Make sure to prioritize the information from the official n8n documentation by using the final answer from the 'get_n8n_info' tool.
+			Always reply with an answer that is actionable and easy to follow for users that are just starting with n8n.
+			It the solution is found using the 'get_n8n_info' tool, include steps to solve the problem by taking them directly from the tool response.
+			If you can't find the answer, just say that you don't know.
+			The problem is:\n
+		`;
+
+		// TODO: Use this to test the memory once it's implemented
+		// const input1 = "How many letters in the word 'education'?";
+		// console.log("\n>> 🤷 <<", input1);
+		// const result1 = await agentExecutor.invoke({
+		// 	input: input1,
+		// });
+		// console.log(">> 🤖 <<", result1.output);
 
 		// const input2 = "Is that a real English word?";
 		// console.log("\n>> 🤷 <<", input2);
@@ -223,26 +255,39 @@ export class AIController {
 		// });
 		// console.log(">> 🤖 <<", result2.output);
 
-		const input3 = "Can you tell me my first name, last name and my age?";
-		console.log("\n>> 🤷 <<", input3);
-		const result3 = await agentExecutor.invoke({
-			input: input3,
-		});
-		console.log(">> 🤖 <<", result3.output);
+		// const input3 = "Can you tell me my first name, last name and my age?";
+		// console.log("\n>> 🤷 <<", input3);
+		// const result3 = await agentExecutor.invoke({
+		// 	input: input3,
+		// });
+		// console.log(">> 🤖 <<", result3.output);
 
-		const input4 = "And how tall am I?";
-		console.log("\n>> 🤷 <<", input4);
-		const result4 = await agentExecutor.invoke({
-			input: input4,
-		});
-		console.log(">> 🤖 <<", result4.output);
+		// const input4 = "And how tall am I?";
+		// console.log("\n>> 🤷 <<", input4);
+		// const result4 = await agentExecutor.invoke({
+		// 	input: input4,
+		// });
+		// console.log(">> 🤖 <<", result4.output);
 
-		const input5 = "Can you tell me how to access workflow templates in n8n?";
-		console.log("\n>> 🤷 <<", input5);
-		const result = await agentExecutor.invoke({
-			input: input5,
+		// const input5 = 'If Mary has 3 apples and John has 5 apples, how many apples do they have together?';
+		// console.log("\n>> 🤷 <<", input5);
+		// const result5 = await agentExecutor.invoke({
+		// 	input: input5,
+		// 	verbose: true,
+		// });
+		// console.log(">> 🤖 <<", result5.output);
+
+		const input6 = userMessagePre + `
+			Webhooks in my workflows are unresponsive.
+			I am running n8n via docker compose on n8n.example.com subdomain. I have cloudflare pointed to proxy traffic to the server and I have nginx set up as a reverse proxy
+			This works and I can access the interface from my browser. Setting a webhook trigger works until I go to test it. Sending a test request doesn’t get registered by n8n and pressing “Stop listening” for test events also does not work.
+			`;
+		console.log("\n>> 🤷 <<", input6.trim());
+		const result6 = await agentExecutor.invoke({
+			input: input6,
+			verbose: true,
 		});
-		console.log(">> 🤖 <<", result.output);
+		console.log(">> 🤖 <<", result6.output);
 
 		// res.write(`${result1.output}\n`);
 		// res.write(`${result2.output}\n`);

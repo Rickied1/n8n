@@ -119,6 +119,7 @@
     "csrf": "3.1.0",
     "curlconverter": "3.21.0",
     "dotenv": "8.6.0",
+    "duck-duck-scrape": "^2.2.5",
     "express": "4.19.2",
     "express-async-errors": "3.1.1",
     "express-handlebars": "7.1.2",
