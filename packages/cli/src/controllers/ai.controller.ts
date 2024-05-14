@@ -262,12 +262,15 @@ export class AIController {
 			func: async (input: string) => {
 				const communityQuery = `${input} site:https://community.n8n.io/`
 				console.log(">> 🧰 << internetSearchTool:", communityQuery);
-				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 3 });
+				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 5 });
 				const response = await duckDuckGoSearchTool.invoke(communityQuery);
+				const objectResonse: { link?: string }[] = JSON.parse(response);
 				// toolHistory.internet_search.push(response);
-				response.forEach((result) => {
-					toolHistory.internet_search.push(result.link);
-				}
+				objectResonse.forEach((result) => {
+					if (result.link) {
+						toolHistory.internet_search.push(result.link);
+					}
+				});
 				console.log(">> 🧰 << duckDuckGoSearchTool:", response);
 				return response;
 			}
