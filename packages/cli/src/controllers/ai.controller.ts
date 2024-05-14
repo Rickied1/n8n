@@ -4,7 +4,6 @@ import { AIService } from '@/services/ai.service';
 import { NodeTypes } from '@/NodeTypes';
 import { FailedDependencyError } from '@/errors/response-errors/failed-dependency.error';
 import express from 'express';
-import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import {
 	ChatPromptTemplate,
 	PromptTemplate,
@@ -22,33 +21,48 @@ import { pull } from "langchain/hub";
 import { DuckDuckGoSearch } from "@langchain/community/tools/duckduckgo_search";
 import { Calculator } from 'langchain/tools/calculator';
 
-const memorySessions = new Map<string, ChatMessageHistory>();
+const TOOLS_PROMPT = `
+Please use 'get_n8n_info' tool to get information from the official n8n documentation.
+and the 'internet_search' tool to get more info from the internet.
+Make sure to always use at least one of these tools to provide the most accurate information.
+Use the 'calculator' tool to perform any arithmetic operations, if necessary.
+Use this knowledge to suggest a solution.
+Make sure to prioritize the information from the official n8n documentation by using the final answer from the 'get_n8n_info' tool.
+If you can't find the answer, just say that you don't know.
+`;
 
-const suggestionTodos = z.array(
-	z.object({
-		title: z.string(),
-		description: z.string(),
-	}),
-);
+const DEBUG_PROMPT = `
+I need to solve the following problem with n8n.
+${TOOLS_PROMPT}
+Make sure to take into account all information about the problem that I will provide later to only provide solutions that are related with the problem.
+Your job is to guide me through the solution process step by step so make sure you only provide ONLY ONE, most relevant, suggestion on how to solve the problem at a time.
+Each suggestion should be short and actionable.
+After each suggestion ALWAYS ask the follow-up question to confirm if I need detailed instructions on how to apply the suggestion.
+This follow-up question must be in the form of 'Do you need more detailed instructions on how to ...'
+Only provide detailed instructions if I confirm that I need them. In this case, always use 'n8n_info' tool to provide the most accurate information.
+When providing the solution, always remember that I already have created the workflow and added the node that is causing the problem,
+so always skip the steps that involve creating the workflow from scratch or adding the node to the workflow.
+`;
 
-const errorSuggestionsSchema = z.object({
-	suggestions: z.array(
-		z.object({
-			title: z.string().describe('The title of the suggestion'),
-			description: z.string().describe('Concise description of the suggestion'),
-			key: z.string(),
-			followUpQuestion: z.string().describe('The follow-up question to be asked to the user'),
-			followUpAction: z.string().describe('The follow-up action to be taken by the user'),
-			codeSnippet: z.string().optional().describe('The code snippet to be provided to the user'),
-			userUsingWrongRunMode: z
-				.boolean()
-				.optional()
-				.describe('Whether the user is using the wrong run mode'),
-		}),
-	),
-});
+const chatHistory: string[] = [];
+const stringifyHistory = (history: string[]) => history.join('\n');
 
-const stringifyAndTrim = (obj: object) => JSON.stringify(obj).trim();
+// const errorSuggestionsSchema = z.object({
+// 	suggestions: z.array(
+// 		z.object({
+// 			title: z.string().describe('The title of the suggestion'),
+// 			description: z.string().describe('Concise description of the suggestion'),
+// 			key: z.string(),
+// 			followUpQuestion: z.string().describe('The follow-up question to be asked to the user'),
+// 			followUpAction: z.string().describe('The follow-up action to be taken by the user'),
+// 			codeSnippet: z.string().optional().describe('The code snippet to be provided to the user'),
+// 			userUsingWrongRunMode: z
+// 				.boolean()
+// 				.optional()
+// 				.describe('Whether the user is using the wrong run mode'),
+// 		}),
+// 	),
+// });
 
 @RestController('/ai')
 export class AIController {
@@ -80,6 +94,29 @@ export class AIController {
 					'Failed to debug error due to an issue with an external dependency. Please try again later.',
 			);
 		}
+	}
+
+	@Post('/debug-with-assistant')
+	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
+		const { nodeType, error, authType, message } = req.body;
+		if (message) {
+			await this.askAssistant(`${message }\n${TOOLS_PROMPT}`, res);
+			return;
+		}
+		let authPrompt = `I am using the following authentication type: ${authType?.name}`
+		if (!authType) {
+			authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(error.node.credentials)}`
+		}
+		const userPrompt = `
+			${DEBUG_PROMPT}
+			My problem is:
+				- I am having the following error in my ${nodeType.displayName} node: ${error.message} ${ error.description ? `- ${error.description}` : ''}
+				- Here is some more information from my workflow:
+				- ${authPrompt}. Use this info to only provide solutions that are compatible with the related to this authentication type and not the others.
+				- This is the JSON object that represents the node that I am having an error in, you can use it to inspect current node parameter values: ${JSON.stringify(error.node)}
+				- I am n8n cloud user, so make sure to account for that in your answer and don't provide solutions that are only available in the self-hosted version.
+			`;
+		await this.askAssistant(userPrompt, res);
 	}
 
 	/**
@@ -139,20 +176,11 @@ export class AIController {
 		// ----------------- Chain -----------------
 		const chain = prompt.pipe(model);
 		const response = await chain.invoke({ question });
-		console.log(">> 🧰 << Final answer:\n", response.content);
+		// console.log(">> 🧰 << Final answer:\n", response.content);
 		return response.content;
 	}
 
-	/**
-	 * Chat with AI assistant that has access to few different tools.
-	 * Currently doesn't work so well but we should get it to work and use
-	 * pinecone similarity search as a tool.
-	 */
-	@Post('/ai-assistant')
-	async aiAssistant(req: AIRequest.DebugChat, res: express.Response) {
-		const message = req.body.message;
-		const error = req.body.error;
-		// ----------------- model -----------------
+	async askAssistant(message: string, res: express.Response) {
 		const model = new ChatOpenAI({
 			temperature: 0,
 			openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
@@ -161,29 +189,6 @@ export class AIController {
 		});
 
 		// ----------------- Tools -----------------
-		// const myInfoTool = new DynamicTool({
-		// 	name: "get_my_info",
-		// 	description: "Returns information about myself (the human).",
-		// 	func: async (input: string) => {
-		// 		const info = {
-		// 			firstName: "Ricardo",
-		// 			lastName: "Espinoza",
-		// 			age: 30,
-		// 			height: 180,
-		// 		}
-		// 		console.log(">> 🧰 << myInfoTool:", input);
-		// 		return `My first name is ${info.firstName}, my last name is ${info.lastName}, I am ${info.age} years old and I am ${info.height} cm tall.`
-		// 	}
-		// });
-		// const wordLengthTool = new DynamicTool({
-		// 	name: "word_length",
-		// 	description: "Returns the number of letters in a word.",
-		// 	func: async (input: string) => {
-		// 		console.log(">> 🧰 << wordLengthTool:", input);
-		// 		return `The word '${input}' has ${input.length} letters.`;
-		// 	}
-		// });
-
 		const calculatorTool = new DynamicTool({
 			name: "calculator",
 			description: "Performs arithmetic operations. Use this tool whenever you need to perform calculations.",
@@ -224,7 +229,6 @@ export class AIController {
 		];
 		// ----------------- Agent -----------------
 		const chatPrompt = await pull<PromptTemplate>("hwchase17/react-chat");
-		let chatHistory = '';
 
 		const agent = await createReactAgent({
 			llm: model,
@@ -237,24 +241,33 @@ export class AIController {
 			tools,
 		});
 
-		// ----------------- Conversation -----------------
-		// TODO: How can this be a custom system message?
-		const userMessage = `
-			I need to solve the following problem with n8n.
-			Please use 'get_n8n_info' tool to get information from the official n8n documentation
-			and the 'internet_search' tool to get more info from the internet.
-			Use the 'calculator' tool to perform any arithmetic operations, if necessary.
-			Use this knowledge to solve my problem.
-			Make sure to prioritize the information from the official n8n documentation by using the final answer from the 'get_n8n_info' tool.
-			Always reply with an answer that is actionable and easy to follow for users that are just starting with n8n.
-			It the solution is found using the 'get_n8n_info' tool, include steps to solve the problem by taking them directly from the tool response.
-			If you can't find the answer, just say that you don't know.
+		console.log(chatHistory);
+		console.log("\n>> 🤷 <<", message.trim());
+		let response =  '';
+		try {
+			const result = await agentExecutor.invoke({
+				input: message,
+				verbose: true,
+				chat_history: stringifyHistory(chatHistory),
+			});
+			response = result.output;
+		} catch (error) {
+			response = error.toString().replace(/Error: Could not parse LLM output: /, '');
+		}
+		console.log(">> 🤖 <<", response);
+		chatHistory.push(`Human: ${message}`);
+		chatHistory.push(`Assistant: ${response}`);
+		res.write(`${response}\n`);
+		res.end('__END__');
+	}
 
-			I am n8n cloud user, so make sure to account for that in your answer and don't provide solutions that are only available in the self-hosted version.
-
-			The problem is: ${message}
-		`;
-
+	/**
+	 * Chat with AI assistant that has access to few different tools.
+	 * Currently doesn't work so well but we should get it to work and use
+	 * pinecone similarity search as a tool.
+	 */
+	@Post('/chat-with-assistant')
+	async chatWithAssistant(req: AIRequest.DebugChat, res: express.Response) {
 		// const input1 = "How many letters in the word 'education'?";
 		// console.log("\n>> 🤷 <<", input1);
 		// const result1 = await agentExecutor.invoke({
@@ -303,23 +316,6 @@ export class AIController {
 		// 	verbose: true,
 		// });
 		// console.log(">> 🤖 <<", result5.output);
-
-		console.log("\n>> 🤷 <<", userMessage.trim());
-		const result6 = await agentExecutor.invoke({
-			input: userMessage,
-			verbose: true,
-			chat_history: chatHistory,
-		});
-		console.log(">> 🤖 <<", result6.output);
-		// TODO: Format chat history in a separate function
-		chatHistory += `Human: ${userMessage}\nAssistant: ${result6.output}\n`;
-
-		// res.write(`${result1.output}\n`);
-		// res.write(`${result2.output}\n`);
-		// res.write(`${result3.output}\n`);
-		// res.write(`${result4.output}\n`);
-		// res.write(`${result6.output}\n`);
-		res.end('__END__');
 	}
 
 	@Post('/debug-chat', { skipAuth: true })

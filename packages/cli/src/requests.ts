@@ -6,6 +6,8 @@ import type {
 	INodeCredentialTestRequest,
 	INodeCredentials,
 	INodeParameters,
+	INodeType,
+	INodeTypeDescription,
 	INodeTypeNameVersion,
 	IUser,
 	NodeError,
@@ -151,6 +153,7 @@ export function hasSharing(
 export declare namespace AIRequest {
 	export type DebugError = AuthenticatedRequest<{}, {}, AIDebugErrorPayload>;
 	export type DebugChat = AuthenticatedRequest<{}, {}, AIDebugChatPayload>;
+	export type AssistantDebug = AuthenticatedRequest<{}, {}, AIAssistantDebugPayload>;
 }
 
 export interface AIDebugErrorPayload {
@@ -177,6 +180,13 @@ export interface AIDebugChatPayload {
 	schemas?: Array<{ node_name: string; schema: Schema }>;
 	nodes?: string[];
 	parameters?: IDataObject;
+}
+
+export interface AIAssistantDebugPayload {
+	nodeType: INodeTypeDescription
+	error: NodeError;
+	authType?: { name: string; value: string };
+	message?: string;
 }
 
 // ----------------------------------

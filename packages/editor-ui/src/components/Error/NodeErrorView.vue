@@ -23,6 +23,7 @@ import { useAIStore } from '@/stores/ai.store';
 import { MAX_DISPLAY_DATA_SIZE } from '@/constants';
 import VueMarkdown from 'vue-markdown-render';
 import type { BaseTextKey } from '@/plugins/i18n';
+import { getMainAuthField, getNodeAuthOptions, getNodeCredentialForSelectedAuthType } from '@/utils/nodeTypesUtils';
 
 const props = defineProps({
 	error: {
@@ -131,8 +132,14 @@ async function onDebugError() {
 		props.error.node?.type,
 		props.error.node?.typeVersion,
 	);
-	const message = `I am having the following error in my ${nodeType?.displayName ?? props.error.node.type} node: ${props.error.message} ${getErrorDescription()}`;
-	await aiStore.debugWithAssistant(message);
+	if (!nodeType) {
+		return;
+	}
+	const authField = getMainAuthField(nodeType);
+	const credentialInUse = props.error.node.parameters[authField?.name ?? ''];
+	const availableAuthOptions = getNodeAuthOptions(nodeType);
+	const selectedOption = availableAuthOptions.find((option) => option.value === credentialInUse);
+	await aiStore.debugWithAssistant(nodeType, props.error, selectedOption);
 }
 
 async function onDebugErrorRegenerate() {
