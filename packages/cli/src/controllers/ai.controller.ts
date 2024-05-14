@@ -53,22 +53,22 @@ This is the question I have:
 let chatHistory: string[] = [];
 const stringifyHistory = (history: string[]) => history.join('\n');
 
-// const errorSuggestionsSchema = z.object({
-// 	suggestions: z.array(
-// 		z.object({
-// 			title: z.string().describe('The title of the suggestion'),
-// 			description: z.string().describe('Concise description of the suggestion'),
-// 			key: z.string(),
-// 			followUpQuestion: z.string().describe('The follow-up question to be asked to the user'),
-// 			followUpAction: z.string().describe('The follow-up action to be taken by the user'),
-// 			codeSnippet: z.string().optional().describe('The code snippet to be provided to the user'),
-// 			userUsingWrongRunMode: z
-// 				.boolean()
-// 				.optional()
-// 				.describe('Whether the user is using the wrong run mode'),
-// 		}),
-// 	),
-// });
+const errorSuggestionsSchema = z.object({
+	suggestions: z.array(
+		z.object({
+			title: z.string().describe('The title of the suggestion'),
+			description: z.string().describe('Concise description of the suggestion'),
+			key: z.string(),
+			followUpQuestion: z.string().describe('The follow-up question to be asked to the user'),
+			followUpAction: z.string().describe('The follow-up action to be taken by the user'),
+			codeSnippet: z.string().optional().describe('The code snippet to be provided to the user'),
+			userUsingWrongRunMode: z
+				.boolean()
+				.optional()
+				.describe('Whether the user is using the wrong run mode'),
+		}),
+	),
+});
 
 @RestController('/ai')
 export class AIController {
@@ -104,8 +104,6 @@ export class AIController {
 
 	/**
  * Chat with AI assistant that has access to few different tools.
- * Currently doesn't work so well but we should get it to work and use
- * pinecone similarity search as a tool.
  */
 	@Post('/chat-with-assistant')
 	async chatWithAssistant(req: AIRequest.AskAssistant, res: express.Response) {
@@ -118,6 +116,9 @@ export class AIController {
 		await this.askAssistant(userMessage, res);
 	}
 
+	/**
+	 * Debug n8n error using the agent that has access to different tools.
+	 */
 	@Post('/debug-with-assistant')
 	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
 		const { nodeType, error, authType, message } = req.body;
@@ -144,8 +145,8 @@ export class AIController {
 
 	/**
 	 * Chat with pinecone vector store that contains n8n documentation.
-	 * This is just a recreation of the Nik's workflow, without the indexing part.
-	 * Ideally, we should use this as a tool for AI agent
+	 * This endpoint is not used in the assistant currently but can be used to test
+	 * access to n8n docs without the agent if needed.
 	 */
 	@Post('/ask-pinecone')
 	async askPinecone(req: AIRequest.DebugChat, res: express.Response) {
@@ -154,6 +155,7 @@ export class AIController {
 		return this.askPineconeChain(question);
 	}
 
+	// ---------------------------------------------------------- UTIL FUNCTIONS ----------------------------------------------------------
 	async askPineconeChain(question: string) {
 		// ----------------- Model -----------------
 		const model = new ChatOpenAI({
