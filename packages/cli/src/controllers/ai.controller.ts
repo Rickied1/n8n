@@ -26,7 +26,8 @@ Please use 'get_n8n_info' tool to get information from the official n8n document
 and the 'internet_search' tool to get more info from the internet.
 Make sure to always use at least one of these tools to provide the most accurate information.
 Use the 'calculator' tool to perform any arithmetic operations, if necessary.
-Use this knowledge to suggest a solution.
+You must use only the knowledge acquired from the tools to provide the most accurate information.
+You must not make up any information.
 Make sure to prioritize the information from the official n8n documentation by using the final answer from the 'get_n8n_info' tool.
 If you can't find the answer, just say that you don't know.
 `;
@@ -52,6 +53,20 @@ This is the question I have:
 
 let chatHistory: string[] = [];
 const stringifyHistory = (history: string[]) => history.join('\n');
+
+let toolHistory = {
+	calculator: [] as string[],
+	internet_search: [] as string[],
+	get_n8n_info: [] as string[],
+};
+
+const resetToolHistory = () => {
+	toolHistory = {
+		calculator: [],
+		internet_search: [],
+		get_n8n_info: [],
+	};
+}
 
 const errorSuggestionsSchema = z.object({
 	suggestions: z.array(
@@ -113,6 +128,7 @@ export class AIController {
 			chatHistory = [];
 			userMessage = `${CHAT_PROMPT}\n${message }\n${TOOLS_PROMPT}`
 		}
+		resetToolHistory();
 		await this.askAssistant(userMessage, res);
 	}
 
@@ -122,6 +138,7 @@ export class AIController {
 	@Post('/debug-with-assistant', { skipAuth: true })
 	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
 		const { nodeType, error, authType, message } = req.body;
+		resetToolHistory();
 		if (message) {
 			await this.askAssistant(`${message }\n${TOOLS_PROMPT}`, res);
 			return;
@@ -182,6 +199,7 @@ export class AIController {
 		// Prepare chunks
 		let out = ""
 		results.forEach((result, i) => {
+			toolHistory.get_n8n_info.push(result.metadata.source);
 			console.log("\t📃", result.metadata.source);
 			out += `--- CHUNK ${i} ---\n${result.pageContent}\n\n`
 		})
@@ -246,6 +264,10 @@ export class AIController {
 				console.log(">> 🧰 << internetSearchTool:", communityQuery);
 				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 3 });
 				const response = await duckDuckGoSearchTool.invoke(communityQuery);
+				// toolHistory.internet_search.push(response);
+				response.forEach((result) => {
+					toolHistory.internet_search.push(result.link);
+				}
 				console.log(">> 🧰 << duckDuckGoSearchTool:", response);
 				return response;
 			}
@@ -286,8 +308,16 @@ export class AIController {
 		console.log(">> 🤖 <<", response);
 		chatHistory.push(`Human: ${message}`);
 		chatHistory.push(`Assistant: ${response}`);
-		res.write(response + '\n');
-		res.end('__END__');
+		res.write(response + '\n \n');
+		res.write(`
+\`\`\`
+-------------- DEBUG INFO --------------
+${toolHistory.get_n8n_info.length > 0 ? `N8N DOCS DOCUMENTS USED: ${toolHistory.get_n8n_info.join(', ')}` : ''}
+${toolHistory.internet_search.length > 0 ? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}` : ''}
+${toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length === 0 ? 'NO TOOLS USED' : ''}
+\`\`\`
+	`);
+		// res.end('__END__');
 	}
 
 	@Post('/debug-chat', { skipAuth: true })

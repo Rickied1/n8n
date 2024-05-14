@@ -35,14 +35,16 @@ export const useAIStore = defineStore('ai', () => {
 			type: 'text',
 			sender: 'bot',
 			createdAt: new Date().toISOString(),
-			text: `Hi ${userName.value}! Please let me use my wast knowledge to help you with the error in your ${activeNode.value ? `__${activeNode.value}__` : ''} node`,
+			text: debugSessionInProgress.value
+				? `Hi ${userName.value}! Please let me use my vast knowledge to help you with the error in your ${activeNode.value ? `__${activeNode.value}__` : ''} node`
+				: `Hi ${userName.value}! How can I help you today?`,
 		},
 		{
 			id: '2',
 			type: 'text',
 			sender: 'bot',
 			createdAt: new Date().toISOString(),
-			text: '⚠️ I currently do ont support chat sessions, so make sure to reload your page to start a new session.',
+			text: '⚠️ I currently do not support chat sessions, so make sure to reload your page to start a new session.',
 		},
 	]);
 
