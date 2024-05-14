@@ -51,9 +51,7 @@ const isErrorDebuggingEnabled = computed(() => {
 });
 
 const showErrorDebuggingButton = computed(() => {
-	return (
-		isErrorDebuggingEnabled.value && !(isLoadingErrorDebugging.value || errorDebuggingMessage.value)
-	);
+	return true;
 });
 
 const displayCause = computed(() => {

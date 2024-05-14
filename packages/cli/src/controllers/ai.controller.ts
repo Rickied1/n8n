@@ -105,7 +105,7 @@ export class AIController {
 	/**
  * Chat with AI assistant that has access to few different tools.
  */
-	@Post('/chat-with-assistant')
+	@Post('/chat-with-assistant', { skipAuth: true })
 	async chatWithAssistant(req: AIRequest.AskAssistant, res: express.Response) {
 		const { message, newSession } = req.body;
 		let userMessage = `${message }\n${TOOLS_PROMPT}`;
@@ -119,7 +119,7 @@ export class AIController {
 	/**
 	 * Debug n8n error using the agent that has access to different tools.
 	 */
-	@Post('/debug-with-assistant')
+	@Post('/debug-with-assistant', { skipAuth: true })
 	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
 		const { nodeType, error, authType, message } = req.body;
 		if (message) {
