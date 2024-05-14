@@ -154,6 +154,7 @@ export declare namespace AIRequest {
 	export type DebugError = AuthenticatedRequest<{}, {}, AIDebugErrorPayload>;
 	export type DebugChat = AuthenticatedRequest<{}, {}, AIDebugChatPayload>;
 	export type AssistantDebug = AuthenticatedRequest<{}, {}, AIAssistantDebugPayload>;
+	export type AskAssistant = AuthenticatedRequest<{}, {}, AskAssistantPayload>;
 }
 
 export interface AIDebugErrorPayload {
@@ -187,6 +188,11 @@ export interface AIAssistantDebugPayload {
 	error: NodeError;
 	authType?: { name: string; value: string };
 	message?: string;
+}
+
+export interface AskAssistantPayload {
+	message: string;
+	newSession?: boolean;
 }
 
 // ----------------------------------

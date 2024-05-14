@@ -55,13 +55,13 @@ export const debugError = async (
 
 export const askAssistant = async (
 	context: IRestApiContext,
-	payload: { message?: string; error?: Error },
+	payload: { message?: string; newSession?: boolean },
 	onChunk: (chunk: string) => void,
 ): Promise<void> => {
 	const headers = {
 		'Content-Type': 'application/json',
 	};
-	const response = await fetch(`${context.baseUrl}/ai/ai-assistant`, {
+	const response = await fetch(`${context.baseUrl}/ai/chat-with-assistant`, {
 		headers,
 		method: 'POST',
 		credentials: 'include',

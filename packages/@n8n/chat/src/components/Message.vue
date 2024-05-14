@@ -121,6 +121,15 @@ const messageComponents = options.messageComponents ?? {};
 			background: var(--chat--message--pre--background);
 			border-radius: var(--chat--border-radius);
 		}
+
+		ul, ol {
+			list-style-position: inside;
+			margin-left: 1em;
+		}
+
+		li {
+			margin: 1em 0;
+		}
 	}
 }
 </style>

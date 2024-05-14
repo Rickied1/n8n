@@ -39,12 +39,18 @@ Your job is to guide me through the solution process step by step so make sure y
 Each suggestion should be short and actionable.
 After each suggestion ALWAYS ask the follow-up question to confirm if I need detailed instructions on how to apply the suggestion.
 This follow-up question must be in the form of 'Do you need more detailed instructions on how to ...'
-Only provide detailed instructions if I confirm that I need them. In this case, always use 'n8n_info' tool to provide the most accurate information.
+Only provide detailed instructions if I confirm that I need them. In this case, always use 'get_n8n_info' tool to provide the most accurate information.
 When providing the solution, always remember that I already have created the workflow and added the node that is causing the problem,
 so always skip the steps that involve creating the workflow from scratch or adding the node to the workflow.
 `;
 
-const chatHistory: string[] = [];
+const CHAT_PROMPT = `
+I need your help with n8n, the workflow automation tool. Please always refer to the official n8n documentation to provide the most accurate information.
+This is the question I have:
+`;
+
+
+let chatHistory: string[] = [];
 const stringifyHistory = (history: string[]) => history.join('\n');
 
 // const errorSuggestionsSchema = z.object({
@@ -96,6 +102,22 @@ export class AIController {
 		}
 	}
 
+	/**
+ * Chat with AI assistant that has access to few different tools.
+ * Currently doesn't work so well but we should get it to work and use
+ * pinecone similarity search as a tool.
+ */
+	@Post('/chat-with-assistant')
+	async chatWithAssistant(req: AIRequest.AskAssistant, res: express.Response) {
+		const { message, newSession } = req.body;
+		let userMessage = `${message }\n${TOOLS_PROMPT}`;
+		if (newSession) {
+			chatHistory = [];
+			userMessage = `${CHAT_PROMPT}\n${message }\n${TOOLS_PROMPT}`
+		}
+		await this.askAssistant(userMessage, res);
+	}
+
 	@Post('/debug-with-assistant')
 	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
 		const { nodeType, error, authType, message } = req.body;
@@ -103,6 +125,7 @@ export class AIController {
 			await this.askAssistant(`${message }\n${TOOLS_PROMPT}`, res);
 			return;
 		}
+		chatHistory = []
 		let authPrompt = `I am using the following authentication type: ${authType?.name}`
 		if (!authType) {
 			authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(error.node.credentials)}`
@@ -144,7 +167,11 @@ export class AIController {
 			apiKey: process.env.N8N_AI_PINECONE_API_KEY ?? ''
 		});
 		const index = pc.Index('n8n-docs');
-		const vectorStore = await PineconeStore.fromExistingIndex(new OpenAIEmbeddings({ modelName: 'text-embedding-3-large', dimensions: 3072 }), {
+		const vectorStore = await PineconeStore.fromExistingIndex(new OpenAIEmbeddings({
+			openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
+			modelName: 'text-embedding-3-large',
+			dimensions: 3072
+		}), {
 			pineconeIndex: index,
 		})
 		// ----------------- Get top chunks matching query -----------------
@@ -257,65 +284,8 @@ export class AIController {
 		console.log(">> 🤖 <<", response);
 		chatHistory.push(`Human: ${message}`);
 		chatHistory.push(`Assistant: ${response}`);
-		res.write(`${response}\n`);
+		res.write(response + '\n');
 		res.end('__END__');
-	}
-
-	/**
-	 * Chat with AI assistant that has access to few different tools.
-	 * Currently doesn't work so well but we should get it to work and use
-	 * pinecone similarity search as a tool.
-	 */
-	@Post('/chat-with-assistant')
-	async chatWithAssistant(req: AIRequest.DebugChat, res: express.Response) {
-		// const input1 = "How many letters in the word 'education'?";
-		// console.log("\n>> 🤷 <<", input1);
-		// const result1 = await agentExecutor.invoke({
-		// 	input: input1,
-		// 	chat_history: chatHistory,
-		// });
-		// console.log(">> 🤖 <<", result1.output);
-		// chatHistory += `Human: ${input1}\nAssistant: ${result1.output}\n`;
-
-		// const input2 = "Is that a real English word?";
-		// console.log("\n>> 🤷 <<", input2);
-		// const result2 = await agentExecutor.invoke({
-		// 	input: input2,
-		// 	chat_history: chatHistory,
-		// });
-		// console.log(">> 🤖 <<", result2.output);
-		// chatHistory += `Human: ${input2}\nAssistant: ${result2.output}\n`;
-
-		// const input3 = "Can you translate it to Spanish?";
-		// console.log("\n>> 🤷 <<", input3);
-		// const result3 = await agentExecutor.invoke({
-		// 	input: input3,
-		// 	chat_history: chatHistory,
-		// });
-		// console.log(">> 🤖 <<", result3.output);
-		// chatHistory += `Human: ${input3}\nAssistant: ${result3.output}\n`;
-
-		// const input3 = "Can you tell me my first name, last name and my age?";
-		// console.log("\n>> 🤷 <<", input3);
-		// const result3 = await agentExecutor.invoke({
-		// 	input: input3,
-		// });
-		// console.log(">> 🤖 <<", result3.output);
-
-		// const input4 = "And how tall am I?";
-		// console.log("\n>> 🤷 <<", input4);
-		// const result4 = await agentExecutor.invoke({
-		// 	input: input4,
-		// });
-		// console.log(">> 🤖 <<", result4.output);
-
-		// const input5 = 'If Mary has 3 apples and John has 5 apples, how many apples do they have together?';
-		// console.log("\n>> 🤷 <<", input5);
-		// const result5 = await agentExecutor.invoke({
-		// 	input: input5,
-		// 	verbose: true,
-		// });
-		// console.log(">> 🤖 <<", result5.output);
 	}
 
 	@Post('/debug-chat', { skipAuth: true })

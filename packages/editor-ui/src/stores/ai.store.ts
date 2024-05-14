@@ -28,6 +28,7 @@ export const useAIStore = defineStore('ai', () => {
 
 	const eventBus = codeNodeEditorEventBus;
 
+	const debugSessionInProgress = ref(false);
 	const initialMessages = ref<ChatMessage[]>([
 		{
 			id: '1',
@@ -48,6 +49,7 @@ export const useAIStore = defineStore('ai', () => {
 	const messages = ref<ChatMessage[]>([]);
 
 	async function sendMessage(text: string) {
+		const hasUserMessages = messages.value.some((message) => message.sender === 'user');
 		messages.value.push({
 			createdAt: new Date().toISOString(),
 			text,
@@ -57,9 +59,12 @@ export const useAIStore = defineStore('ai', () => {
 
 		chatEventBus.emit('scrollToBottom');
 
-		// void debugChat({ error: new Error('Whatever'), text, sessionId: currentSessionId.value });
 		waitingForResponse.value = true;
-		await debugWithAssistantFollowup(text);
+		if (debugSessionInProgress.value) {
+			await debugWithAssistantFollowup(text);
+		} else {
+			await askAssistant(text, !hasUserMessages);
+		}
 		waitingForResponse.value = false;
 	}
 
@@ -90,7 +95,8 @@ export const useAIStore = defineStore('ai', () => {
 		const lastMessage = getLastMessage();
 
 		if (lastMessage.type === 'text') {
-			lastMessage.text += messageChunk.replaceAll('\\n', '\n');
+			lastMessage.text += `\n${messageChunk}`;
+
 			chatEventBus.emit('scrollToBottom');
 		}
 	}
@@ -227,8 +233,12 @@ export const useAIStore = defineStore('ai', () => {
 		waitingForResponse.value = false;
 	}
 
-	async function askAssistant(message: string) {
-		await aiApi.askAssistant(rootStore.getRestApiContext, { message }, onMessageReceived);
+	async function askAssistant(message: string, newSession: boolean = false) {
+		await aiApi.askAssistant(
+			rootStore.getRestApiContext,
+			{ message, newSession },
+			onMessageReceived,
+		);
 	}
 
 	async function askPinecone() {
@@ -290,5 +300,6 @@ export const useAIStore = defineStore('ai', () => {
 		askPinecone,
 		debugWithAssistant,
 		debugWithAssistantFollowup,
+		debugSessionInProgress,
 	};
 });

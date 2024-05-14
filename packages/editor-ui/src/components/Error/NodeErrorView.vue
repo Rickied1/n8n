@@ -139,6 +139,7 @@ async function onDebugError() {
 	const credentialInUse = props.error.node.parameters[authField?.name ?? ''];
 	const availableAuthOptions = getNodeAuthOptions(nodeType);
 	const selectedOption = availableAuthOptions.find((option) => option.value === credentialInUse);
+	aiStore.debugSessionInProgress = true;
 	await aiStore.debugWithAssistant(nodeType, props.error, selectedOption);
 }
 
