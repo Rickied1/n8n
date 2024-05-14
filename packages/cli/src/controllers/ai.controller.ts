@@ -175,6 +175,15 @@ export class AIController {
 		// 		return `My first name is ${info.firstName}, my last name is ${info.lastName}, I am ${info.age} years old and I am ${info.height} cm tall.`
 		// 	}
 		// });
+		// const wordLengthTool = new DynamicTool({
+		// 	name: "word_length",
+		// 	description: "Returns the number of letters in a word.",
+		// 	func: async (input: string) => {
+		// 		console.log(">> 🧰 << wordLengthTool:", input);
+		// 		return `The word '${input}' has ${input.length} letters.`;
+		// 	}
+		// });
+
 		const calculatorTool = new DynamicTool({
 			name: "calculator",
 			description: "Performs arithmetic operations. Use this tool whenever you need to perform calculations.",
@@ -209,17 +218,18 @@ export class AIController {
 		});
 
 		const tools = [
-			// myInfoTool,
 			calculatorTool,
 			n8nInfoTool,
 			internetSearchTool,
 		];
 		// ----------------- Agent -----------------
-		const prompt = await pull<PromptTemplate>("hwchase17/react");
+		const chatPrompt = await pull<PromptTemplate>("hwchase17/react-chat");
+		let chatHistory = '';
+
 		const agent = await createReactAgent({
 			llm: model,
 			tools,
-			prompt,
+			prompt: chatPrompt,
 		});
 
 		const agentExecutor = new AgentExecutor({
@@ -239,23 +249,38 @@ export class AIController {
 			Always reply with an answer that is actionable and easy to follow for users that are just starting with n8n.
 			It the solution is found using the 'get_n8n_info' tool, include steps to solve the problem by taking them directly from the tool response.
 			If you can't find the answer, just say that you don't know.
+
+			I am n8n cloud user, so make sure to account for that in your answer and don't provide solutions that are only available in the self-hosted version.
+
 			The problem is: ${message}
 		`;
 
-		// TODO: Use this to test the memory once it's implemented
 		// const input1 = "How many letters in the word 'education'?";
 		// console.log("\n>> 🤷 <<", input1);
 		// const result1 = await agentExecutor.invoke({
 		// 	input: input1,
+		// 	chat_history: chatHistory,
 		// });
 		// console.log(">> 🤖 <<", result1.output);
+		// chatHistory += `Human: ${input1}\nAssistant: ${result1.output}\n`;
 
 		// const input2 = "Is that a real English word?";
 		// console.log("\n>> 🤷 <<", input2);
 		// const result2 = await agentExecutor.invoke({
 		// 	input: input2,
+		// 	chat_history: chatHistory,
 		// });
 		// console.log(">> 🤖 <<", result2.output);
+		// chatHistory += `Human: ${input2}\nAssistant: ${result2.output}\n`;
+
+		// const input3 = "Can you translate it to Spanish?";
+		// console.log("\n>> 🤷 <<", input3);
+		// const result3 = await agentExecutor.invoke({
+		// 	input: input3,
+		// 	chat_history: chatHistory,
+		// });
+		// console.log(">> 🤖 <<", result3.output);
+		// chatHistory += `Human: ${input3}\nAssistant: ${result3.output}\n`;
 
 		// const input3 = "Can you tell me my first name, last name and my age?";
 		// console.log("\n>> 🤷 <<", input3);
@@ -283,14 +308,17 @@ export class AIController {
 		const result6 = await agentExecutor.invoke({
 			input: userMessage,
 			verbose: true,
+			chat_history: chatHistory,
 		});
 		console.log(">> 🤖 <<", result6.output);
+		// TODO: Format chat history in a separate function
+		chatHistory += `Human: ${userMessage}\nAssistant: ${result6.output}\n`;
 
 		// res.write(`${result1.output}\n`);
 		// res.write(`${result2.output}\n`);
 		// res.write(`${result3.output}\n`);
 		// res.write(`${result4.output}\n`);
-		res.write(`${result6.output}\n`);
+		// res.write(`${result6.output}\n`);
 		res.end('__END__');
 	}
 
