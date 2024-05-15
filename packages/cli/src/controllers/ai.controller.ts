@@ -68,6 +68,13 @@ const resetToolHistory = () => {
 	};
 }
 
+const assistantModel = new ChatOpenAI({
+	temperature: 0,
+	openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
+	modelName: 'gpt-4o',
+	streaming: true,
+});
+
 const errorSuggestionsSchema = z.object({
 	suggestions: z.array(
 		z.object({
@@ -174,13 +181,6 @@ export class AIController {
 
 	// ---------------------------------------------------------- UTIL FUNCTIONS ----------------------------------------------------------
 	async askPineconeChain(question: string) {
-		// ----------------- Model -----------------
-		const model = new ChatOpenAI({
-			temperature: 0,
-			openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
-			modelName: 'gpt-4',
-			streaming: true,
-		});
 		// ----------------- Vector store -----------------
 		const pc = new Pinecone({
 			apiKey: process.env.N8N_AI_PINECONE_API_KEY ?? ''
@@ -221,20 +221,13 @@ export class AIController {
 			['human', '{question}'],
 		]);
 		// ----------------- Chain -----------------
-		const chain = prompt.pipe(model);
+		const chain = prompt.pipe(assistantModel);
 		const response = await chain.invoke({ question });
 		// console.log(">> 🧰 << Final answer:\n", response.content);
 		return response.content;
 	}
 
 	async askAssistant(message: string, res: express.Response) {
-		const model = new ChatOpenAI({
-			temperature: 0,
-			openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
-			modelName: 'gpt-4',
-			streaming: true,
-		});
-
 		// ----------------- Tools -----------------
 		const calculatorTool = new DynamicTool({
 			name: "calculator",
@@ -285,7 +278,7 @@ export class AIController {
 		const chatPrompt = await pull<PromptTemplate>("hwchase17/react-chat");
 
 		const agent = await createReactAgent({
-			llm: model,
+			llm: assistantModel,
 			tools,
 			prompt: chatPrompt,
 		});

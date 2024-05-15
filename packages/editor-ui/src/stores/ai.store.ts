@@ -35,9 +35,7 @@ export const useAIStore = defineStore('ai', () => {
 			type: 'text',
 			sender: 'bot',
 			createdAt: new Date().toISOString(),
-			text: debugSessionInProgress.value
-				? `Hi ${userName.value}! Please let me use my vast knowledge to help you with the error in your ${activeNode.value ? `__${activeNode.value}__` : ''} node`
-				: `Hi ${userName.value}! How can I help you today?`,
+			text: `Hi ${userName.value}! I am your n8n assistant. How can I help you today?`,
 		},
 		{
 			id: '2',
@@ -223,9 +221,10 @@ export const useAIStore = defineStore('ai', () => {
 	async function debugWithAssistant(
 		nodeType: INodeTypeDescription,
 		error: NodeError,
-		authType: { name: string; value: string },
+		authType?: { name: string; value: string },
 	) {
 		chatEventBus.emit('open');
+		initialMessages.value[0].text = `Hi ${userName.value}! I see you're having trouble with the __${activeNode.value}__ node. Let me help you with that.`;
 		waitingForResponse.value = true;
 		await aiApi.debugWithAssistant(
 			rootStore.getRestApiContext,
