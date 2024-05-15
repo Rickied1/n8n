@@ -23,16 +23,17 @@ import { Calculator } from 'langchain/tools/calculator';
 
 const TOOLS_PROMPT = `
 Please use 'get_n8n_info' tool to get information from the official n8n documentation.
-and the 'internet_search' tool to get more info from the n8n community forum.
+and the 'internet_search' tool to get more info from the n8n community forum. If you cannot find the answer in the official documentation,
+use the 'internet_search' tool to search the n8n community forum without asking for permission.
 Make sure to always use at least one of these tools to provide the most accurate information.
 Use the 'calculator' tool to perform any arithmetic operations, if necessary.
 You must use only the knowledge acquired from the tools to provide the most accurate information.
-You must not make up any information.
+You must not make up any information or assume what should the solution be if it's not backed by the information from the tools.
 Make sure to prioritize the information from the official n8n documentation by using the final answer from the 'get_n8n_info' tool.
 `;
 
 const DEBUG_PROMPT = `
-I need to solve the following problem with n8n.
+I need to solve a problem with n8n. Your goal is to provide me with the most accurate information regarding the problem but not to solve it for me at any cost.
 ${TOOLS_PROMPT}
 Make sure to take into account all information about the problem that I will provide later to only provide solutions that are related with the problem.
 Your job is to guide me through the solution process step by step so make sure you only provide ONLY ONE, most relevant, suggestion on how to solve the problem at a time.
@@ -44,7 +45,7 @@ After each suggestion ALWAYS ask two follow-up questions:
 			Only ask this question if the suggestion requires detailed instructions.
 	2. Ask me to confirm if I need another suggestion.
 Only provide detailed instructions if I confirm that I need them. In this case, always use the available tools to provide the most accurate information.
-Once you think there are no more suggestions to provide, let me know, don't just repeat already provided suggestions.
+Also, make sure not to repeat same step twice.
 When providing the solution, always remember that I already have created the workflow and added the node that is causing the problem,
 so always skip the steps that involve creating the workflow from scratch or adding the node to the workflow.
 `;
@@ -137,7 +138,7 @@ export class AIController {
 		let userMessage = `${message }\n${TOOLS_PROMPT}`;
 		if (newSession) {
 			chatHistory = [];
-			userMessage = `${CHAT_PROMPT}\n${message }\n${TOOLS_PROMPT}`
+			userMessage = `${message }\n${TOOLS_PROMPT}`
 		}
 		resetToolHistory();
 		await this.askAssistant(userMessage, res);
