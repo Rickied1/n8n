@@ -18,7 +18,7 @@ import { AgentExecutor, createReactAgent } from 'langchain/agents';
 import { PineconeStore } from "@langchain/pinecone";
 import { Pinecone } from '@pinecone-database/pinecone';
 import { pull } from "langchain/hub";
-import { DuckDuckGoSearch } from "@langchain/community/tools/duckduckgo_search";
+import { DuckDuckGoSearch, SearchTimeType } from "@langchain/community/tools/duckduckgo_search";
 import { Calculator } from 'langchain/tools/calculator';
 
 const TOOLS_PROMPT = `
@@ -176,11 +176,33 @@ export class AIController {
 	async askPinecone(req: AIRequest.DebugChat, res: express.Response) {
 		const question = 'How to submit new workflows to n8n templates library?';
 		console.log("\n>> 🤷 <<", question);
-		return this.askPineconeChain(question);
+		const documentation = await this.searchDocsVectorStore(question);
+		// ----------------- Prompt -----------------
+		const systemMessage = SystemMessagePromptTemplate.fromTemplate(`
+			You are an automation expert and are tasked to help users answer their questions about n8n.
+			Use the following pieces of context to answer the question at the end.
+			If you don't know the answer, just say that you don't know, don't try to make up an answer.
+			Try to make the answers actionable and easy to follow for users that are just starting with n8n.
+
+			{docs}
+
+			Question: {question}
+			Helpful Answer:
+		`);
+		const systemMessageFormatted = await systemMessage.format({ docs: documentation, question });
+		const prompt = ChatPromptTemplate.fromMessages([
+			systemMessageFormatted,
+			['human', '{question}'],
+		]);
+		// ----------------- Chain -----------------
+		const chain = prompt.pipe(assistantModel);
+		const response = await chain.invoke({ question });
+		console.log(">> 🧰 << Final answer:\n", response.content);
+		return response.content;
 	}
 
 	// ---------------------------------------------------------- UTIL FUNCTIONS ----------------------------------------------------------
-	async askPineconeChain(question: string) {
+	async searchDocsVectorStore(question: string) {
 		// ----------------- Vector store -----------------
 		const pc = new Pinecone({
 			apiKey: process.env.N8N_AI_PINECONE_API_KEY ?? ''
@@ -196,35 +218,13 @@ export class AIController {
 		// ----------------- Get top chunks matching query -----------------
 		const results = await vectorStore.similaritySearch(question, 3);
 		console.log(">> 🧰 << GOT THESE DOCUMENTS:");
-		// Prepare chunks
 		let out = ""
 		results.forEach((result, i) => {
 			toolHistory.get_n8n_info.push(result.metadata.source);
-			console.log("\t📃", result.metadata.source);
-			out += `--- CHUNK ${i} ---\n${result.pageContent}\n\n`
+			out += `--- N8N DOCUMENTATION DOCUMENT ${i} ---\n${result.pageContent}\n\n`
 		})
-		// ----------------- Prompt -----------------
-		const systemMessage = SystemMessagePromptTemplate.fromTemplate(`
-			You are an automation expert and are tasked to help users answer their questions about n8n.
-			Use the following pieces of context to answer the question at the end.
-			If you don't know the answer, just say that you don't know, don't try to make up an answer.
-			Try to make the answers actionable and easy to follow for users that are just starting with n8n.
-
-			{docs}
-
-			Question: {question}
-			Helpful Answer:
-		`);
-		const systemMessageFormatted = await systemMessage.format({ docs: out, question });
-		const prompt = ChatPromptTemplate.fromMessages([
-			systemMessageFormatted,
-			['human', '{question}'],
-		]);
-		// ----------------- Chain -----------------
-		const chain = prompt.pipe(assistantModel);
-		const response = await chain.invoke({ question });
-		// console.log(">> 🧰 << Final answer:\n", response.content);
-		return response.content;
+		// console.log(">> 🧰 << Final answer:\n", out);
+		return out;
 	}
 
 	async askAssistant(message: string, res: express.Response) {
@@ -242,10 +242,10 @@ export class AIController {
 
 		const n8nInfoTool = new DynamicTool({
 			name: "get_n8n_info",
-			description: "Returns information about n8n. Use this tool to answer questions and solve problems related to n8n, the workflow automation tool.",
+			description: "Returns most relevant pages from the official n8n documentation. Use this tool to answer questions and solve problems related to n8n, the workflow automation tool.",
 			func: async (input: string) => {
 				console.log(">> 🧰 << n8nInfoTool:", input);
-				return (await this.askPineconeChain(input)).toString();
+				return (await this.searchDocsVectorStore(input)).toString();
 			}
 		});
 
@@ -255,10 +255,9 @@ export class AIController {
 			func: async (input: string) => {
 				const communityQuery = `${input} site:https://community.n8n.io/`
 				console.log(">> 🧰 << internetSearchTool:", communityQuery);
-				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 5 });
+				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 5, searchOptions: { time: SearchTimeType.YEAR } });
 				const response = await duckDuckGoSearchTool.invoke(communityQuery);
 				const objectResonse: { link?: string }[] = JSON.parse(response);
-				// toolHistory.internet_search.push(response);
 				objectResonse.forEach((result) => {
 					if (result.link) {
 						toolHistory.internet_search.push(result.link);
