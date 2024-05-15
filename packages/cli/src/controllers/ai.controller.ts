@@ -23,13 +23,12 @@ import { Calculator } from 'langchain/tools/calculator';
 
 const TOOLS_PROMPT = `
 Please use 'get_n8n_info' tool to get information from the official n8n documentation.
-and the 'internet_search' tool to get more info from the internet.
+and the 'internet_search' tool to get more info from the n8n community forum.
 Make sure to always use at least one of these tools to provide the most accurate information.
 Use the 'calculator' tool to perform any arithmetic operations, if necessary.
 You must use only the knowledge acquired from the tools to provide the most accurate information.
 You must not make up any information.
 Make sure to prioritize the information from the official n8n documentation by using the final answer from the 'get_n8n_info' tool.
-If you can't find the answer, just say that you don't know.
 `;
 
 const DEBUG_PROMPT = `
@@ -37,10 +36,15 @@ I need to solve the following problem with n8n.
 ${TOOLS_PROMPT}
 Make sure to take into account all information about the problem that I will provide later to only provide solutions that are related with the problem.
 Your job is to guide me through the solution process step by step so make sure you only provide ONLY ONE, most relevant, suggestion on how to solve the problem at a time.
-Each suggestion should be short and actionable.
-After each suggestion ALWAYS ask the follow-up question to confirm if I need detailed instructions on how to apply the suggestion.
-This follow-up question must be in the form of 'Do you need more detailed instructions on how to ...'
-Only provide detailed instructions if I confirm that I need them. In this case, always use 'get_n8n_info' tool to provide the most accurate information.
+Each suggestion should be very short (maximum 2 sentences) and actionable. Don't repeat already proposed suggestion. Feel free to suggest the first step without using the tools and
+then use the tools to provide more detailed information. But make sure not to give any false information.
+After each suggestion ALWAYS ask two follow-up questions:
+	1. 	Ask me to confirm if I need detailed instructions on how to apply the suggestion.
+			This follow-up question must be in the form of 'Do you need more detailed instructions on how to ...'
+			Only ask this question if the suggestion requires detailed instructions.
+	2. Ask me to confirm if I need another suggestion.
+Only provide detailed instructions if I confirm that I need them. In this case, always use the available tools to provide the most accurate information.
+Once you think there are no more suggestions to provide, let me know, don't just repeat already provided suggestions.
 When providing the solution, always remember that I already have created the workflow and added the node that is causing the problem,
 so always skip the steps that involve creating the workflow from scratch or adding the node to the workflow.
 `;
@@ -220,6 +224,7 @@ export class AIController {
 		console.log(">> 🧰 << GOT THESE DOCUMENTS:");
 		let out = ""
 		results.forEach((result, i) => {
+			console.log("\t📃", result.metadata.source);
 			toolHistory.get_n8n_info.push(result.metadata.source);
 			out += `--- N8N DOCUMENTATION DOCUMENT ${i} ---\n${result.pageContent}\n\n`
 		})
