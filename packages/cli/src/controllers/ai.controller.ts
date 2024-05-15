@@ -228,6 +228,9 @@ export class AIController {
 			toolHistory.get_n8n_info.push(result.metadata.source);
 			out += `--- N8N DOCUMENTATION DOCUMENT ${i} ---\n${result.pageContent}\n\n`
 		})
+		if (results.length === 0) {
+			toolHistory.get_n8n_info.push("NO DOCS FOUND");
+		}
 		// console.log(">> 🧰 << Final answer:\n", out);
 		return out;
 	}
@@ -262,12 +265,15 @@ export class AIController {
 				console.log(">> 🧰 << internetSearchTool:", communityQuery);
 				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 5, searchOptions: { time: SearchTimeType.YEAR } });
 				const response = await duckDuckGoSearchTool.invoke(communityQuery);
-				const objectResonse: { link?: string }[] = JSON.parse(response);
-				objectResonse.forEach((result) => {
+				const objectResponse: { link?: string }[] = JSON.parse(response);
+				objectResponse.forEach((result) => {
 					if (result.link) {
 						toolHistory.internet_search.push(result.link);
 					}
 				});
+				if (toolHistory.internet_search.length === 0) {
+					toolHistory.internet_search.push("NO FORUM PAGES FOUND");
+				}
 				console.log(">> 🧰 << duckDuckGoSearchTool:", response);
 				return response;
 			}
