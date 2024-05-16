@@ -14,7 +14,7 @@ import { PineconeStore } from "@langchain/pinecone";
 import { Pinecone } from '@pinecone-database/pinecone';
 import { DuckDuckGoSearch, SearchTimeType } from "@langchain/community/tools/duckduckgo_search";
 import { Calculator } from 'langchain/tools/calculator';
-import { DEBUG_CONVERSATION_RULES, REACT_CHAT_PROMPT } from '@/aiAssistant/prompts';
+import { DEBUG_CONVERSATION_RULES, FREE_CHAT_CONVERSATION_RULES, REACT_CHAT_PROMPT } from '@/aiAssistant/prompts';
 
 let chatHistory: string[] = [];
 const stringifyHistory = (history: string[]) => history.join('\n');
@@ -166,7 +166,7 @@ export class AIController {
 
 		const n8nInfoTool = new DynamicTool({
 			name: "get_n8n_info",
-			description: "Returns most relevant pages from the official n8n documentation. Use this tool to answer questions and solve problems related to n8n, the workflow automation tool.",
+			description: "Returns most relevant pages from the official n8n documentation. Always use this tool to answer questions and solve problems related to n8n.",
 			func: async (input: string) => {
 				console.log(">> 🧰 << n8nInfoTool:", input);
 				return (await this.searchDocsVectorStore(input)).toString();
@@ -202,7 +202,7 @@ export class AIController {
 		];
 		// ----------------- Agent -----------------
 		const chatPrompt = ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
-		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : DEBUG_CONVERSATION_RULES;
+		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : FREE_CHAT_CONVERSATION_RULES;
 
 		const agent = await createReactAgent({
 			llm: assistantModel,
