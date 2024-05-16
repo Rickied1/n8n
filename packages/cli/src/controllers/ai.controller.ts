@@ -33,6 +33,10 @@ const resetToolHistory = () => {
 	};
 }
 
+const getHumanMessages = (history: string[]) => {
+	return history.filter((message, index) => message.startsWith('Human:'));
+}
+
 const assistantModel = new ChatOpenAI({
 	temperature: 0,
 	openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
@@ -68,7 +72,7 @@ export class AIController {
 		const { nodeType, error, authType, message } = req.body;
 		resetToolHistory();
 		if (message) {
-			await this.askAssistant(`${message }\n`, res);
+			await this.askAssistant(`${message }\n`, res, true);
 			return;
 		}
 		chatHistory = []
@@ -203,6 +207,11 @@ export class AIController {
 		// ----------------- Agent -----------------
 		const chatPrompt = ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
 		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : FREE_CHAT_CONVERSATION_RULES;
+		const humanAskedForSuggestions = getHumanMessages(chatHistory).filter((message) => message.includes('I need another suggestion'));
+
+		if (debug && humanAskedForSuggestions.length >= 3) {
+			message = 'I have asked for too many new suggestions. Please follow your conversation rules for this case.'
+		}
 
 		const agent = await createReactAgent({
 			llm: assistantModel,
@@ -215,7 +224,6 @@ export class AIController {
 			tools,
 		});
 
-		console.log(chatHistory);
 		console.log("\n>> 🤷 <<", message.trim());
 		let response =  '';
 		try {
