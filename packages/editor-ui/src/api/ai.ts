@@ -1,6 +1,6 @@
 import type { IRestApiContext, Schema } from '@/Interface';
 import { makeRestApiRequest } from '@/utils/apiUtils';
-import type { INodeType, NodeError, type IDataObject } from 'n8n-workflow';
+import type { INodeType, INodeTypeDescription, NodeError, type IDataObject } from 'n8n-workflow';
 
 export interface DebugErrorPayload {
 	error: Error;
@@ -104,6 +104,7 @@ export const debugWithAssistant = async (
 		nodeType?: INodeTypeDescription;
 		error?: NodeError;
 		authType?: { name: string; value: string };
+		userTraits?: { nodeVersion?: string; n8nVersion?: string };
 		message?: string;
 	},
 	onChunk: (chunk: string) => void,

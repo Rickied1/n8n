@@ -16,6 +16,8 @@ import { DuckDuckGoSearch, SearchTimeType } from "@langchain/community/tools/duc
 import { Calculator } from 'langchain/tools/calculator';
 import { DEBUG_CONVERSATION_RULES, FREE_CHAT_CONVERSATION_RULES, REACT_CHAT_PROMPT } from '@/aiAssistant/prompts';
 
+// ReAct agent history is string, according to the docs:
+// https://js.langchain.com/v0.1/docs/modules/agents/agent_types/react/#using-with-chat-history
 let chatHistory: string[] = [];
 const stringifyHistory = (history: string[]) => history.join('\n');
 
@@ -37,6 +39,14 @@ const getHumanMessages = (history: string[]) => {
 	return history.filter((message, index) => message.startsWith('Human:'));
 }
 
+// Remove id and position from node parameters since they are not relevant to the assistant
+const removeUnrelevantNodeProps = (parameters: any) => {
+	const newParameters = { ...parameters };
+	delete newParameters.id;
+	delete newParameters.position;
+	return newParameters;
+}
+
 const assistantModel = new ChatOpenAI({
 	temperature: 0,
 	openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
@@ -53,6 +63,7 @@ export class AIController {
 
 	/**
  * Chat with AI assistant that has access to few different tools.
+ * THIS IS THE FREE-CHAT MODE
  */
 	@Post('/chat-with-assistant', { skipAuth: true })
 	async chatWithAssistant(req: AIRequest.AskAssistant, res: express.Response) {
@@ -66,10 +77,11 @@ export class AIController {
 
 	/**
 	 * Debug n8n error using the agent that has access to different tools.
+	 * THIS IS THE DEBUG MODE
 	 */
 	@Post('/debug-with-assistant', { skipAuth: true })
 	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
-		const { nodeType, error, authType, message } = req.body;
+		const { nodeType, error, authType, message, userTraits } = req.body;
 		resetToolHistory();
 		if (message) {
 			await this.askAssistant(`${message }\n`, res, true);
@@ -84,8 +96,9 @@ export class AIController {
 			Can you help me solve this problem in n8n: I am having the following error in my ${nodeType.displayName} node: ${error.message} ${ error.description ? `- ${error.description}` : ''}
 			- Here is some more information about my workflow and myself that you can use to provide a solution:
 				- ${authPrompt}. Use this info to only provide solutions that are compatible with the related to this authentication type and not the others.
-				- This is the JSON object that represents the node that I am having an error in, you can use it to inspect current node parameter values: ${JSON.stringify(error.node)}
-				- I am n8n cloud user, so make sure to account for that in your answer and don't provide solutions that are only available in the self-hosted version.
+				- This is the JSON object that represents the node that I am having an error in, you can use it to inspect current node parameter values: ${JSON.stringify(removeUnrelevantNodeProps(error.node))}
+				- n8n version and deployment type that I am using: ${userTraits.n8nVersion},
+				- Version of the ${nodeType.displayName} node that I am having an error in: ${userTraits.nodeVersion}
 			`;
 
 		await this.askAssistant(userPrompt, res, true);
@@ -207,10 +220,16 @@ export class AIController {
 		// ----------------- Agent -----------------
 		const chatPrompt = ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
 		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : FREE_CHAT_CONVERSATION_RULES;
-		const humanAskedForSuggestions = getHumanMessages(chatHistory).filter((message) => message.includes('I need another suggestion'));
+		const humanAskedForSuggestions = getHumanMessages(chatHistory).filter((message) => {
+			return message.includes('I need another suggestion') || message.includes('I need more detailed instructions');
+		});
 
-		if (debug && humanAskedForSuggestions.length >= 3) {
-			message = 'I have asked for too many new suggestions. Please follow your conversation rules for this case.'
+		if (humanAskedForSuggestions.length >= 3) {
+			if (debug) {
+				message = 'I have asked for too many new suggestions. Please follow your conversation rules for this case.'
+			}
+		} else {
+			message += ' Please only give me information from the official n8n sources.';
 		}
 
 		const agent = await createReactAgent({
@@ -249,6 +268,7 @@ ${toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length ==
 \`\`\`
 	`);
 		res.write('\n');
+		res.write('');
 		res.end('__END__');
 	}
 

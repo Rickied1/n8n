@@ -24,6 +24,7 @@ import { MAX_DISPLAY_DATA_SIZE } from '@/constants';
 import VueMarkdown from 'vue-markdown-render';
 import type { BaseTextKey } from '@/plugins/i18n';
 import { getMainAuthField, getNodeAuthOptions, getNodeCredentialForSelectedAuthType } from '@/utils/nodeTypesUtils';
+import { useSettingsStore } from '@/stores/settings.store';
 
 const props = defineProps({
 	error: {

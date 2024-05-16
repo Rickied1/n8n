@@ -187,6 +187,7 @@ export interface AIAssistantDebugPayload {
 	nodeType: INodeTypeDescription
 	error: NodeError;
 	authType?: { name: string; value: string };
+	userTraits: { nodeVersion?: string; n8nVersion?: string };
 	message?: string;
 }
 
