@@ -5,7 +5,6 @@ import { NodeTypes } from '@/NodeTypes';
 import express from 'express';
 import {
 	ChatPromptTemplate,
-	PromptTemplate,
 	SystemMessagePromptTemplate,
 } from '@langchain/core/prompts';
 import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
@@ -15,7 +14,7 @@ import { PineconeStore } from "@langchain/pinecone";
 import { Pinecone } from '@pinecone-database/pinecone';
 import { DuckDuckGoSearch, SearchTimeType } from "@langchain/community/tools/duckduckgo_search";
 import { Calculator } from 'langchain/tools/calculator';
-import { DEBUG_PROMPT, REACT_CHAT_PROMPT, TOOLS_PROMPT } from '@/aiAssistant/prompts';
+import { DEBUG_CONVERSATION_RULES, REACT_CHAT_PROMPT } from '@/aiAssistant/prompts';
 
 let chatHistory: string[] = [];
 const stringifyHistory = (history: string[]) => history.join('\n');
@@ -54,13 +53,11 @@ export class AIController {
 	@Post('/chat-with-assistant', { skipAuth: true })
 	async chatWithAssistant(req: AIRequest.AskAssistant, res: express.Response) {
 		const { message, newSession } = req.body;
-		let userMessage = `${message }\n${TOOLS_PROMPT}`;
 		if (newSession) {
 			chatHistory = [];
-			userMessage = `${message }\n${TOOLS_PROMPT}`
 		}
 		resetToolHistory();
-		await this.askAssistant(userMessage, res);
+		await this.askAssistant(message, res);
 	}
 
 	/**
@@ -71,7 +68,7 @@ export class AIController {
 		const { nodeType, error, authType, message } = req.body;
 		resetToolHistory();
 		if (message) {
-			await this.askAssistant(`${message }\n${TOOLS_PROMPT}`, res);
+			await this.askAssistant(`${message }\n`, res);
 			return;
 		}
 		chatHistory = []
@@ -80,15 +77,14 @@ export class AIController {
 			authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(error.node.credentials)}`
 		}
 		const userPrompt = `
-			${DEBUG_PROMPT}
-			My problem is:
-				- I am having the following error in my ${nodeType.displayName} node: ${error.message} ${ error.description ? `- ${error.description}` : ''}
-				- Here is some more information from my workflow:
+			Can you help me solve this problem in n8n: I am having the following error in my ${nodeType.displayName} node: ${error.message} ${ error.description ? `- ${error.description}` : ''}
+			- Here is some more information about my workflow and myself that you can use to provide a solution:
 				- ${authPrompt}. Use this info to only provide solutions that are compatible with the related to this authentication type and not the others.
 				- This is the JSON object that represents the node that I am having an error in, you can use it to inspect current node parameter values: ${JSON.stringify(error.node)}
 				- I am n8n cloud user, so make sure to account for that in your answer and don't provide solutions that are only available in the self-hosted version.
 			`;
-		await this.askAssistant(userPrompt, res);
+
+		await this.askAssistant(userPrompt, res, true);
 	}
 
 	/**
@@ -155,7 +151,7 @@ export class AIController {
 		return out;
 	}
 
-	async askAssistant(message: string, res: express.Response) {
+	async askAssistant(message: string, res: express.Response, debug?: boolean) {
 		// ----------------- Tools -----------------
 		const calculatorTool = new DynamicTool({
 			name: "calculator",
@@ -206,6 +202,7 @@ export class AIController {
 		];
 		// ----------------- Agent -----------------
 		const chatPrompt = ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
+		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : DEBUG_CONVERSATION_RULES;
 
 		const agent = await createReactAgent({
 			llm: assistantModel,
@@ -224,8 +221,8 @@ export class AIController {
 		try {
 			const result = await agentExecutor.invoke({
 				input: message,
-				verbose: true,
 				chat_history: stringifyHistory(chatHistory),
+				conversation_rules: conversationRules,
 			});
 			response = result.output;
 		} catch (error) {
@@ -240,7 +237,7 @@ export class AIController {
 -------------- DEBUG INFO --------------
 ${toolHistory.get_n8n_info.length > 0 ? `N8N DOCS DOCUMENTS USED: ${toolHistory.get_n8n_info.join(', ')}` : ''}
 ${toolHistory.internet_search.length > 0 ? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}` : ''}
-${toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length === 0 ? 'NO TOOLS USED' : ''}
+${toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length === 0 ? '\nNO TOOLS USED' : ''}
 \`\`\`
 	`);
 		// res.end('__END__');
