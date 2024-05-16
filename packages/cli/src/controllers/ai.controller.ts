@@ -170,7 +170,7 @@ export class AIController {
 
 		const n8nInfoTool = new DynamicTool({
 			name: "get_n8n_info",
-			description: "Returns most relevant pages from the official n8n documentation. Always use this tool to answer questions and solve problems related to n8n.",
+			description: "Has access to the most relevant pages from the official n8n documentation.",
 			func: async (input: string) => {
 				console.log(">> 🧰 << n8nInfoTool:", input);
 				return (await this.searchDocsVectorStore(input)).toString();
@@ -179,7 +179,7 @@ export class AIController {
 
 		const internetSearchTool = new DynamicTool({
 			name: "internet_search",
-			description: "Searches the n8n community forum for the answer to a question. Use this tool to find answers to questions that are not in the n8n documentation.",
+			description: "Searches the n8n community forum for the answer to a question.",
 			func: async (input: string) => {
 				const communityQuery = `${input} site:https://community.n8n.io/`
 				console.log(">> 🧰 << internetSearchTool:", communityQuery);
@@ -248,7 +248,8 @@ ${toolHistory.internet_search.length > 0 ? `FORUM PAGES USED: ${toolHistory.inte
 ${toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length === 0 ? '\nNO TOOLS USED' : ''}
 \`\`\`
 	`);
-		// res.end('__END__');
+		res.write('\n');
+		res.end('__END__');
 	}
 
 }

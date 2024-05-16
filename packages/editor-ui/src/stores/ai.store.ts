@@ -79,7 +79,31 @@ export const useAIStore = defineStore('ai', () => {
 	function onMessageReceived(messageChunk: string) {
 		waitingForResponse.value = false;
 		if (messageChunk.length === 0) return;
-		if (messageChunk === '__END__') return;
+		if (messageChunk === '__END__') {
+			const followUpActions = [
+				{ label: 'I need more detailed instructions', key: 'more_details' },
+				{ label: 'I need another suggestion', key: 'another_suggestion' },
+			];
+			const newMessageId = Math.random().toString();
+			messages.value.push({
+				createdAt: new Date().toISOString(),
+				transparent: true,
+				key: 'QuickReplies',
+				sender: 'bot',
+				type: 'component',
+				id: newMessageId,
+				arguments: {
+					suggestions: followUpActions,
+					async onReplySelected({ label, key }: { action: string; label: string }) {
+						await sendMessage(label);
+						// Remove the quick replies so only user message is shown
+						messages.value = messages.value.filter((message) => {
+							return message.id !== newMessageId;
+						});
+					},
+				},
+			});
+		}
 
 		if (getLastMessage()?.sender !== 'bot') {
 			messages.value.push({
