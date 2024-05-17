@@ -497,7 +497,7 @@ importers:
     dependencies:
       '@langchain/community':
         specifier: 0.0.53
-        version: 0.0.53(@pinecone-database/pinecone@2.1.0)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2)
+        version: 0.0.53(@pinecone-database/pinecone@2.1.0)(duck-duck-scrape@2.2.5)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2)
       '@langchain/core':
         specifier: 0.1.61
         version: 0.1.61
@@ -588,6 +588,9 @@ importers:
       dotenv:
         specifier: 8.6.0
         version: 8.6.0
+      duck-duck-scrape:
+        specifier: ^2.2.5
+        version: 2.2.5
       express:
         specifier: 4.19.2
         version: 4.19.2
@@ -650,7 +653,7 @@ importers:
         version: 9.0.2
       langchain:
         specifier: 0.1.36
-        version: 0.1.36(@pinecone-database/pinecone@2.1.0)(axios@1.6.7)(handlebars@4.7.8)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2)
+        version: 0.1.36(@pinecone-database/pinecone@2.1.0)(axios@1.6.7)(duck-duck-scrape@2.2.5)(handlebars@4.7.8)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2)
       ldapts:
         specifier: 4.2.6
         version: 4.2.6
@@ -6030,7 +6033,7 @@ packages:
       - supports-color
     dev: false
 
-  /@langchain/community@0.0.53(@pinecone-database/pinecone@2.1.0)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2):
+  /@langchain/community@0.0.53(@pinecone-database/pinecone@2.1.0)(duck-duck-scrape@2.2.5)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2):
     resolution: {integrity: sha512-iFqZPt4MRssGYsQoKSXWJQaYTZCC7WNuilp2JCCs3wKmJK3l6mR0eV+PDrnT+TaDHUVxt/b0rwgM0sOiy0j2jA==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -6315,6 +6318,7 @@ packages:
       '@langchain/core': 0.1.61
       '@langchain/openai': 0.0.28
       '@pinecone-database/pinecone': 2.1.0
+      duck-duck-scrape: 2.2.5
       expr-eval: 2.0.2
       flat: 5.0.2
       ioredis: 5.3.2
@@ -13552,6 +13556,13 @@ packages:
       wordwrap: 1.0.0
     dev: false
 
+  /duck-duck-scrape@2.2.5:
+    resolution: {integrity: sha512-RTu/Ag5LhgD/j1l2zVGCwTINBoEYCffl58nMoBjtXWJG8tTex72h3gxpDjAr8jVqFaBvhgASNKTUsE31JeqYgw==}
+    dependencies:
+      html-entities: 2.5.2
+      needle: 3.3.1
+    dev: false
+
   /duck@0.1.12:
     resolution: {integrity: sha512-wkctla1O6VfP89gQ+J/yDesM0S7B7XLXjKGzXxMDVFg7uEn706niAtyYovKbyq1oT9YwDcly721/iUWoc8MVRg==}
     dependencies:
@@ -15702,6 +15713,10 @@ packages:
       whatwg-encoding: 3.1.1
     dev: true
 
+  /html-entities@2.5.2:
+    resolution: {integrity: sha512-K//PSRMQk4FZ78Kyau+mZurHn3FH0Vwr+H36eE0rPbeYkRRi9YxceYPhuN60UwWorxyKHhqoAJl2OFKa4BVtaA==}
+    dev: false
+
   /html-escaper@2.0.2:
     resolution: {integrity: sha512-H2iMtd0I4Mt5eYiapRdIDjp+XzelXQ0tFE4JS7YFwFevXXMmOp9myNrUvCg0D6ws8iqkRPBfKHgbwig1SmlLfg==}
 
@@ -17672,7 +17687,7 @@ packages:
       - voy-search
     dev: false
 
-  /langchain@0.1.36(@pinecone-database/pinecone@2.1.0)(axios@1.6.7)(handlebars@4.7.8)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2):
+  /langchain@0.1.36(@pinecone-database/pinecone@2.1.0)(axios@1.6.7)(duck-duck-scrape@2.2.5)(handlebars@4.7.8)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2):
     resolution: {integrity: sha512-NTbnCL/jKWIeEI//Nm1oG8nhW3vkYWvEMr1MPotmTThTfeKfO87eV/OAzAyh6Ruy6GFs/qofRgQZGIe6XvXTNQ==}
     engines: {node: '>=18'}
     peerDependencies:
@@ -17835,7 +17850,7 @@ packages:
         optional: true
     dependencies:
       '@anthropic-ai/sdk': 0.9.1
-      '@langchain/community': 0.0.53(@pinecone-database/pinecone@2.1.0)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2)
+      '@langchain/community': 0.0.53(@pinecone-database/pinecone@2.1.0)(duck-duck-scrape@2.2.5)(ioredis@5.3.2)(jsonwebtoken@9.0.2)(lodash@4.17.21)(mysql2@3.9.7)(pg@8.11.3)(ws@8.14.2)
       '@langchain/core': 0.1.61
       '@langchain/openai': 0.0.28
       '@langchain/textsplitters': 0.0.0
@@ -19130,6 +19145,15 @@ packages:
 
   /natural-orderby@2.0.3:
     resolution: {integrity: sha512-p7KTHxU0CUrcOXe62Zfrb5Z13nLvPhSWR/so3kFulUQU0sgUll2Z0LwpsLN351eOOD+hRGu/F1g+6xDfPeD++Q==}
+    dev: false
+
+  /needle@3.3.1:
+    resolution: {integrity: sha512-6k0YULvhpw+RoLNiQCRKOl09Rv1dPLr8hHnVjHqdolKwDrdNyk+Hmrthi4lIGPPz3r39dLx0hsF5s40sZ3Us4Q==}
+    engines: {node: '>= 4.4.x'}
+    hasBin: true
+    dependencies:
+      iconv-lite: 0.6.3
+      sax: 1.2.4
     dev: false
 
   /negotiator@0.6.3:

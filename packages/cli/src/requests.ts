@@ -6,8 +6,10 @@ import type {
 	INodeCredentialTestRequest,
 	INodeCredentials,
 	INodeParameters,
+	INodeTypeDescription,
 	INodeTypeNameVersion,
 	IUser,
+	NodeError,
 } from 'n8n-workflow';
 
 import { Expose } from 'class-transformer';
@@ -177,6 +179,45 @@ export function hasSharing(
 
 export declare namespace AIRequest {
 	export type GenerateCurl = AuthenticatedRequest<{}, {}, AIGenerateCurlPayload>;
+	export type DebugChat = AuthenticatedRequest<{}, {}, AIDebugChatPayload>;
+	export type AssistantDebug = AuthenticatedRequest<{}, {}, AIAssistantDebugPayload>;
+	export type AskAssistant = AuthenticatedRequest<{}, {}, AskAssistantPayload>;
+}
+
+export type SchemaType =
+	| 'string'
+	| 'number'
+	| 'boolean'
+	| 'bigint'
+	| 'symbol'
+	| 'array'
+	| 'object'
+	| 'function'
+	| 'null'
+	| 'undefined';
+
+export type Schema = { type: SchemaType; key?: string; value: string | Schema[]; path: string };
+
+export interface AIDebugChatPayload {
+	text?: string;
+	sessionId: string;
+	error?: NodeError;
+	schemas?: Array<{ node_name: string; schema: Schema }>;
+	nodes?: string[];
+	parameters?: IDataObject;
+}
+
+export interface AIAssistantDebugPayload {
+	nodeType: INodeTypeDescription
+	error: NodeError;
+	authType?: { name: string; value: string };
+	userTraits: { nodeVersion?: string; n8nVersion?: string };
+	message?: string;
+}
+
+export interface AskAssistantPayload {
+	message: string;
+	newSession?: boolean;
 }
 
 export interface AIGenerateCurlPayload {

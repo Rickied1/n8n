@@ -1,5 +1,6 @@
 <template>
 	<div ref="nodeViewRootRef" :class="$style['content']">
+		<AIFlow />
 		<div
 			id="node-view-root"
 			class="node-view-root do-not-select"
@@ -395,6 +396,7 @@ import type { ProjectSharingData } from '@/features/projects/projects.types';
 import { useAIStore } from '@/stores/ai.store';
 import { useStorage } from '@/composables/useStorage';
 import { isJSPlumbEndpointElement } from '@/utils/typeGuards';
+import AIFlow from './AIFlow/AIFlow.vue';
 
 interface AddNodeOptions {
 	position?: XYPosition;
@@ -426,6 +428,7 @@ export default defineComponent({
 		ContextMenu,
 		SetupWorkflowCredentialsButton,
 		NextStepPopup,
+		AIFlow,
 	},
 	async beforeRouteLeave(to, from, next) {
 		if (

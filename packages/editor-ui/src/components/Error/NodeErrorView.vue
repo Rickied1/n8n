@@ -19,6 +19,8 @@ import type {
 import { sanitizeHtml } from '@/utils/htmlUtils';
 import { MAX_DISPLAY_DATA_SIZE } from '@/constants';
 import type { BaseTextKey } from '@/plugins/i18n';
+import { getMainAuthField, getNodeAuthOptions } from '@/utils/nodeTypesUtils';
+import { useAIStore } from '@/stores/ai.store';
 
 const props = defineProps({
 	error: {
@@ -34,6 +36,7 @@ const i18n = useI18n();
 const nodeTypesStore = useNodeTypesStore();
 const ndvStore = useNDVStore();
 const rootStore = useRootStore();
+const aiStore = useAIStore();
 
 const displayCause = computed(() => {
 	return JSON.stringify(props.error.cause).length < MAX_DISPLAY_DATA_SIZE;
@@ -359,6 +362,22 @@ function copySuccess() {
 		type: 'info',
 	});
 }
+
+async function debugWithAssistant() {
+	const nodeType = useNodeTypesStore().getNodeType(
+		props.error.node?.type,
+		props.error.node?.typeVersion,
+	);
+	if (!nodeType) {
+		return;
+	}
+	const authField = getMainAuthField(nodeType);
+	const credentialInUse = props.error.node.parameters[authField?.name ?? ''];
+	const availableAuthOptions = getNodeAuthOptions(nodeType);
+	const selectedOption = availableAuthOptions.find((option) => option.value === credentialInUse);
+	aiStore.debugSessionInProgress = true;
+	await aiStore.debugWithAssistant(nodeType, props.error, selectedOption);
+}
 </script>
 
 <template>
@@ -368,6 +387,9 @@ function copySuccess() {
 				<div>
 					{{ getErrorMessage() }}
 				</div>
+				<N8nButton type="tertiary" size="small" @click="debugWithAssistant">
+					{{ i18n.baseText('nodeErrorView.askAssistant') }}
+				</N8nButton>
 			</div>
 			<div
 				v-if="error.description || error.context?.descriptionKey"

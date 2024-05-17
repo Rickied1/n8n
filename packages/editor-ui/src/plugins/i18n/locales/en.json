@@ -1056,6 +1056,7 @@
 	"nodeCredentials.showMessage.message": "Nodes that used credential \"{oldCredentialName}\" have been updated to use \"{newCredentialName}\"",
 	"nodeCredentials.showMessage.title": "Node credential updated",
 	"nodeCredentials.updateCredential": "Update Credential",
+	"nodeErrorView.askAssistant": "🧞 Ask Assistant",
 	"nodeErrorView.cause": "Cause",
 	"nodeErrorView.copyToClipboard": "Copy to Clipboard",
 	"nodeErrorView.copyToClipboard.tooltip": "Copy error details for debugging. Copied data may contain sensitive information. Proceed with caution when sharing.",
