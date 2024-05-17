@@ -192,20 +192,24 @@ export class AIController {
 
 		const internetSearchTool = new DynamicTool({
 			name: "internet_search",
-			description: "Searches the n8n community forum for the answer to a question.",
+			description: "Searches the n8n internet sources for the answer to a question.",
 			func: async (input: string) => {
-				const communityQuery = `${input} site:https://community.n8n.io/`
+				const communityQuery = `${input} site:https://community.n8n.io OR site:https://blog.n8n.io OR site:https://n8n.io`
 				console.log(">> 🧰 << internetSearchTool:", communityQuery);
-				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 5, searchOptions: { time: SearchTimeType.YEAR } });
+				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 10, searchOptions: { time: SearchTimeType.YEAR } });
 				const response = await duckDuckGoSearchTool.invoke(communityQuery);
-				const objectResponse: { link?: string }[] = JSON.parse(response);
-				objectResponse.forEach((result) => {
-					if (result.link) {
-						toolHistory.internet_search.push(result.link);
+				try {
+					const objectResponse: { link?: string }[] = JSON.parse(response);
+					objectResponse.forEach((result) => {
+						if (result.link) {
+							toolHistory.internet_search.push(result.link);
+						}
+					});
+					if (toolHistory.internet_search.length === 0) {
+						toolHistory.internet_search.push("NO FORUM PAGES FOUND");
 					}
-				});
-				if (toolHistory.internet_search.length === 0) {
-					toolHistory.internet_search.push("NO FORUM PAGES FOUND");
+				} catch (error) {
+					console.error("Error parsing search results", error);
 				}
 				console.log(">> 🧰 << duckDuckGoSearchTool:", response);
 				return response;
