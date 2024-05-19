@@ -1,14 +1,3 @@
-// import { Post, RestController } from '@/decorators';
-// import { AIRequest } from '@/requests';
-// import { AIService } from '@/services/ai.service';
-// import { FailedDependencyError } from '@/errors/response-errors/failed-dependency.error';
-
-// @RestController('/ai')
-// export class AIController {
-// 	constructor(private readonly aiService: AIService) {}
-
-
-// }
 import { Post, RestController } from '@/decorators';
 import { AIRequest } from '@/requests';
 import { AIService } from '@/services/ai.service';
@@ -30,9 +19,14 @@ import { FailedDependencyError } from '@/errors/response-errors/failed-dependenc
 
 // ReAct agent history is string, according to the docs:
 // https://js.langchain.com/v0.1/docs/modules/agents/agent_types/react/#using-with-chat-history
+// TODO:
+//	- 	Add sessions support
+//	- 	We can use UserMessage and SystemMessage classes to make it more readable
+//		but in the end it has to render to a string
 let chatHistory: string[] = [];
 const stringifyHistory = (history: string[]) => history.join('\n');
 
+// Tool history is just for debugging
 let toolHistory = {
 	calculator: [] as string[],
 	internet_search: [] as string[],
@@ -74,9 +68,9 @@ export class AIController {
 	) {}
 
 	/**
- * Chat with AI assistant that has access to few different tools.
- * THIS IS THE FREE-CHAT MODE
- */
+ 	* Chat with AI assistant that has access to few different tools.
+ 	* THIS IS THE FREE-CHAT MODE
+ 	*/
 	@Post('/chat-with-assistant', { skipAuth: true })
 	async chatWithAssistant(req: AIRequest.AskAssistant, res: express.Response) {
 		const { message, newSession } = req.body;
@@ -119,7 +113,7 @@ export class AIController {
 	/**
 	 * Chat with pinecone vector store that contains n8n documentation.
 	 * This endpoint is not used in the assistant currently but can be used to test
-	 * access to n8n docs without the agent if needed.
+	 * access to n8n docs without the agent if needed (cheaper & faster, but less accurate, option).
 	 */
 	@Post('/ask-pinecone')
 	async askPinecone(req: AIRequest.DebugChat, res: express.Response) {
@@ -185,7 +179,13 @@ export class AIController {
 		const results = await vectorStore.similaritySearch(question, 3);
 		console.log(">> 🧰 << GOT THESE DOCUMENTS:");
 		let out = ""
+		// This will make sure that we don't repeat the same document in the output
+		const documents: string[] = [];
 		results.forEach((result, i) => {
+			if (documents.includes(result.metadata.source)) {
+				return;
+			}
+			documents.push(result.metadata.source);
 			console.log("\t📃", result.metadata.source);
 			toolHistory.get_n8n_info.push(result.metadata.source);
 			out += `--- N8N DOCUMENTATION DOCUMENT ${i} ---\n${result.pageContent}\n\n`
@@ -193,7 +193,6 @@ export class AIController {
 		if (results.length === 0) {
 			toolHistory.get_n8n_info.push("NO DOCS FOUND");
 		}
-		// console.log(">> 🧰 << Final answer:\n", out);
 		return out;
 	}
 
@@ -250,6 +249,8 @@ export class AIController {
 			n8nInfoTool,
 			internetSearchTool,
 		];
+
+		const toolNames = tools.map((tool) => tool.name);
 		// ----------------- Agent -----------------
 		const chatPrompt = ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
 		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : FREE_CHAT_CONVERSATION_RULES;
@@ -274,6 +275,7 @@ export class AIController {
 		const agentExecutor = new AgentExecutor({
 			agent,
 			tools,
+			returnIntermediateSteps: true,
 		});
 
 		console.log("\n>> 🤷 <<", message.trim());
@@ -283,12 +285,23 @@ export class AIController {
 				input: message,
 				chat_history: stringifyHistory(chatHistory),
 				conversation_rules: conversationRules,
+				tool_names: toolNames,
 			});
 			response = result.output;
+			// console.log();
+			// console.log('--------------------- 📋 INTERMEDIATE STEPS ------------------------------------');
+			// result.intermediateSteps.forEach((step) => {
+			// 	console.log('🦾', step.action.toString());
+			// 	console.log('🧠', step.observation);
+			// });
+			// console.log('-----------------------------------------------------------------------------');
+			// console.log();
 		} catch (error) {
+			// TODO: This can be handled by agentExecutor
 			response = error.toString().replace(/Error: Could not parse LLM output: /, '');
 		}
 		console.log(">> 🤖 <<", response);
+
 		chatHistory.push(`Human: ${message}`);
 		chatHistory.push(`Assistant: ${response}`);
 		res.write(response + '\n \n');
