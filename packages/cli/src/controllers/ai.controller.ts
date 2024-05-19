@@ -285,7 +285,7 @@ export class AIController {
 		console.log("\n>> 🤷 <<", message.trim());
 		let response =  '';
 		try {
-			// TODO: Add streaming
+			// TODO: Add streaming & LangSmith tracking
 			const result = await agentExecutor.invoke({
 				input: message,
 				chat_history: stringifyHistory(chatHistory),
