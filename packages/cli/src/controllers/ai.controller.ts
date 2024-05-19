@@ -33,6 +33,8 @@ let toolHistory = {
 	get_n8n_info: [] as string[],
 };
 
+const INTERNET_TOOL_SITES = ['https://community.n8n.io', 'https://blog.n8n.io', 'https://n8n.io'];
+
 const resetToolHistory = () => {
 	toolHistory = {
 		calculator: [],
@@ -99,7 +101,7 @@ export class AIController {
 			authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(error.node.credentials)}`
 		}
 		const userPrompt = `
-			Can you help me solve this problem in n8n: I am having the following error in my ${nodeType.displayName} node: ${error.message} ${ error.description ? `- ${error.description}` : ''}
+			I am having the following error in my ${nodeType.displayName} node: ${error.message} ${ error.description ? `- ${error.description}` : ''}
 			- Here is some more information about my workflow and myself that you can use to provide a solution:
 				- ${authPrompt}. Use this info to only provide solutions that are compatible with the related to this authentication type and not the others.
 				- This is the JSON object that represents the node that I am having an error in, you can use it to inspect current node parameter values: ${JSON.stringify(removeUnrelevantNodeProps(error.node))}
@@ -188,7 +190,7 @@ export class AIController {
 			documents.push(result.metadata.source);
 			console.log("\t📃", result.metadata.source);
 			toolHistory.get_n8n_info.push(result.metadata.source);
-			out += `--- N8N DOCUMENTATION DOCUMENT ${i} ---\n${result.pageContent}\n\n`
+			out += `--- N8N DOCUMENTATION DOCUMENT ${i+1} ---\n${result.pageContent}\n\n`
 		})
 		if (results.length === 0) {
 			toolHistory.get_n8n_info.push("NO DOCS FOUND");
@@ -222,10 +224,10 @@ export class AIController {
 			name: "internet_search",
 			description: "Searches the n8n internet sources for the answer to a question.",
 			func: async (input: string) => {
-				const communityQuery = `${input} site:https://community.n8n.io OR site:https://blog.n8n.io OR site:https://n8n.io`
-				console.log(">> 🧰 << internetSearchTool:", communityQuery);
-				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 10, searchOptions: { time: SearchTimeType.YEAR } });
-				const response = await duckDuckGoSearchTool.invoke(communityQuery);
+				const searchQuery = `${input} site:${INTERNET_TOOL_SITES.join(' OR site:')}`
+				console.log(">> 🧰 << internetSearchTool:", searchQuery);
+				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 10 });
+				const response = await duckDuckGoSearchTool.invoke(searchQuery);
 				try {
 					const objectResponse: { link?: string }[] = JSON.parse(response);
 					objectResponse.forEach((result) => {
@@ -253,11 +255,13 @@ export class AIController {
 		const toolNames = tools.map((tool) => tool.name);
 		// ----------------- Agent -----------------
 		const chatPrompt = ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
+		// Different conversation rules for debug and free-chat modes
 		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : FREE_CHAT_CONVERSATION_RULES;
 		const humanAskedForSuggestions = getHumanMessages(chatHistory).filter((message) => {
 			return message.includes('I need another suggestion') || message.includes('I need more detailed instructions');
 		});
 
+		// Hard-stop if human asks for too many suggestions
 		if (humanAskedForSuggestions.length >= 3) {
 			if (debug) {
 				message = 'I have asked for too many new suggestions. Please follow your conversation rules for this case.'
@@ -281,6 +285,7 @@ export class AIController {
 		console.log("\n>> 🤷 <<", message.trim());
 		let response =  '';
 		try {
+			// TODO: Add streaming
 			const result = await agentExecutor.invoke({
 				input: message,
 				chat_history: stringifyHistory(chatHistory),
