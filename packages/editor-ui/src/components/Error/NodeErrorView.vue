@@ -1,6 +1,5 @@
 <script lang="ts" setup>
 import { useI18n } from '@/composables/useI18n';
-import type { PropType } from 'vue';
 import { computed } from 'vue';
 import { useClipboard } from '@/composables/useClipboard';
 import { useToast } from '@/composables/useToast';
@@ -24,13 +23,11 @@ import { useAIStore } from '@/stores/ai.store';
 import { chatEventBus } from '@n8n/chat/event-buses/chatEventBus';
 import { useUsersStore } from '@/stores/users.store';
 
-const props = defineProps({
-	error: {
-		type: Object as PropType<NodeError | NodeApiError | NodeOperationError>,
-		required: true,
-	},
-});
+type Props = {
+	error: NodeError | NodeApiError | NodeOperationError;
+};
 
+const props = defineProps<Props>();
 const clipboard = useClipboard();
 const toast = useToast();
 const i18n = useI18n();
@@ -42,7 +39,7 @@ const aiStore = useAIStore();
 const userStore = useUsersStore();
 
 const displayCause = computed(() => {
-	return JSON.stringify(props.error.cause).length < MAX_DISPLAY_DATA_SIZE;
+	return JSON.stringify(props.error.cause ?? '').length < MAX_DISPLAY_DATA_SIZE;
 });
 
 const parameters = computed<INodeProperties[]>(() => {
@@ -189,21 +186,23 @@ function addItemIndexSuffix(message: string): string {
 }
 
 function getErrorMessage(): string {
-	const baseErrorMessage = '';
 	let message = '';
 
 	const isSubNodeError =
 		props.error.name === 'NodeOperationError' &&
 		(props.error as NodeOperationError).functionality === 'configuration-node';
+	const isNonEmptyString = (value?: unknown): value is string =>
+		!!value && typeof value === 'string';
 
 	if (isSubNodeError) {
 		message = i18n.baseText('nodeErrorView.errorSubNode', {
 			interpolate: { node: props.error.node.name },
 		});
 	} else if (
-		props.error.message === props.error.description ||
-		!props.error.context?.messageTemplate
+		isNonEmptyString(props.error.message) &&
+		(props.error.message === props.error.description || !props.error.context?.messageTemplate)
 	) {
+<<<<<<< HEAD
 		let errorMessage = props.error.message;
 		if (!errorMessage) {
 			errorMessage = props.error.messages.join(', ');
@@ -215,6 +214,17 @@ function getErrorMessage(): string {
 		message =
 			baseErrorMessage +
 			(props.error.context.messageTemplate as string).replace(/%%PARAMETER%%/g, parameterName);
+=======
+		message = props.error.message;
+	} else if (
+		isNonEmptyString(props.error.context?.messageTemplate) &&
+		isNonEmptyString(props.error.context?.parameter)
+	) {
+		const parameterName = parameterDisplayName(props.error.context.parameter);
+		message = props.error.context.messageTemplate.replace(/%%PARAMETER%%/g, parameterName);
+	} else if (Array.isArray(props.error.messages) && props.error.messages.length > 0) {
+		message = props.error.messages[0];
+>>>>>>> master
 	}
 
 	return addItemIndexSuffix(message);
@@ -409,7 +419,7 @@ async function openAssistant() {
 <template>
 	<div class="node-error-view">
 		<div class="node-error-view__header">
-			<div class="node-error-view__header-message">
+			<div class="node-error-view__header-message" data-test-id="node-error-message">
 				<div>
 					{{ getErrorMessage() }}
 				</div>
@@ -419,6 +429,7 @@ async function openAssistant() {
 			</div>
 			<div
 				v-if="error.description || error.context?.descriptionKey"
+				data-test-id="node-error-description"
 				class="node-error-view__header-description"
 				v-html="getErrorDescription()"
 			></div>

@@ -837,13 +837,10 @@ export default defineComponent({
 			return Boolean(this.workflowsStore.subWorkflowExecutionError);
 		},
 		workflowRunErrorAsNodeError(): NodeError {
-			return {
-				node: this.node,
-				messages: [this.workflowRunData?.[this.node?.name]?.[this.runIndex]?.error?.message ?? ''],
-			} as NodeError;
+			return this.workflowRunData?.[this.node?.name]?.[this.runIndex]?.error as NodeError;
 		},
 		hasRunError(): boolean {
-			return Boolean(this.node && this.workflowRunData?.[this.node.name]?.[this.runIndex]?.error);
+			return Boolean(this.node && this.workflowRunErrorAsNodeError);
 		},
 		executionHints(): NodeHint[] {
 			if (this.hasNodeRun) {
@@ -1021,6 +1018,24 @@ export default defineComponent({
 		showIoSearchNoMatchContent(): boolean {
 			return this.hasNodeRun && !this.inputData.length && !!this.search;
 		},
+		parentNodeOutputData(): INodeExecutionData[] {
+			const workflow = this.workflowsStore.getCurrentWorkflow();
+
+			const parentNode = workflow.getParentNodesByDepth(this.node.name)[0];
+			let parentNodeData: INodeExecutionData[] = [];
+
+			if (parentNode?.name) {
+				parentNodeData = this.nodeHelpers.getNodeInputData(
+					workflow.getNode(parentNode?.name),
+					this.runIndex,
+					this.outputIndex,
+					'input',
+					this.connectionType,
+				);
+			}
+
+			return parentNodeData;
+		},
 	},
 	watch: {
 		node(newNode: INodeUi, prevNode: INodeUi) {
@@ -1118,19 +1133,18 @@ export default defineComponent({
 		},
 		shouldHintBeDisplayed(hint: NodeHint): boolean {
 			const { location, whenToDisplay } = hint;
+
 			if (location) {
-				if (location === 'ndv') {
-					return true;
+				if (location === 'ndv' && !['input', 'output'].includes(this.paneType)) {
+					return false;
 				}
-				if (location === 'inputPane' && this.paneType === 'input') {
-					return true;
-				}
-
-				if (location === 'outputPane' && this.paneType === 'output') {
-					return true;
+				if (location === 'inputPane' && this.paneType !== 'input') {
+					return false;
 				}
 
-				return false;
+				if (location === 'outputPane' && this.paneType !== 'output') {
+					return false;
+				}
 			}
 
 			if (whenToDisplay === 'afterExecution' && !this.hasNodeRun) {
@@ -1150,7 +1164,12 @@ export default defineComponent({
 
 				if (workflowNode) {
 					const executionHints = this.executionHints;
-					const nodeHints = NodeHelpers.getNodeHints(workflow, workflowNode, this.nodeType);
+					const nodeHints = NodeHelpers.getNodeHints(workflow, workflowNode, this.nodeType, {
+						runExecutionData: this.workflowExecution?.data ?? null,
+						runIndex: this.runIndex,
+						connectionInputData: this.parentNodeOutputData,
+					});
+
 					return executionHints.concat(nodeHints).filter(this.shouldHintBeDisplayed);
 				}
 			}
