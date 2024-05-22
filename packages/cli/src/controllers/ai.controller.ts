@@ -28,6 +28,7 @@ import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
+import { ApplicationError } from 'n8n-workflow';
 
 // ReAct agent history is string, according to the docs:
 // https://js.langchain.com/v0.1/docs/modules/agents/agent_types/react/#using-with-chat-history
@@ -67,7 +68,7 @@ const errorSuggestionSchema = z.object({
 		codeDiff: z
 			.string()
 			.optional()
-			.describe(`Return edits similar to unified diffs that 'diff -U0' would produce.`),
+			.describe('Return edits similar to unified diffs that `diff -U0` would produce.'),
 	}),
 });
 
@@ -78,11 +79,11 @@ const followUpQuestionResponseSchema = z.object({
 			.describe('Weather the question the user did, is related to the current context'),
 		whatChanged: z
 			.string()
-			.describe(`Short summary of what you did to address the LAST user question`),
+			.describe('Short summary of what you did to address the LAST user question'),
 		codeDiff: z
 			.string()
 			.optional()
-			.describe(`Return edits similar to unified diffs that 'diff -U0' would produce`),
+			.describe('Return edits similar to unified diffs that `diff -U0` would produce'),
 	}),
 });
 
@@ -93,7 +94,7 @@ const getHumanMessages = (history: string[]) => {
 };
 
 // Remove id and position from node parameters since they are not relevant to the assistant
-const removeUnrelevantNodeProps = (parameters: any) => {
+const removeUnrelevantNodeProps = (parameters: { id?: string; position?: string }) => {
 	const newParameters = { ...parameters };
 	delete newParameters.id;
 	delete newParameters.position;
@@ -236,12 +237,14 @@ export class AIController {
 		// This will make sure that we don't repeat the same document in the output
 		const documents: string[] = [];
 		results.forEach((result, i) => {
-			if (documents.includes(result.metadata.source)) {
+			const source = (result?.metadata?.source as string) ?? '';
+
+			if (documents.includes(source)) {
 				return;
 			}
-			documents.push(result.metadata.source);
-			console.log('\t📃', result.metadata.source);
-			toolHistory.get_n8n_info.push(result.metadata.source);
+			documents.push(source);
+			console.log('\t📃', source);
+			toolHistory.get_n8n_info.push(source);
 			out += `--- N8N DOCUMENTATION DOCUMENT ${i + 1} ---\n${result.pageContent}\n\n`;
 		});
 		if (results.length === 0) {
@@ -281,7 +284,7 @@ export class AIController {
 				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 10 });
 				const response = await duckDuckGoSearchTool.invoke(searchQuery);
 				try {
-					const objectResponse: { link?: string }[] = JSON.parse(response);
+					const objectResponse = JSON.parse(response) as unknown as [{ link?: string }];
 					objectResponse.forEach((result) => {
 						if (result.link) {
 							toolHistory.internet_search.push(result.link);
@@ -305,10 +308,10 @@ export class AIController {
 		const chatPrompt = ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
 		// Different conversation rules for debug and free-chat modes
 		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : FREE_CHAT_CONVERSATION_RULES;
-		const humanAskedForSuggestions = getHumanMessages(chatHistory).filter((message) => {
+		const humanAskedForSuggestions = getHumanMessages(chatHistory).filter((msg) => {
 			return (
-				message.includes('I need another suggestion') ||
-				message.includes('I need more detailed instructions')
+				msg.includes('I need another suggestion') ||
+				msg.includes('I need more detailed instructions')
 			);
 		});
 
@@ -342,7 +345,7 @@ export class AIController {
 				conversation_rules: conversationRules,
 				tool_names: toolNames,
 			});
-			response = result.output;
+			response = result.output as string;
 			// console.log();
 			// console.log('--------------------- 📋 INTERMEDIATE STEPS ------------------------------------');
 			// result.intermediateSteps.forEach((step) => {
@@ -353,7 +356,8 @@ export class AIController {
 			// console.log();
 		} catch (error) {
 			// TODO: This can be handled by agentExecutor
-			response = error.toString().replace(/Error: Could not parse LLM output: /, '');
+			if (error instanceof Error)
+				response = error.toString().replace(/Error: Could not parse LLM output: /, '');
 		}
 		console.log('>> 🤖 <<', response);
 
@@ -368,7 +372,7 @@ export class AIController {
 
 	@Post('/debug-chat', { skipAuth: true })
 	async debugChat(req: AIRequest.DebugChat, res: express.Response) {
-		const { sessionId, text, schemas, nodes, parameters, error } = req.body;
+		const { sessionId, schemas, nodes, parameters, error } = req.body;
 
 		const model = new ChatOpenAI({
 			temperature: 0,
@@ -390,21 +394,9 @@ export class AIController {
 
 		const outputParser = new JsonOutputFunctionsParser();
 
-		let chatMessageHistory = memorySessions.get(sessionId);
+		const chatMessageHistory = new ChatMessageHistory();
 
-		let isFollowUpQuestion = false;
-
-		if (!chatMessageHistory) {
-			chatMessageHistory = new ChatMessageHistory();
-			memorySessions.set(sessionId, chatMessageHistory);
-		} else {
-			isFollowUpQuestion = true;
-		}
-
-		let chainStream;
-
-		if (!isFollowUpQuestion) {
-			const systemMessage = SystemMessagePromptTemplate.fromTemplate(`
+		const systemMessage = SystemMessagePromptTemplate.fromTemplate(`
 
 			You're an assistant n8n expert assistant. Your role is to help users fix issues with coding in the n8n code node.
 
@@ -449,70 +441,44 @@ export class AIController {
 
 		`);
 
-			const systemMessageFormatted = await systemMessage.format({
-				nodes,
-				schemas: JSON.stringify(schemas),
-				runMode: parameters!.mode,
-				language: parameters!.language,
-				code: parameters!.jsCode,
-			});
+		const systemMessageFormatted = await systemMessage.format({
+			nodes,
+			schemas: JSON.stringify(schemas),
+			runMode: parameters!.mode,
+			language: parameters!.language,
+			code: parameters!.jsCode,
+		});
 
-			const prompt = ChatPromptTemplate.fromMessages([
-				systemMessageFormatted,
+		const prompt = ChatPromptTemplate.fromMessages([
+			systemMessageFormatted,
 
-				['human', '{question} \n\n Error: {error}'],
-			]);
+			['human', '{question} \n\n Error: {error}'],
+		]);
 
-			await chatMessageHistory.addMessage(systemMessageFormatted);
-			await chatMessageHistory.addMessage(
-				new HumanMessage(
-					`Please suggest solutions for the error below: \n\n Error: ${JSON.stringify(error)}`,
-				),
-			);
+		await chatMessageHistory.addMessage(systemMessageFormatted);
+		await chatMessageHistory.addMessage(
+			new HumanMessage(
+				`Please suggest solutions for the error below: \n\n Error: ${JSON.stringify(error)}`,
+			),
+		);
 
-			const chain = prompt.pipe(modelWithOutputParser).pipe(outputParser);
+		const chain = prompt.pipe(modelWithOutputParser).pipe(outputParser);
 
-			const chainWithHistory = new RunnableWithMessageHistory({
-				runnable: chain,
-				getMessageHistory: async () => chatMessageHistory,
-				inputMessagesKey: 'question',
-				historyMessagesKey: 'history',
-			});
+		const chainWithHistory = new RunnableWithMessageHistory({
+			runnable: chain,
+			getMessageHistory: async () => chatMessageHistory,
+			inputMessagesKey: 'question',
+			historyMessagesKey: 'history',
+		});
 
-			chainStream = await chainWithHistory.stream(
-				{
-					question:
-						'Please suggest solutions for the error below and carefully look for other errors in the code. Remember that response should always match the original intent',
-					error: JSON.stringify(error),
-				},
-				{ configurable: { sessionId } },
-			);
-		} else {
-			const prompt = ChatPromptTemplate.fromMessages([
-				new MessagesPlaceholder('history'),
-				['human', '{question}'],
-			]);
-
-			await chatMessageHistory.addMessage(new HumanMessage(`${text}`));
-
-			const chain = prompt.pipe(modelWithOutputParser).pipe(outputParser);
-
-			const chainWithHistory = new RunnableWithMessageHistory({
-				runnable: chain,
-				getMessageHistory: async () => chatMessageHistory,
-				inputMessagesKey: 'question',
-				historyMessagesKey: 'history',
-			});
-
-			chainStream = await chainWithHistory.stream(
-				{
-					// TODO: The build fails here because there is no text property on error object
-					// question: error?.text ?? '',
-					question: error?.message ?? '',
-				},
-				{ configurable: { sessionId } },
-			);
-		}
+		const chainStream = await chainWithHistory.stream(
+			{
+				question:
+					'Please suggest solutions for the error below and carefully look for other errors in the code. Remember that response should always match the original intent',
+				error: JSON.stringify(error),
+			},
+			{ configurable: { sessionId } },
+		);
 
 		let data = '';
 		try {
@@ -524,8 +490,9 @@ export class AIController {
 			await chatMessageHistory.addMessage(new AIMessage(JSON.stringify(data)));
 			// console.log('Final messages: ', chatMessageHistory.getMessages());
 			res.end('__END__');
-		} catch (err) {
-			console.error('Error during streaming:', err);
+		} catch (e) {
+			console.error('Error during streaming:', e);
+			// eslint-disable-next-line id-denylist
 			res.end(JSON.stringify({ err: 'An error occurred during streaming' }) + '\n');
 		}
 
@@ -559,11 +526,10 @@ export class AIController {
 
 		const outputParser = new JsonOutputFunctionsParser();
 
-		let chatMessageHistory = memorySessions.get(sessionId);
+		const chatMessageHistory = memorySessions.get(sessionId);
 
 		if (!chatMessageHistory) {
-			chatMessageHistory = new ChatMessageHistory();
-			memorySessions.set(sessionId, chatMessageHistory);
+			throw new ApplicationError('No chat history found for the given session id');
 		}
 
 		const prompt = ChatPromptTemplate.fromMessages([
@@ -601,8 +567,9 @@ export class AIController {
 			await chatMessageHistory.addMessage(new AIMessage(JSON.stringify(data)));
 			// console.log('Final messages: ', chatMessageHistory.getMessages());
 			res.end('__END__');
-		} catch (err) {
-			console.error('Error during streaming:', err);
+		} catch (e) {
+			console.error('Error during streaming:', e);
+			// eslint-disable-next-line id-denylist
 			res.end(JSON.stringify({ err: 'An error occurred during streaming' }) + '\n');
 		}
 
@@ -639,19 +606,11 @@ export class AIController {
 
 		const outputParser = new JsonOutputFunctionsParser();
 
-		let chatMessageHistory = memorySessions.get(sessionId);
-
-		let isFollowUpQuestion = false;
+		const chatMessageHistory = memorySessions.get(sessionId);
 
 		if (!chatMessageHistory) {
-			chatMessageHistory = new ChatMessageHistory();
-			memorySessions.set(sessionId, chatMessageHistory);
-		} else {
-			isFollowUpQuestion = true;
+			throw new ApplicationError('No chat history found for the given session id');
 		}
-
-		let chainStream;
-
 		// messages.inputVariables;
 
 		const prompt = ChatPromptTemplate.fromMessages([
