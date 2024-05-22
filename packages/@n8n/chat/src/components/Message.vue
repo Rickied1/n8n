@@ -80,8 +80,13 @@ const messageComponents = options.messageComponents ?? {};
 	border-radius: var(--chat--message--border-radius, var(--chat--border-radius));
 
 	p {
+		margin: 0.5em 0;
 		line-height: var(--chat--message-line-height, 1.8);
 		word-wrap: break-word;
+	}
+
+	h3 {
+		font-weight: bold;
 	}
 
 	// Default message gap is half of the spacing

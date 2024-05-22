@@ -426,52 +426,75 @@ export const useAIStore = defineStore('ai', () => {
 	function onMessageReceived(messageChunk: string) {
 		waitingForResponse.value = false;
 		if (messageChunk.length === 0) return;
-		if (messageChunk === '__END__') {
-			if (debugSessionInProgress.value && getLastMessage().type !== 'component') {
-				const followUpActions = [
-					{ label: 'I need more detailed instructions', key: 'more_details' },
-					{ label: 'I need another suggestion', key: 'another_suggestion' },
-				];
-				const newMessageId = Math.random().toString();
-				messages.value.push({
-					createdAt: new Date().toISOString(),
-					transparent: true,
-					key: 'QuickReplies',
-					sender: 'bot',
-					type: 'component',
-					id: newMessageId,
-					arguments: {
-						suggestions: followUpActions,
-						async onReplySelected({ label, key }: { action: string; label: string }) {
-							await sendMessage(label);
-							// Remove the quick replies so only user message is shown
-							messages.value = messages.value.filter((message) => {
-								return message.id !== newMessageId;
-							});
-						},
-					},
-				});
+		let jsonResponse: {
+			response?: string;
+			debugInfo?: string;
+			quickActions?: Array<{ label: string; value: string }>;
+		} | null = null;
+		try {
+			jsonResponse = JSON.parse(messageChunk);
+		} catch (error) {
+			return;
+		}
+
+		let newMessageText = jsonResponse?.response ?? messageChunk;
+		if (jsonResponse?.response) {
+			try {
+				const jsonSuggestion: { suggestionTitle?: string; suggestionText?: string } = JSON.parse(
+					jsonResponse.response,
+				);
+				if (jsonSuggestion.suggestionTitle && jsonSuggestion.suggestionText) {
+					newMessageText = `### ${jsonSuggestion.suggestionTitle}\r\n\n ${jsonSuggestion.suggestionText}`;
+				}
+			} catch (error) {
+				// newMessageText = messageChunk;
+				console.log('Error parsing JSON', error);
 			}
 		}
 
-		if (getLastMessage()?.sender !== 'bot') {
+		messages.value.push({
+			createdAt: new Date().toISOString(),
+			text: newMessageText,
+			sender: 'bot',
+			type: 'text',
+			id: Math.random().toString(),
+		});
+		if (jsonResponse?.debugInfo) {
 			messages.value.push({
 				createdAt: new Date().toISOString(),
-				text: messageChunk,
+				text: `\`\`\`\n${jsonResponse.debugInfo}`,
 				sender: 'bot',
 				type: 'text',
 				id: Math.random().toString(),
 			});
-			return;
 		}
 
-		const lastMessage = getLastMessage();
-
-		if (lastMessage.type === 'text') {
-			lastMessage.text += `\n${messageChunk}`;
-
-			chatEventBus.emit('scrollToBottom');
+		if (jsonResponse?.quickActions) {
+			// const followUpActions = [
+			// 	{ label: 'I need more detailed instructions', key: 'more_details' },
+			// 	{ label: 'I need another suggestion', key: 'another_suggestion' },
+			// ];
+			const newMessageId = Math.random().toString();
+			messages.value.push({
+				createdAt: new Date().toISOString(),
+				transparent: true,
+				key: 'QuickReplies',
+				sender: 'bot',
+				type: 'component',
+				id: newMessageId,
+				arguments: {
+					suggestions: jsonResponse.quickActions,
+					async onReplySelected({ label, key }: { action: string; label: string }) {
+						await sendMessage(label);
+						// Remove the quick replies so only user message is shown
+						messages.value = messages.value.filter((message) => {
+							return message.id !== newMessageId;
+						});
+					},
+				},
+			});
 		}
+		chatEventBus.emit('scrollToBottom');
 	}
 
 	function nodeVersionTag(nodeType: NodeError['node']): string {

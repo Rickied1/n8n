@@ -18,6 +18,7 @@ import { Calculator } from 'langchain/tools/calculator';
 import {
 	DEBUG_CONVERSATION_RULES,
 	FREE_CHAT_CONVERSATION_RULES,
+	QUICK_ACTIONS,
 	REACT_CHAT_PROMPT,
 } from '@/aiAssistant/prompts';
 import { FailedDependencyError } from '@/errors/response-errors/failed-dependency.error';
@@ -264,7 +265,7 @@ export class AIController {
 
 		const n8nInfoTool = new DynamicTool({
 			name: 'get_n8n_info',
-			description: 'Has access to the most relevant pages from the official n8n documentation.',
+			description: 'Has access to the official n8n documentation',
 			func: async (input: string) => {
 				console.log('>> 🧰 << n8nInfoTool:', input);
 				return (await this.searchDocsVectorStore(input)).toString();
@@ -273,7 +274,7 @@ export class AIController {
 
 		const internetSearchTool = new DynamicTool({
 			name: 'internet_search',
-			description: 'Searches the n8n internet sources for the answer to a question.',
+			description: 'Searches the n8n internet sources',
 			func: async (input: string) => {
 				const searchQuery = `${input} site:${INTERNET_TOOL_SITES.join(' OR site:')}`;
 				console.log('>> 🧰 << internetSearchTool:', searchQuery);
@@ -317,8 +318,6 @@ export class AIController {
 				message =
 					'I have asked for too many new suggestions. Please follow your conversation rules for this case.';
 			}
-		} else {
-			message += ' Please only give me information from the official n8n sources.';
 		}
 
 		const agent = await createReactAgent({
@@ -360,18 +359,11 @@ export class AIController {
 
 		chatHistory.push(`Human: ${message}`);
 		chatHistory.push(`Assistant: ${response}`);
-		res.write(response + '\n \n');
-		res.write(`
-\`\`\`
--------------- DEBUG INFO --------------
-${toolHistory.get_n8n_info.length > 0 ? `N8N DOCS DOCUMENTS USED: ${toolHistory.get_n8n_info.join(', ')}` : ''}
-${toolHistory.internet_search.length > 0 ? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}` : ''}
-${toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length === 0 ? '\nNO TOOLS USED' : ''}
-\`\`\`
-	`);
-		res.write('\n');
-		res.write('');
-		res.end('__END__');
+		let debugInfo = '-------------- DEBUG INFO --------------\n';
+		debugInfo += toolHistory.get_n8n_info.length > 0 ? `N8N DOCS DOCUMENTS USED: ${toolHistory.get_n8n_info.join(', ')}\n` : '';
+		debugInfo += toolHistory.internet_search.length > 0 ? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}\n` : '';
+		debugInfo += toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length === 0 ? 'NO TOOLS USED' : '';
+		res.end(JSON.stringify({ response, debugInfo, quickActions: debug ? QUICK_ACTIONS : undefined }));
 	}
 
 	@Post('/debug-chat', { skipAuth: true })
