@@ -15,12 +15,7 @@ import { PineconeStore } from '@langchain/pinecone';
 import { Pinecone } from '@pinecone-database/pinecone';
 import { DuckDuckGoSearch } from '@langchain/community/tools/duckduckgo_search';
 import { Calculator } from 'langchain/tools/calculator';
-import {
-	DEBUG_CONVERSATION_RULES,
-	FREE_CHAT_CONVERSATION_RULES,
-	QUICK_ACTIONS,
-	REACT_CHAT_PROMPT,
-} from '@/aiAssistant/prompts';
+import { REACT_CHAT_PROMPT } from '@/aiAssistant/chat_prompts';
 import { FailedDependencyError } from '@/errors/response-errors/failed-dependency.error';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { RunnableWithMessageHistory } from '@langchain/core/runnables';
@@ -29,6 +24,7 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { ApplicationError } from 'n8n-workflow';
+import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/debug_prompts';
 
 // ReAct agent history is string, according to the docs:
 // https://js.langchain.com/v0.1/docs/modules/agents/agent_types/react/#using-with-chat-history
@@ -43,7 +39,7 @@ const stringifyHistory = (history: string[]) => history.join('\n');
 let toolHistory = {
 	calculator: [] as string[],
 	internet_search: [] as string[],
-	get_n8n_info: [] as string[],
+	n8n_documentation: [] as string[],
 };
 
 const INTERNET_TOOL_SITES = ['https://community.n8n.io', 'https://blog.n8n.io', 'https://n8n.io'];
@@ -52,7 +48,7 @@ const resetToolHistory = () => {
 	toolHistory = {
 		calculator: [],
 		internet_search: [],
-		get_n8n_info: [],
+		n8n_documentation: [],
 	};
 };
 
@@ -244,30 +240,19 @@ export class AIController {
 			}
 			documents.push(source);
 			console.log('\t📃', source);
-			toolHistory.get_n8n_info.push(source);
+			toolHistory.n8n_documentation.push(source);
 			out += `--- N8N DOCUMENTATION DOCUMENT ${i + 1} ---\n${result.pageContent}\n\n`;
 		});
 		if (results.length === 0) {
-			toolHistory.get_n8n_info.push('NO DOCS FOUND');
+			toolHistory.n8n_documentation.push('NO DOCS FOUND');
 		}
 		return out;
 	}
 
 	async askAssistant(message: string, res: express.Response, debug?: boolean) {
 		// ----------------- Tools -----------------
-		const calculatorTool = new DynamicTool({
-			name: 'calculator',
-			description:
-				'Performs arithmetic operations. Use this tool whenever you need to perform calculations.',
-			func: async (input: string) => {
-				console.log('>> 🧰 << calculatorTool:', input);
-				const calculator = new Calculator();
-				return await calculator.invoke(input);
-			},
-		});
-
 		const n8nInfoTool = new DynamicTool({
-			name: 'get_n8n_info',
+			name: 'n8n_documentation',
 			description: 'Has access to the official n8n documentation',
 			func: async (input: string) => {
 				console.log('>> 🧰 << n8nInfoTool:', input);
@@ -301,13 +286,12 @@ export class AIController {
 			},
 		});
 
-		const tools = [calculatorTool, n8nInfoTool, internetSearchTool];
+		const tools = [n8nInfoTool, internetSearchTool];
 
 		const toolNames = tools.map((tool) => tool.name);
 		// ----------------- Agent -----------------
-		const chatPrompt = ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
+		const chatPrompt = debug ? ChatPromptTemplate.fromTemplate(REACT_DEBUG_PROMPT) : ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
 		// Different conversation rules for debug and free-chat modes
-		const conversationRules = debug ? DEBUG_CONVERSATION_RULES : FREE_CHAT_CONVERSATION_RULES;
 		const humanAskedForSuggestions = getHumanMessages(chatHistory).filter((msg) => {
 			return (
 				msg.includes('I need another suggestion') ||
@@ -342,7 +326,6 @@ export class AIController {
 			const result = await agentExecutor.invoke({
 				input: message,
 				chat_history: stringifyHistory(chatHistory),
-				conversation_rules: conversationRules,
 				tool_names: toolNames,
 			});
 			response = result.output as string;
@@ -364,9 +347,9 @@ export class AIController {
 		chatHistory.push(`Human: ${message}`);
 		chatHistory.push(`Assistant: ${response}`);
 		let debugInfo = '-------------- DEBUG INFO --------------\n';
-		debugInfo += toolHistory.get_n8n_info.length > 0 ? `N8N DOCS DOCUMENTS USED: ${toolHistory.get_n8n_info.join(', ')}\n` : '';
+		debugInfo += toolHistory.n8n_documentation.length > 0 ? `N8N DOCS DOCUMENTS USED: ${toolHistory.n8n_documentation.join(', ')}\n` : '';
 		debugInfo += toolHistory.internet_search.length > 0 ? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}\n` : '';
-		debugInfo += toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length === 0 ? 'NO TOOLS USED' : '';
+		debugInfo += toolHistory.n8n_documentation.length === 0 && toolHistory.internet_search.length === 0 ? 'NO TOOLS USED' : '';
 		res.end(JSON.stringify({ response, debugInfo, quickActions: debug ? QUICK_ACTIONS : undefined }));
 	}
 
