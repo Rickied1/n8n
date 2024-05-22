@@ -143,8 +143,13 @@ const messageComponents = options.messageComponents ?? {};
 		}
 
 		ul, ol {
-			list-style-position: inside;
-			margin-left: 1em;
+			list-style-position: outside;
+			margin-left: 1.5em;
+		}
+		ol {
+			li {
+				padding-left: 0.3em;
+			}
 		}
 		li {
 			margin: 1em 0;
