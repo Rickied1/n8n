@@ -20,7 +20,14 @@ import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { ApplicationError, INode } from 'n8n-workflow';
 import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
-import { chatHistory, checkIfAllQuickActionsUsed, clearChatHistory, increaseSuggestionCounter, stringifyHistory, usedQuickActions } from '@/aiAssistant/history/chat_history';
+import {
+	chatHistory,
+	checkIfAllQuickActionsUsed,
+	clearChatHistory,
+	increaseSuggestionCounter,
+	stringifyHistory,
+	usedQuickActions,
+} from '@/aiAssistant/history/chat_history';
 import { resetToolHistory, toolHistory } from '@/aiAssistant/history/tool_history';
 import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs.tool';
 import { internetSearchTool } from '@/aiAssistant/tools/internet_search.tool';
@@ -186,7 +193,9 @@ export class AIController {
 
 		// ----------------- Agent -----------------
 		// Different prompts for debug and free-chat modes
-		const chatPrompt = debug ? ChatPromptTemplate.fromTemplate(REACT_DEBUG_PROMPT) : ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
+		const chatPrompt = debug
+			? ChatPromptTemplate.fromTemplate(REACT_DEBUG_PROMPT)
+			: ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
 
 		// Hard-stop if human asks for too many suggestions
 		increaseSuggestionCounter(message.trim());
@@ -238,27 +247,36 @@ export class AIController {
 		chatHistory.push(`Human: ${message}`);
 		chatHistory.push(`Assistant: ${response}`);
 		let debugInfo = '-------------- DEBUG INFO --------------\n';
-		debugInfo += toolHistory.n8n_documentation.length > 0 ? `N8N DOCS DOCUMENTS USED: ${toolHistory.n8n_documentation.join(', ')}\n` : '';
-		debugInfo += toolHistory.internet_search.length > 0 ? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}\n` : '';
-		debugInfo += toolHistory.n8n_documentation.length === 0 && toolHistory.internet_search.length === 0 ? 'NO TOOLS USED' : '';
+		debugInfo +=
+			toolHistory.n8n_documentation.length > 0
+				? `N8N DOCS DOCUMENTS USED: ${toolHistory.n8n_documentation.join(', ')}\n`
+				: '';
+		debugInfo +=
+			toolHistory.internet_search.length > 0
+				? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}\n`
+				: '';
+		debugInfo +=
+			toolHistory.n8n_documentation.length === 0 && toolHistory.internet_search.length === 0
+				? 'NO TOOLS USED'
+				: '';
 
 		// If users asked for detailed information already, don't show it again until they ask for another suggestion
 		const quickActions = debug ? QUICK_ACTIONS : undefined;
 		if (quickActions) {
 			if (usedQuickActions[QUICK_ACTIONS[0].label] > 0) {
-					QUICK_ACTIONS[0].disabled = true;
+				QUICK_ACTIONS[0].disabled = true;
 			}
 		}
 		if (message.trim() === QUICK_ACTIONS[1].label) {
 			QUICK_ACTIONS[0].disabled = false;
 		}
 
-		res.end(JSON.stringify({ response, debugInfo, quickActions: noMoreHelp ? [] : quickActions}));
+		res.end(JSON.stringify({ response, debugInfo, quickActions: noMoreHelp ? [] : quickActions }));
 	}
 
 	@Post('/debug-chat', { skipAuth: true })
 	async debugChat(req: AIRequest.DebugChat, res: express.Response) {
-		const { sessionId, schemas, nodes, parameters, error } = req.body;
+		const { sessionId, text, schemas, nodes, parameters, error } = req.body;
 
 		const model = new ChatOpenAI({
 			temperature: 0,
@@ -280,9 +298,21 @@ export class AIController {
 
 		const outputParser = new JsonOutputFunctionsParser();
 
-		const chatMessageHistory = new ChatMessageHistory();
+		let chatMessageHistory = memorySessions.get(sessionId);
 
-		const systemMessage = SystemMessagePromptTemplate.fromTemplate(`
+		let isFollowUpQuestion = false;
+
+		if (!chatMessageHistory) {
+			chatMessageHistory = new ChatMessageHistory();
+			memorySessions.set(sessionId, chatMessageHistory);
+		} else {
+			isFollowUpQuestion = true;
+		}
+
+		let chainStream;
+
+		if (!isFollowUpQuestion) {
+			const systemMessage = SystemMessagePromptTemplate.fromTemplate(`
 
 			You're an assistant n8n expert assistant. Your role is to help users fix issues with coding in the n8n code node.
 
@@ -327,44 +357,68 @@ export class AIController {
 
 		`);
 
-		const systemMessageFormatted = await systemMessage.format({
-			nodes,
-			schemas: JSON.stringify(schemas),
-			runMode: parameters!.mode,
-			language: parameters!.language,
-			code: parameters!.jsCode,
-		});
+			const systemMessageFormatted = await systemMessage.format({
+				nodes,
+				schemas: JSON.stringify(schemas),
+				runMode: parameters!.mode,
+				language: parameters!.language,
+				code: parameters!.jsCode,
+			});
 
-		const prompt = ChatPromptTemplate.fromMessages([
-			systemMessageFormatted,
+			const prompt = ChatPromptTemplate.fromMessages([
+				systemMessageFormatted,
 
-			['human', '{question} \n\n Error: {error}'],
-		]);
+				['human', '{question} \n\n Error: {error}'],
+			]);
 
-		await chatMessageHistory.addMessage(systemMessageFormatted);
-		await chatMessageHistory.addMessage(
-			new HumanMessage(
-				`Please suggest solutions for the error below: \n\n Error: ${JSON.stringify(error)}`,
-			),
-		);
+			await chatMessageHistory.addMessage(systemMessageFormatted);
+			await chatMessageHistory.addMessage(
+				new HumanMessage(
+					`Please suggest solutions for the error below: \n\n Error: ${JSON.stringify(error)}`,
+				),
+			);
 
-		const chain = prompt.pipe(modelWithOutputParser).pipe(outputParser);
+			const chain = prompt.pipe(modelWithOutputParser).pipe(outputParser);
 
-		const chainWithHistory = new RunnableWithMessageHistory({
-			runnable: chain,
-			getMessageHistory: async () => chatMessageHistory,
-			inputMessagesKey: 'question',
-			historyMessagesKey: 'history',
-		});
+			const chainWithHistory = new RunnableWithMessageHistory({
+				runnable: chain,
+				getMessageHistory: async () => chatMessageHistory,
+				inputMessagesKey: 'question',
+				historyMessagesKey: 'history',
+			});
 
-		const chainStream = await chainWithHistory.stream(
-			{
-				question:
-					'Please suggest solutions for the error below and carefully look for other errors in the code. Remember that response should always match the original intent',
-				error: JSON.stringify(error),
-			},
-			{ configurable: { sessionId } },
-		);
+			chainStream = await chainWithHistory.stream(
+				{
+					question:
+						'Please suggest solutions for the error below and carefully look for other errors in the code. Remember that response should always match the original intent',
+					error: JSON.stringify(error),
+				},
+				{ configurable: { sessionId } },
+			);
+		} else {
+			const prompt = ChatPromptTemplate.fromMessages([
+				new MessagesPlaceholder('history'),
+				['human', '{question}'],
+			]);
+
+			await chatMessageHistory.addMessage(new HumanMessage(`${text}`));
+
+			const chain = prompt.pipe(modelWithOutputParser).pipe(outputParser);
+
+			const chainWithHistory = new RunnableWithMessageHistory({
+				runnable: chain,
+				getMessageHistory: async () => chatMessageHistory,
+				inputMessagesKey: 'question',
+				historyMessagesKey: 'history',
+			});
+
+			chainStream = await chainWithHistory.stream(
+				{
+					question: error?.text ?? '',
+				},
+				{ configurable: { sessionId } },
+			);
+		}
 
 		let data = '';
 		try {
@@ -376,9 +430,8 @@ export class AIController {
 			await chatMessageHistory.addMessage(new AIMessage(JSON.stringify(data)));
 			// console.log('Final messages: ', chatMessageHistory.getMessages());
 			res.end('__END__');
-		} catch (e) {
-			console.error('Error during streaming:', e);
-			// eslint-disable-next-line id-denylist
+		} catch (err) {
+			console.error('Error during streaming:', err);
 			res.end(JSON.stringify({ err: 'An error occurred during streaming' }) + '\n');
 		}
 
