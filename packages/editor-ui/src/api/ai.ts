@@ -1,4 +1,5 @@
 import type { IRestApiContext, Schema } from '@/Interface';
+import type { DebugChatPayload } from '@/stores/ai.store';
 import { makeRestApiRequest } from '@/utils/apiUtils';
 import type { IDataObject, INodeTypeDescription, NodeError } from 'n8n-workflow';
 
@@ -168,6 +169,120 @@ export const askPinecone = async (
 			const { done, value } = await reader.read();
 			if (done) {
 				// console.log('Stream finished');
+				// waitingForResponse.value = false;
+				return;
+			}
+
+			const chunk = decoder.decode(value);
+			const splitChunks = chunk.split('\n');
+
+			for (const splitChunk of splitChunks) {
+				if (splitChunk) {
+					onChunk(splitChunk);
+				}
+			}
+			await readStream();
+		}
+		// Start reading the stream
+		await readStream();
+	} else {
+		console.error('Error:', response.status);
+	}
+};
+
+export const applyCodeSuggestion = async (
+	context: IRestApiContext,
+	payload: { sessionId: string },
+): Promise<void> => {
+	const headers = {
+		'Content-Type': 'application/json',
+	};
+	const response = await fetch(`${context.baseUrl}/ai/debug-chat/apply-code-suggestion`, {
+		headers,
+		method: 'POST',
+		credentials: 'include',
+		body: JSON.stringify(payload),
+	});
+
+	// console.log('fetch response', await response.json());
+
+	if (response.ok && response.body) {
+		const body = await response.json();
+		return body.data.codeSnippet;
+	} else {
+		console.error('Error:', response.status);
+	}
+};
+
+export const debugChatWithAiErrorHelper = async (
+	context: IRestApiContext,
+	payload: DebugChatPayload,
+	onChunk: (chunk: string) => void,
+): Promise<void> => {
+	const headers = {
+		'Content-Type': 'application/json',
+	};
+	const response = await fetch(`${context.baseUrl}/ai/debug-chat`, {
+		headers,
+		method: 'POST',
+		credentials: 'include',
+		body: JSON.stringify(payload),
+	});
+
+	if (response.ok && response.body) {
+		// Handle the streaming response
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder('utf-8');
+
+		async function readStream() {
+			const { done, value } = await reader.read();
+			if (done) {
+				console.log('Stream finished');
+				// waitingForResponse.value = false;
+				return;
+			}
+
+			const chunk = decoder.decode(value);
+			const splitChunks = chunk.split('\n');
+
+			for (const splitChunk of splitChunks) {
+				if (splitChunk) {
+					onChunk(splitChunk);
+				}
+			}
+			await readStream();
+		}
+		// Start reading the stream
+		await readStream();
+	} else {
+		console.error('Error:', response.status);
+	}
+};
+
+export const followUpChatWithAiErrorHelper = async (
+	context: IRestApiContext,
+	payload: { text: string; sessionId: string },
+	onChunk: (chunk: string) => void,
+): Promise<void> => {
+	const headers = {
+		'Content-Type': 'application/json',
+	};
+	const response = await fetch(`${context.baseUrl}/ai/debug-chat-follow-up-question`, {
+		headers,
+		method: 'POST',
+		credentials: 'include',
+		body: JSON.stringify(payload),
+	});
+
+	if (response.ok && response.body) {
+		// Handle the streaming response
+		const reader = response.body.getReader();
+		const decoder = new TextDecoder('utf-8');
+
+		async function readStream() {
+			const { done, value } = await reader.read();
+			if (done) {
+				console.log('Stream finished');
 				// waitingForResponse.value = false;
 				return;
 			}

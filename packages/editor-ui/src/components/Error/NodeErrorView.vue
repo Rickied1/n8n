@@ -21,6 +21,8 @@ import { MAX_DISPLAY_DATA_SIZE } from '@/constants';
 import type { BaseTextKey } from '@/plugins/i18n';
 import { getMainAuthField, getNodeAuthOptions } from '@/utils/nodeTypesUtils';
 import { useAIStore } from '@/stores/ai.store';
+import { chatEventBus } from '@n8n/chat/event-buses/chatEventBus';
+import { useUsersStore } from '@/stores/users.store';
 
 const props = defineProps({
 	error: {
@@ -37,6 +39,7 @@ const nodeTypesStore = useNodeTypesStore();
 const ndvStore = useNDVStore();
 const rootStore = useRootStore();
 const aiStore = useAIStore();
+const userStore = useUsersStore();
 
 const displayCause = computed(() => {
 	return JSON.stringify(props.error.cause).length < MAX_DISPLAY_DATA_SIZE;
@@ -70,6 +73,8 @@ const n8nVersion = computed(() => {
 const hasManyInputItems = computed(() => {
 	return ndvStore.ndvInputData.length > 1;
 });
+
+const userName = computed(() => userStore.currentUser?.firstName ?? 'there');
 
 const nodeDefaultName = computed(() => {
 	const node = props.error?.node;
@@ -363,7 +368,7 @@ function copySuccess() {
 	});
 }
 
-async function debugWithAssistant() {
+async function openAssistant() {
 	const nodeType = useNodeTypesStore().getNodeType(
 		props.error.node?.type,
 		props.error.node?.typeVersion,
@@ -371,6 +376,23 @@ async function debugWithAssistant() {
 	if (!nodeType) {
 		return;
 	}
+
+	if (nodeType.name === 'n8n-nodes-base.code') {
+		aiStore.chatTitle = `🧞 n8n AI Code error helper assistant -> ${props.error.message}`;
+		aiStore.initialMessages = [
+			{
+				id: '1',
+				type: 'text',
+				sender: 'bot',
+				createdAt: new Date().toISOString(),
+				text: `Hi ${userName.value}! I have a few ideas on what the issue might be. Here's my top suggestion 👇`,
+			},
+		];
+		chatEventBus.emit('open');
+		await aiStore.startNewDebugSession(props.error);
+		return;
+	}
+
 	const authField = getMainAuthField(nodeType);
 	const credentialInUse = props.error.node.parameters[authField?.name ?? ''];
 	const availableAuthOptions = getNodeAuthOptions(nodeType);
@@ -387,7 +409,7 @@ async function debugWithAssistant() {
 				<div>
 					{{ getErrorMessage() }}
 				</div>
-				<N8nButton type="tertiary" size="small" @click="debugWithAssistant">
+				<N8nButton type="tertiary" size="small" @click="openAssistant">
 					{{ i18n.baseText('nodeErrorView.askAssistant') }}
 				</N8nButton>
 			</div>

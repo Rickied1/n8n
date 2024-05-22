@@ -11,7 +11,9 @@ import type { Chat, ChatOptions } from '@n8n/chat/types';
 import { provide, ref, useCssModule, computed } from 'vue';
 import type { AddedNodesAndConnections } from '@/Interface';
 import QuickReplies from './QuickReplies.vue';
+import FollowUp from './FollowUp.vue';
 import { useAIStore } from '@/stores/ai.store';
+import MessageWithSuggestions from './MessageWithSuggestions.vue';
 
 const emit = defineEmits<{
 	(event: 'addNodes', value: AddedNodesAndConnections): void;
@@ -40,6 +42,8 @@ const chatOptions: ChatOptions = {
 	mode: 'window',
 	messageComponents: {
 		QuickReplies,
+		MessageWithSuggestions,
+		FollowUp,
 	},
 };
 
