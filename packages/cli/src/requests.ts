@@ -208,7 +208,7 @@ export interface AIDebugChatPayload {
 }
 
 export interface AIAssistantDebugPayload {
-	nodeType: INodeTypeDescription
+	nodeType: INodeTypeDescription;
 	error: NodeError;
 	authType?: { name: string; value: string };
 	userTraits: { nodeVersion?: string; n8nVersion?: string };
