@@ -8,14 +8,9 @@ import {
 	MessagesPlaceholder,
 	SystemMessagePromptTemplate,
 } from '@langchain/core/prompts';
-import { ChatOpenAI, OpenAIEmbeddings } from '@langchain/openai';
-import { DynamicTool } from '@langchain/core/tools';
+import { ChatOpenAI } from '@langchain/openai';
 import { AgentExecutor, createReactAgent } from 'langchain/agents';
-import { PineconeStore } from '@langchain/pinecone';
-import { Pinecone } from '@pinecone-database/pinecone';
-import { DuckDuckGoSearch } from '@langchain/community/tools/duckduckgo_search';
-import { Calculator } from 'langchain/tools/calculator';
-import { REACT_CHAT_PROMPT } from '@/aiAssistant/chat_prompts';
+import { REACT_CHAT_PROMPT } from '@/aiAssistant/prompts/chat_prompts';
 import { FailedDependencyError } from '@/errors/response-errors/failed-dependency.error';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
 import { RunnableWithMessageHistory } from '@langchain/core/runnables';
@@ -24,33 +19,11 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { ApplicationError } from 'n8n-workflow';
-import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/debug_prompts';
-
-// ReAct agent history is string, according to the docs:
-// https://js.langchain.com/v0.1/docs/modules/agents/agent_types/react/#using-with-chat-history
-// TODO:
-//	- 	Add sessions support
-//	- 	We can use UserMessage and SystemMessage classes to make it more readable
-//		but in the end it has to render to a string
-let chatHistory: string[] = [];
-const stringifyHistory = (history: string[]) => history.join('\n');
-
-// Tool history is just for debugging
-let toolHistory = {
-	calculator: [] as string[],
-	internet_search: [] as string[],
-	n8n_documentation: [] as string[],
-};
-
-const INTERNET_TOOL_SITES = ['https://community.n8n.io', 'https://blog.n8n.io', 'https://n8n.io'];
-
-const resetToolHistory = () => {
-	toolHistory = {
-		calculator: [],
-		internet_search: [],
-		n8n_documentation: [],
-	};
-};
+import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
+import { chatHistory, clearChatHistory, getHumanMessages, stringifyHistory } from '@/aiAssistant/history/chat_history';
+import { resetToolHistory, toolHistory } from '@/aiAssistant/history/tool_history';
+import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs_tool';
+import { internetSearchTool } from '@/aiAssistant/tools/internet_search_tool';
 
 const errorSuggestionSchema = z.object({
 	suggestion: z.object({
@@ -85,10 +58,6 @@ const followUpQuestionResponseSchema = z.object({
 
 const memorySessions = new Map<string, ChatMessageHistory>();
 
-const getHumanMessages = (history: string[]) => {
-	return history.filter((message, index) => message.startsWith('Human:'));
-};
-
 // Remove id and position from node parameters since they are not relevant to the assistant
 const removeUnrelevantNodeProps = (parameters: { id?: string; position?: string }) => {
 	const newParameters = { ...parameters };
@@ -119,7 +88,7 @@ export class AIController {
 	async chatWithAssistant(req: AIRequest.AskAssistant, res: express.Response) {
 		const { message, newSession } = req.body;
 		if (newSession) {
-			chatHistory = [];
+			clearChatHistory();
 		}
 		resetToolHistory();
 		await this.askAssistant(message, res);
@@ -137,7 +106,7 @@ export class AIController {
 			await this.askAssistant(`${message}\n`, res, true);
 			return;
 		}
-		chatHistory = [];
+		clearChatHistory();
 		let authPrompt = `I am using the following authentication type: ${authType?.name}`;
 		if (!authType) {
 			authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(error.node.credentials)}`;
@@ -167,7 +136,7 @@ export class AIController {
 	async askPinecone(req: AIRequest.DebugChat, res: express.Response) {
 		const question = 'How to submit new workflows to n8n templates library?';
 		console.log('\n>> 🤷 <<', question);
-		const documentation = await this.searchDocsVectorStore(question);
+		const documentation = await searchDocsVectorStore(question);
 		// ----------------- Prompt -----------------
 		const systemMessage = SystemMessagePromptTemplate.fromTemplate(`
 			You are an automation expert and are tasked to help users answer their questions about n8n.
@@ -210,85 +179,11 @@ export class AIController {
 	}
 
 	// ---------------------------------------------------------- UTIL FUNCTIONS ----------------------------------------------------------
-	async searchDocsVectorStore(question: string) {
-		// ----------------- Vector store -----------------
-		const pc = new Pinecone({
-			apiKey: process.env.N8N_AI_PINECONE_API_KEY ?? '',
-		});
-		const index = pc.Index('n8n-docs');
-		const vectorStore = await PineconeStore.fromExistingIndex(
-			new OpenAIEmbeddings({
-				openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
-				modelName: 'text-embedding-3-large',
-				dimensions: 3072,
-			}),
-			{
-				pineconeIndex: index,
-			},
-		);
-		// ----------------- Get top chunks matching query -----------------
-		const results = await vectorStore.similaritySearch(question, 3);
-		console.log('>> 🧰 << GOT THESE DOCUMENTS:');
-		let out = '';
-		// This will make sure that we don't repeat the same document in the output
-		const documents: string[] = [];
-		results.forEach((result, i) => {
-			const source = (result?.metadata?.source as string) ?? '';
-
-			if (documents.includes(source)) {
-				return;
-			}
-			documents.push(source);
-			console.log('\t📃', source);
-			toolHistory.n8n_documentation.push(source);
-			out += `--- N8N DOCUMENTATION DOCUMENT ${i + 1} ---\n${result.pageContent}\n\n`;
-		});
-		if (results.length === 0) {
-			toolHistory.n8n_documentation.push('NO DOCS FOUND');
-		}
-		return out;
-	}
-
 	async askAssistant(message: string, res: express.Response, debug?: boolean) {
 		// ----------------- Tools -----------------
-		const n8nInfoTool = new DynamicTool({
-			name: 'n8n_documentation',
-			description: 'Has access to the official n8n documentation',
-			func: async (input: string) => {
-				console.log('>> 🧰 << n8nInfoTool:', input);
-				return (await this.searchDocsVectorStore(input)).toString();
-			},
-		});
-
-		const internetSearchTool = new DynamicTool({
-			name: 'internet_search',
-			description: 'Searches the n8n internet sources',
-			func: async (input: string) => {
-				const searchQuery = `${input} site:${INTERNET_TOOL_SITES.join(' OR site:')}`;
-				console.log('>> 🧰 << internetSearchTool:', searchQuery);
-				const duckDuckGoSearchTool = new DuckDuckGoSearch({ maxResults: 10 });
-				const response = await duckDuckGoSearchTool.invoke(searchQuery);
-				try {
-					const objectResponse = JSON.parse(response) as unknown as [{ link?: string }];
-					objectResponse.forEach((result) => {
-						if (result.link) {
-							toolHistory.internet_search.push(result.link);
-						}
-					});
-					if (toolHistory.internet_search.length === 0) {
-						toolHistory.internet_search.push('NO FORUM PAGES FOUND');
-					}
-				} catch (error) {
-					console.error('Error parsing search results', error);
-				}
-				console.log('>> 🧰 << duckDuckGoSearchTool:', response);
-				return response;
-			},
-		});
-
 		const tools = [n8nInfoTool, internetSearchTool];
-
 		const toolNames = tools.map((tool) => tool.name);
+
 		// ----------------- Agent -----------------
 		const chatPrompt = debug ? ChatPromptTemplate.fromTemplate(REACT_DEBUG_PROMPT) : ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
 		// Different conversation rules for debug and free-chat modes
