@@ -202,19 +202,6 @@ function getErrorMessage(): string {
 		isNonEmptyString(props.error.message) &&
 		(props.error.message === props.error.description || !props.error.context?.messageTemplate)
 	) {
-<<<<<<< HEAD
-		let errorMessage = props.error.message;
-		if (!errorMessage) {
-			errorMessage = props.error.messages.join(', ');
-		}
-		message = baseErrorMessage + errorMessage;
-	} else {
-		const parameterName = parameterDisplayName(props.error.context.parameter as string);
-
-		message =
-			baseErrorMessage +
-			(props.error.context.messageTemplate as string).replace(/%%PARAMETER%%/g, parameterName);
-=======
 		message = props.error.message;
 	} else if (
 		isNonEmptyString(props.error.context?.messageTemplate) &&
@@ -224,7 +211,6 @@ function getErrorMessage(): string {
 		message = props.error.context.messageTemplate.replace(/%%PARAMETER%%/g, parameterName);
 	} else if (Array.isArray(props.error.messages) && props.error.messages.length > 0) {
 		message = props.error.messages[0];
->>>>>>> master
 	}
 
 	return addItemIndexSuffix(message);

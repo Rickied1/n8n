@@ -18,9 +18,9 @@ import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
-import { ApplicationError } from 'n8n-workflow';
+import { ApplicationError, INode } from 'n8n-workflow';
 import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
-import { chatHistory, checkIfAllQuickActionsUsed, clearChatHistory, getHumanMessages, increaseSuggestionCounter, stringifyHistory, usedQuickActions } from '@/aiAssistant/history/chat_history';
+import { chatHistory, checkIfAllQuickActionsUsed, clearChatHistory, increaseSuggestionCounter, stringifyHistory, usedQuickActions } from '@/aiAssistant/history/chat_history';
 import { resetToolHistory, toolHistory } from '@/aiAssistant/history/tool_history';
 import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs.tool';
 import { internetSearchTool } from '@/aiAssistant/tools/internet_search.tool';
@@ -59,8 +59,8 @@ const followUpQuestionResponseSchema = z.object({
 const memorySessions = new Map<string, ChatMessageHistory>();
 
 // Remove id and position from node parameters since they are not relevant to the assistant
-const removeUnrelevantNodeProps = (parameters: { id?: string; position?: string }) => {
-	const newParameters = { ...parameters };
+const removeUnrelevantNodeProps = (node: INode) => {
+	const newParameters = { ...node.parameters };
 	delete newParameters.id;
 	delete newParameters.position;
 	return newParameters;
