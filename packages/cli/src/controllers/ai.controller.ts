@@ -144,8 +144,12 @@ export class AIController {
 		if (!authType) {
 			authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(error.node.credentials)}`;
 		}
+		let errorMessage = error.message;
+		if (!errorMessage) {
+			errorMessage = error.messages.join(', ');
+		}
 		const userPrompt = `
-			I am having the following error in my ${nodeType.displayName} node: ${error.message} ${error.description ? `- ${error.description}` : ''}
+			I am having the following error in my ${nodeType.displayName} node: ${errorMessage} ${error.description ? `- ${error.description}` : ''}
 			- Here is some more information about my workflow and myself that you can use to provide a solution:
 				- ${authPrompt}. Use this info to only provide solutions that are compatible with the related to this authentication type and not the others.
 				- This is the JSON object that represents the node that I am having an error in, you can use it to inspect current node parameter values: ${JSON.stringify(removeUnrelevantNodeProps(error.node))}

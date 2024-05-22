@@ -204,7 +204,11 @@ function getErrorMessage(): string {
 		props.error.message === props.error.description ||
 		!props.error.context?.messageTemplate
 	) {
-		message = baseErrorMessage + props.error.message;
+		let errorMessage = props.error.message;
+		if (!errorMessage) {
+			errorMessage = props.error.messages.join(', ');
+		}
+		message = baseErrorMessage + errorMessage;
 	} else {
 		const parameterName = parameterDisplayName(props.error.context.parameter as string);
 
