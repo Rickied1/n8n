@@ -1,6 +1,8 @@
-export const QUICK_ACTIONS = [
-	{ label: 'I need more detailed instructions', key: 'more_details' },
-	{ label: 'I need another suggestion', key: 'another_suggestion' }
+import { QuickAction } from "../types";
+
+export const QUICK_ACTIONS: QuickAction[] = [
+	{ label: 'Yes, help me fix the issue', key: 'more_details', disabled: false},
+	{ label: 'No, try something else', key: 'another_suggestion', disabled: false},
 ];
 
 export const DEBUG_CONVERSATION_RULES = `
@@ -9,10 +11,10 @@ export const DEBUG_CONVERSATION_RULES = `
 			- 'suggestionTitle': Suggestion title
 			- 'suggestionText': Must be limited to one sentence. Must not contain any code snippets or detailed instructions.
 3.	User will always respond to the suggestion with one of the following, so make sure to formulate the suggestion accordingly:
-			- "I need more detailed instructions"
-			- "I need another suggestion"
-4. 	If the user responds that they need more detailed instructions, assistant must use the available tools to provide more detailed instructions. These instructions must come from n8n documentation or other official n8n sources.
-5. 	If the user responds that they need another suggestion, start the process again from step 1 but follow also the following rules:
+			- "Yes, help me fix the issue"
+			- "No, try something else"
+4. 	If the user responds that they need help (yes), assistant must provide official n8n step-by-step instructions on how to solve the problem.
+5. 	If the user responds that they need another suggestion (no), start the process again from step 1 but follow also the following rules:
 		-	At this point, assistant must use it's tools to formulate a new suggestion
 		-	Each new suggestion must be different from the previous ones and must provide a new direction to the user.
 		- Assistant must stop providing suggestions after it has provided three suggestions to the user. This is very important for keeping the conversation focused and efficient.

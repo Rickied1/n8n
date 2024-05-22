@@ -3,9 +3,33 @@
 // TODO:
 //	- 	Add sessions support
 //	- 	We can use UserMessage and SystemMessage classes to make it more readable
+
+import { QUICK_ACTIONS } from "../prompts/debug_prompts";
+
 //			but in the end it has to render to a string
 export let chatHistory: string[] = [];
 export const stringifyHistory = (history: string[]) => history.join('\n');
+
+export const usedQuickActions: Record<string, number> ={
+	...QUICK_ACTIONS.reduce((acc, { label }) => ({ ...acc, [label]: 0 }), {}),
+}
+
+export const increaseSuggestionCounter = (label: string) => {
+	if (label in usedQuickActions) {
+		usedQuickActions[label]++;
+	}
+}
+
+export const resetSuggestionsCounter = (label: string) => {
+	if (label in usedQuickActions) {
+		usedQuickActions[label] = 0;
+	}
+}
+
+export const checkIfAllQuickActionsUsed = () => {
+	// Check if any of the quick actions have been used more than three times
+	return QUICK_ACTIONS.some(({ label }) => usedQuickActions[label] >= 3);
+}
 
 export const getHumanMessages = (history: string[]) => {
 	return history.filter((message, index) => message.startsWith('Human:'));
@@ -13,4 +37,10 @@ export const getHumanMessages = (history: string[]) => {
 
 export const clearChatHistory = () => {
 	chatHistory = [];
+	for (const key in usedQuickActions) {
+		usedQuickActions[key] = 0;
+	}
+	QUICK_ACTIONS.forEach((action) => {
+		action.disabled = false;
+	})
 }

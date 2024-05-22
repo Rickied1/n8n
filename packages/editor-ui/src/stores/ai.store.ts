@@ -429,7 +429,7 @@ export const useAIStore = defineStore('ai', () => {
 		let jsonResponse: {
 			response?: string;
 			debugInfo?: string;
-			quickActions?: Array<{ label: string; value: string }>;
+			quickActions?: Array<{ label: string; value: string; disabled: boolean }>;
 		} | null = null;
 		try {
 			jsonResponse = JSON.parse(messageChunk);
@@ -470,10 +470,7 @@ export const useAIStore = defineStore('ai', () => {
 		}
 
 		if (jsonResponse?.quickActions) {
-			// const followUpActions = [
-			// 	{ label: 'I need more detailed instructions', key: 'more_details' },
-			// 	{ label: 'I need another suggestion', key: 'another_suggestion' },
-			// ];
+			const quickReplies = jsonResponse?.quickActions.filter((action) => !action.disabled);
 			const newMessageId = Math.random().toString();
 			messages.value.push({
 				createdAt: new Date().toISOString(),
@@ -483,7 +480,7 @@ export const useAIStore = defineStore('ai', () => {
 				type: 'component',
 				id: newMessageId,
 				arguments: {
-					suggestions: jsonResponse.quickActions,
+					suggestions: quickReplies,
 					async onReplySelected({ label, key }: { action: string; label: string }) {
 						await sendMessage(label);
 						// Remove the quick replies so only user message is shown

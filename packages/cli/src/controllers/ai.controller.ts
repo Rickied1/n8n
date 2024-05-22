@@ -20,10 +20,10 @@ import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { ApplicationError } from 'n8n-workflow';
 import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
-import { chatHistory, clearChatHistory, getHumanMessages, stringifyHistory } from '@/aiAssistant/history/chat_history';
+import { chatHistory, checkIfAllQuickActionsUsed, clearChatHistory, getHumanMessages, increaseSuggestionCounter, stringifyHistory, usedQuickActions } from '@/aiAssistant/history/chat_history';
 import { resetToolHistory, toolHistory } from '@/aiAssistant/history/tool_history';
-import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs_tool';
-import { internetSearchTool } from '@/aiAssistant/tools/internet_search_tool';
+import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs.tool';
+import { internetSearchTool } from '@/aiAssistant/tools/internet_search.tool';
 
 const errorSuggestionSchema = z.object({
 	suggestion: z.object({
@@ -185,17 +185,13 @@ export class AIController {
 		const toolNames = tools.map((tool) => tool.name);
 
 		// ----------------- Agent -----------------
+		// Different prompts for debug and free-chat modes
 		const chatPrompt = debug ? ChatPromptTemplate.fromTemplate(REACT_DEBUG_PROMPT) : ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
-		// Different conversation rules for debug and free-chat modes
-		const humanAskedForSuggestions = getHumanMessages(chatHistory).filter((msg) => {
-			return (
-				msg.includes('I need another suggestion') ||
-				msg.includes('I need more detailed instructions')
-			);
-		});
 
 		// Hard-stop if human asks for too many suggestions
-		if (humanAskedForSuggestions.length >= 3) {
+		increaseSuggestionCounter(message.trim());
+		const noMoreHelp = checkIfAllQuickActionsUsed();
+		if (noMoreHelp) {
 			if (debug) {
 				message =
 					'I have asked for too many new suggestions. Please follow your conversation rules for this case.';
@@ -245,7 +241,19 @@ export class AIController {
 		debugInfo += toolHistory.n8n_documentation.length > 0 ? `N8N DOCS DOCUMENTS USED: ${toolHistory.n8n_documentation.join(', ')}\n` : '';
 		debugInfo += toolHistory.internet_search.length > 0 ? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}\n` : '';
 		debugInfo += toolHistory.n8n_documentation.length === 0 && toolHistory.internet_search.length === 0 ? 'NO TOOLS USED' : '';
-		res.end(JSON.stringify({ response, debugInfo, quickActions: debug ? QUICK_ACTIONS : undefined }));
+
+		// If users asked for detailed information already, don't show it again until they ask for another suggestion
+		const quickActions = debug ? QUICK_ACTIONS : undefined;
+		if (quickActions) {
+			if (usedQuickActions[QUICK_ACTIONS[0].label] > 0) {
+					QUICK_ACTIONS[0].disabled = true;
+			}
+		}
+		if (message.trim() === QUICK_ACTIONS[1].label) {
+			QUICK_ACTIONS[0].disabled = false;
+		}
+
+		res.end(JSON.stringify({ response, debugInfo, quickActions: noMoreHelp ? [] : quickActions}));
 	}
 
 	@Post('/debug-chat', { skipAuth: true })
