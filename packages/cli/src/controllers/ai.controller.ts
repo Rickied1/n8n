@@ -510,7 +510,9 @@ ${toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length ==
 
 			chainStream = await chainWithHistory.stream(
 				{
-					question: error?.text ?? '',
+					// TODO: The build fails here because there is no text property on error object
+					// question: error?.text ?? '',
+					question: error?.message ?? '',
 				},
 				{ configurable: { sessionId } },
 			);
@@ -562,6 +564,11 @@ ${toolHistory.get_n8n_info.length === 0 && toolHistory.internet_search.length ==
 		const outputParser = new JsonOutputFunctionsParser();
 
 		let chatMessageHistory = memorySessions.get(sessionId);
+
+		if (!chatMessageHistory) {
+			chatMessageHistory = new ChatMessageHistory();
+			memorySessions.set(sessionId, chatMessageHistory);
+		}
 
 		const prompt = ChatPromptTemplate.fromMessages([
 			new MessagesPlaceholder('history'),
