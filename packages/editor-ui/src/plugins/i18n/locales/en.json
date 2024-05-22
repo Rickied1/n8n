@@ -1480,6 +1480,7 @@
 	"runData.executeNode": "Test Node",
 	"runData.executionTime": "Execution Time",
 	"runData.fileExtension": "File Extension",
+	"runData.directory": "Directory",
 	"runData.fileName": "File Name",
 	"runData.invalidPinnedData": "Invalid pinned data",
 	"runData.items": "Items",
