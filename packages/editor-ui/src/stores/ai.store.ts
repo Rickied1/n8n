@@ -24,6 +24,7 @@ import { useWorkflowsStore } from './workflows.store';
 import { executionDataToJson } from '@/utils/nodeTypesUtils';
 import { useDataSchema } from '@/composables/useDataSchema';
 import { codeNodeEditorEventBus } from '@/event-bus';
+import { uuid } from '@jsplumb/util';
 
 const CURRENT_POPUP_HEIGHT = 94;
 
@@ -584,7 +585,8 @@ export const useAIStore = defineStore('ai', () => {
 		const errorId = await digestMessage(error.message);
 
 		messages.value = [];
-		currentSessionId.value = `${currentUser.id}-${activeNode}-${errorId}`;
+		currentSessionId.value = uuid();
+		console.log('this is the current session');
 		delete error.stack;
 		chatEventBus.emit('open');
 

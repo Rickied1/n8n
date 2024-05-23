@@ -18,7 +18,7 @@ import { JsonOutputFunctionsParser } from 'langchain/output_parsers';
 import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
-import { ApplicationError, INode } from 'n8n-workflow';
+import { ApplicationError } from 'n8n-workflow';
 import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
 import {
 	chatHistory,
@@ -282,9 +282,15 @@ export class AIController {
 		if (!chatMessageHistory) {
 			chatMessageHistory = new ChatMessageHistory();
 			memorySessions.set(sessionId, chatMessageHistory);
+			setTimeout(() => {
+				console.log('deleting session with id', sessionId);
+				memorySessions.delete(sessionId);
+			}, 300000);
 		} else {
 			isFollowUpQuestion = true;
 		}
+
+		console.log('number of sessions open', memorySessions.size);
 
 		let chainStream;
 
@@ -344,7 +350,6 @@ export class AIController {
 
 			const prompt = ChatPromptTemplate.fromMessages([
 				systemMessageFormatted,
-
 				['human', '{question} \n\n Error: {error}'],
 			]);
 
