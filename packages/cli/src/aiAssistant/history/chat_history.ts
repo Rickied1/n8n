@@ -1,15 +1,15 @@
+import { QUICK_ACTIONS } from "../prompts/debug_prompts";
+
 // ReAct agent history is string, according to the docs:
 // https://js.langchain.com/v0.1/docs/modules/agents/agent_types/react/#using-with-chat-history
 // TODO:
 //	- 	Add sessions support
 //	- 	We can use UserMessage and SystemMessage classes to make it more readable
-
-import { QUICK_ACTIONS } from "../prompts/debug_prompts";
-
 //			but in the end it has to render to a string
 export let chatHistory: string[] = [];
 export const stringifyHistory = (history: string[]) => history.join('\n');
 
+// Track used quick actions so we can alter them as the conversation progresses
 export const usedQuickActions: Record<string, number> ={
 	...QUICK_ACTIONS.reduce((acc, { label }) => ({ ...acc, [label]: 0 }), {}),
 }

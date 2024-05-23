@@ -440,9 +440,15 @@ export const useAIStore = defineStore('ai', () => {
 		let newMessageText = jsonResponse?.response ?? messageChunk;
 		if (jsonResponse?.response) {
 			try {
-				const jsonSuggestion: { suggestionTitle?: string; suggestionText?: string } = JSON.parse(
-					jsonResponse.response,
-				);
+				// Strip everything around curly braces from jsonResponse.response
+				const jsonStart = jsonResponse.response.indexOf('{');
+				const jsonEnd = jsonResponse.response.lastIndexOf('}');
+				let justJSON = jsonResponse.response ?? '';
+				if (jsonStart !== -1 && jsonEnd !== -1) {
+					justJSON = jsonResponse.response.slice(jsonStart, jsonEnd + 1);
+				}
+				const jsonSuggestion: { suggestionTitle?: string; suggestionText?: string } =
+					JSON.parse(justJSON);
 				if (jsonSuggestion.suggestionTitle && jsonSuggestion.suggestionText) {
 					newMessageText = `### ${jsonSuggestion.suggestionTitle}\r\n\n ${jsonSuggestion.suggestionText}`;
 				}
@@ -469,7 +475,7 @@ export const useAIStore = defineStore('ai', () => {
 			});
 		}
 
-		if (jsonResponse?.quickActions) {
+		if (jsonResponse?.quickActions && jsonResponse.quickActions.length > 0) {
 			const quickReplies = jsonResponse?.quickActions.filter((action) => !action.disabled);
 			const newMessageId = Math.random().toString();
 			messages.value.push({

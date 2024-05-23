@@ -253,7 +253,7 @@ export class AIController {
 			QUICK_ACTIONS[0].disabled = false;
 		}
 
-		res.end(JSON.stringify({ response, debugInfo, quickActions: noMoreHelp ? [] : quickActions}));
+		res.end(JSON.stringify({ response, debugInfo, quickActions: noMoreHelp ? [] : quickActions }));
 	}
 
 	@Post('/debug-chat', { skipAuth: true })
