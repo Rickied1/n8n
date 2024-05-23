@@ -313,10 +313,13 @@ export const useAIStore = defineStore('ai', () => {
 		}
 	}
 
-	async function onFollowUpResponseRecieved(messageChunk: string) {
+	let unrelatedQuestion = false;
+
+	async function onFollowUpResponseReceived(messageChunk: string) {
 		waitingForResponse.value = false;
 		if (messageChunk.length === 0) return;
 		if (messageChunk === '__END__') {
+			unrelatedQuestion = false;
 			//have to get the last message and the args from there
 
 			const lastMessage = getLastMessage();
@@ -380,9 +383,10 @@ export const useAIStore = defineStore('ai', () => {
 
 		const parsedMessage = jsonParse<Record<string, unknown>>(messageChunk);
 
-		if (getLastMessage()?.sender === 'user') {
-			console.log('CREEE EN COMPONENTE', parsedMessage);
-
+		if (
+			getLastMessage()?.sender === 'user' &&
+			parsedMessage.followUp?.userQuestionRelatedToTheCurrentContext
+		) {
 			messages.value.push({
 				createdAt: new Date().toISOString(),
 				sender: 'bot',
@@ -401,7 +405,18 @@ export const useAIStore = defineStore('ai', () => {
 			return;
 		}
 
-		console.log('get argument to the compoent');
+		if (!parsedMessage.followUp?.userQuestionRelatedToTheCurrentContext && !unrelatedQuestion) {
+			unrelatedQuestion = true;
+			messages.value.push({
+				createdAt: new Date().toISOString(),
+				sender: 'bot',
+				type: 'text',
+				text: "I can't help with that yet",
+				id: Math.random().toString(),
+			});
+			return;
+		}
+
 		const lastMessage = getLastMessage();
 		lastMessage.arguments = {
 			followUp: {
@@ -412,14 +427,6 @@ export const useAIStore = defineStore('ai', () => {
 			},
 		};
 
-		// if (parsedMessage.followUp?.whatChanged)
-		// 	messages.value.push({
-		// 		createdAt: new Date().toISOString(),
-		// 		text: parsedMessage.followUp?.whatChanged,
-		// 		sender: 'bot',
-		// 		type: 'text',
-		// 		id: Math.random().toString(),
-		// 	});
 		chatEventBus.emit('scrollToBottom');
 	}
 
@@ -606,7 +613,7 @@ export const useAIStore = defineStore('ai', () => {
 		return await aiApi.followUpChatWithAiErrorHelper(
 			rootStore.getRestApiContext,
 			{ ...payload },
-			onFollowUpResponseRecieved,
+			onFollowUpResponseReceived,
 		);
 	}
 
