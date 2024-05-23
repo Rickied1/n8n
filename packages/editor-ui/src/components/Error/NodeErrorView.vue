@@ -22,6 +22,7 @@ import { getMainAuthField, getNodeAuthOptions } from '@/utils/nodeTypesUtils';
 import { useAIStore } from '@/stores/ai.store';
 import { chatEventBus } from '@n8n/chat/event-buses/chatEventBus';
 import { useUsersStore } from '@/stores/users.store';
+import { useNodeHelpers } from '@/composables/useNodeHelpers';
 
 type Props = {
 	error: NodeError | NodeApiError | NodeOperationError;
@@ -393,12 +394,20 @@ async function openAssistant() {
 		return;
 	}
 
+	// Get node credentials details for the ai assistant
 	const authField = getMainAuthField(nodeType);
 	const credentialInUse = props.error.node.parameters[authField?.name ?? ''];
 	const availableAuthOptions = getNodeAuthOptions(nodeType);
 	const selectedOption = availableAuthOptions.find((option) => option.value === credentialInUse);
+	// Get node input data for the ai assistant
+	const inputData = ndvStore.ndvInputData[0].json;
+	const inputNodeName = ndvStore.input.nodeName;
+	const nodeInputData: { inputNodeName?: string; inputData?: IDataObject } = {
+		inputNodeName,
+		inputData,
+	};
 	aiStore.debugSessionInProgress = true;
-	await aiStore.debugWithAssistant(nodeType, props.error, selectedOption);
+	await aiStore.debugWithAssistant(nodeType, props.error, selectedOption, nodeInputData);
 }
 </script>
 

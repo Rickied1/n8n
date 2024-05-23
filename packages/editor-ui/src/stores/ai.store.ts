@@ -531,7 +531,9 @@ export const useAIStore = defineStore('ai', () => {
 		nodeType: INodeTypeDescription,
 		error: NodeError,
 		authType?: { name: string; value: string },
+		nodeInputData?: { inputNodeName?: string; inputData?: IDataObject },
 	) {
+		messages.value = [];
 		chatTitle.value = '🧞 n8n Assistant::Debug mode';
 		chatEventBus.emit('open');
 		initialMessages.value[0].text = `Hi ${userName.value}! I see you're having trouble with the __${activeNode.value}__ node. Let me help you with that.`;
@@ -545,7 +547,7 @@ export const useAIStore = defineStore('ai', () => {
 		}
 		await aiApi.debugWithAssistant(
 			rootStore.getRestApiContext,
-			{ nodeType, error, authType, userTraits },
+			{ nodeType, error, authType, userTraits, nodeInputData },
 			onMessageReceived,
 		);
 		waitingForResponse.value = false;

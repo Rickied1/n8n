@@ -31,6 +31,7 @@ import {
 import { resetToolHistory, toolHistory } from '@/aiAssistant/history/tool_history';
 import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs.tool';
 import { internetSearchTool } from '@/aiAssistant/tools/internet_search.tool';
+import { prepareDebugUserPrompt } from '@/aiAssistant/utils';
 
 const errorSuggestionSchema = z.object({
 	suggestion: z.object({
@@ -64,14 +65,6 @@ const followUpQuestionResponseSchema = z.object({
 });
 
 const memorySessions = new Map<string, ChatMessageHistory>();
-
-// Remove id and position from node parameters since they are not relevant to the assistant
-const removeUnrelevantNodeProps = (node: INode) => {
-	const newParameters = { ...node.parameters };
-	delete newParameters.id;
-	delete newParameters.position;
-	return newParameters;
-};
 
 const assistantModel = new ChatOpenAI({
 	temperature: 0,
@@ -107,30 +100,14 @@ export class AIController {
 	 */
 	@Post('/debug-with-assistant', { skipAuth: true })
 	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
-		const { nodeType, error, authType, message, userTraits } = req.body;
+		const { nodeType, error, authType, message, userTraits, nodeInputData } = req.body;
 		resetToolHistory();
 		if (message) {
 			await this.askAssistant(`${message}\n`, res, true);
 			return;
 		}
 		clearChatHistory();
-		let authPrompt = `I am using the following authentication type: ${authType?.name}`;
-		if (!authType) {
-			authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(error.node.credentials)}`;
-		}
-		let errorMessage = error.message;
-		if (!errorMessage) {
-			errorMessage = error.messages.join(', ');
-		}
-		const userPrompt = `
-			I am having the following error in my ${nodeType.displayName} node: ${errorMessage} ${error.description ? `- ${error.description}` : ''}
-			- Here is some more information about my workflow and myself that you can use to provide a solution:
-				- ${authPrompt}. Use this info to only provide solutions that are compatible with the related to this authentication type and not the others.
-				- This is the JSON object that represents the node that I am having an error in, you can use it to inspect current node parameter values: ${JSON.stringify(removeUnrelevantNodeProps(error.node))}
-				- n8n version and deployment type that I am using: ${userTraits.n8nVersion},
-				- Version of the ${nodeType.displayName} node that I am having an error in: ${userTraits.nodeVersion}
-			`;
-
+		const userPrompt = prepareDebugUserPrompt(nodeType, error, authType, userTraits, nodeInputData);
 		await this.askAssistant(userPrompt, res, true);
 	}
 

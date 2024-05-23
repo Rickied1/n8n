@@ -2,7 +2,11 @@ import { DuckDuckGoSearch } from '@langchain/community/tools/duckduckgo_search';
 import { DynamicTool } from '@langchain/core/tools';
 import { toolHistory } from '../history/tool_history';
 
-const INTERNET_TOOL_SITES = ['https://community.n8n.io', 'https://blog.n8n.io', 'https://n8n.io'];
+const INTERNET_TOOL_SITES = [
+	'https://community.n8n.io',
+	'https://blog.n8n.io',
+	'https://n8n.io'
+];
 
 export const internetSearchTool = new DynamicTool({
 	name: 'internet_search',
