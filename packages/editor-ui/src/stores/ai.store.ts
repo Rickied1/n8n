@@ -533,6 +533,7 @@ export const useAIStore = defineStore('ai', () => {
 		error: NodeError,
 		authType?: { name: string; value: string },
 		nodeInputData?: { inputNodeName?: string; inputData?: IDataObject },
+		referencedNodesData?: { [key: string]: IDataObject },
 	) {
 		messages.value = [];
 		chatTitle.value = '🧞 n8n Assistant::Debug mode';
@@ -548,7 +549,7 @@ export const useAIStore = defineStore('ai', () => {
 		}
 		await aiApi.debugWithAssistant(
 			rootStore.getRestApiContext,
-			{ nodeType, error, authType, userTraits, nodeInputData },
+			{ nodeType, error, authType, userTraits, nodeInputData, referencedNodesData },
 			onMessageReceived,
 		);
 		waitingForResponse.value = false;

@@ -102,14 +102,14 @@ export class AIController {
 	 */
 	@Post('/debug-with-assistant', { skipAuth: true })
 	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
-		const { nodeType, error, authType, message, userTraits, nodeInputData } = req.body;
+		const { nodeType, error, authType, message, userTraits, nodeInputData, referencedNodesData } = req.body;
 		resetToolHistory();
 		if (message) {
 			await this.askAssistant(`${message}\n`, res, true);
 			return;
 		}
 		clearChatHistory();
-		const userPrompt = prepareDebugUserPrompt(nodeType, error, authType, userTraits, nodeInputData);
+		const userPrompt = prepareDebugUserPrompt(nodeType, error, authType, userTraits, nodeInputData, referencedNodesData);
 		await this.askAssistant(userPrompt, res, true);
 	}
 

@@ -7,7 +7,9 @@ import { useNodeTypesStore } from '@/stores/nodeTypes.store';
 import { useNDVStore } from '@/stores/ndv.store';
 import { useRootStore } from '@/stores/n8nRoot.store';
 import type {
+	AssignmentCollectionValue,
 	IDataObject,
+	INode,
 	INodeProperties,
 	INodePropertyCollection,
 	INodePropertyOptions,
@@ -23,6 +25,7 @@ import { useAIStore } from '@/stores/ai.store';
 import { chatEventBus } from '@n8n/chat/event-buses/chatEventBus';
 import { useUsersStore } from '@/stores/users.store';
 import { useNodeHelpers } from '@/composables/useNodeHelpers';
+import { useWorkflowsStore } from '@/stores/workflows.store';
 
 type Props = {
 	error: NodeError | NodeApiError | NodeOperationError;
@@ -369,6 +372,79 @@ function copySuccess() {
 	});
 }
 
+// TODO: These functions are pieced together just for the poc purpose. They need to be refactored and tested
+const entityRegex = /\$\((['"])(.*?)\1\)/g;
+function extractNodeNames(template: string): string[] {
+	let matches;
+	const nodeNames: string[] = [];
+	while ((matches = entityRegex.exec(template)) !== null) {
+		nodeNames.push(matches[2]);
+	}
+	return nodeNames;
+}
+
+/**
+ * Get the output data of the nodes based on their names.
+ */
+function getNodeOutputs(nodeNames: string[]): { [key: string]: IDataObject } {
+	const nodeOutputs: { [key: string]: IDataObject } = {};
+	const executionData = useWorkflowsStore().workflowExecutionData;
+	nodeNames.forEach((nodeName) => {
+		const nodeOutput = executionData?.data?.resultData.runData[nodeName];
+		if (!nodeOutput) {
+			return;
+		}
+		// TODO: Take into account multiple output indexes and multiple outputs
+		const output = nodeOutput[0]?.data?.main?.[0]?.[0]?.json;
+		if (output) {
+			nodeOutputs[nodeName] = output;
+		}
+	});
+	return nodeOutputs;
+}
+
+/**
+ * Extract the node names from the expressions in the node parameters.
+ */
+function getReferencedNodes(node: INode): string[] {
+	const referencedNodes: string[] = [];
+	if (!node) {
+		return referencedNodes;
+	}
+	// Special case for code node
+	if (node.type === 'n8n-nodes-base.set' && node.parameters.assignments) {
+		const assignments = node.parameters.assignments as AssignmentCollectionValue;
+		if (assignments.assignments && assignments.assignments.length) {
+			assignments.assignments.forEach((assignment) => {
+				if (assignment.name && assignment.value && String(assignment.value).startsWith('=')) {
+					const nodeNames = extractNodeNames(String(assignment.value));
+					if (nodeNames.length) {
+						referencedNodes.push(...nodeNames);
+					}
+				}
+			});
+		}
+	} else {
+		Object.values(node.parameters).forEach((value) => {
+			if (!value) {
+				return;
+			}
+			let strValue = String(value);
+			// Handle resource locator
+			if (typeof value === 'object' && 'value' in value) {
+				strValue = String(value.value);
+			}
+			if (strValue.startsWith('=')) {
+				const nodeNames = extractNodeNames(strValue);
+				if (nodeNames.length) {
+					referencedNodes.push(...nodeNames);
+				}
+			}
+		});
+	}
+	return referencedNodes;
+}
+
 async function openAssistant() {
 	const nodeType = useNodeTypesStore().getNodeType(
 		props.error.node?.type,
@@ -400,6 +476,8 @@ async function openAssistant() {
 	const availableAuthOptions = getNodeAuthOptions(nodeType);
 	const selectedOption = availableAuthOptions.find((option) => option.value === credentialInUse);
 	// Get node input data for the ai assistant
+	const referencedNodeNames = getReferencedNodes(props.error.node);
+	const nodeOutputs = getNodeOutputs(referencedNodeNames);
 	const inputData = ndvStore.ndvInputData[0].json;
 	const inputNodeName = ndvStore.input.nodeName;
 	const nodeInputData: { inputNodeName?: string; inputData?: IDataObject } = {
@@ -407,7 +485,13 @@ async function openAssistant() {
 		inputData,
 	};
 	aiStore.debugSessionInProgress = true;
-	await aiStore.debugWithAssistant(nodeType, props.error, selectedOption, nodeInputData);
+	await aiStore.debugWithAssistant(
+		nodeType,
+		props.error,
+		selectedOption,
+		nodeInputData,
+		nodeOutputs,
+	);
 }
 </script>
 

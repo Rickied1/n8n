@@ -213,6 +213,7 @@ export interface AIAssistantDebugPayload {
 	authType?: { name: string; value: string };
 	userTraits: { nodeVersion?: string; n8nVersion?: string };
 	nodeInputData?: { inputNodeName: string; inputData: IDataObject };
+	referencedNodesData?: { [key: string]: IDataObject };
 	message?: string;
 }
 
