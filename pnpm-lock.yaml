@@ -1513,7 +1513,7 @@ importers:
         version: 3.0.3
       ts-ics:
         specifier: ^1.2.2
-        version: 1.2.2(date-fns@2.30.0)(lodash@4.17.21)(zod@3.23.8)
+        version: 1.2.2(date-fns@2.30.0)(lodash@4.17.21)(zod@3.22.4)
       typedi:
         specifier: 0.10.0
         version: 0.10.0(patch_hash=sk6omkefrosihg7lmqbzh7vfxe)
@@ -25467,7 +25467,7 @@ packages:
     dependencies:
       typescript: 5.4.5
 
-  /ts-ics@1.2.2(date-fns@2.30.0)(lodash@4.17.21)(zod@3.23.8):
+  /ts-ics@1.2.2(date-fns@2.30.0)(lodash@4.17.21)(zod@3.22.4):
     resolution: {integrity: sha512-L7T5JQi99qQ2Uv7AoCHUZ8Mx1bJYo7qBZtBckuHueR90I3WVdW5NC/tOqTVgu18c3zj08du+xlgWlTIcE+Foxw==}
     peerDependencies:
       date-fns: ^2
@@ -25477,7 +25477,7 @@ packages:
       date-fns: 2.30.0
       date-fns-tz: 2.0.0(date-fns@2.30.0)
       lodash: 4.17.21
-      zod: 3.23.8
+      zod: 3.22.4
     dev: false
 
   /ts-interface-checker@0.1.13:
@@ -27365,8 +27365,8 @@ packages:
       zod: 3.22.4
     dev: false
 
-  /zod@3.23.8:
-    resolution: {integrity: sha512-XBx9AXhXktjUqnepgTiE5flcKIYWi/rme0Eaj+5Y0lftuGBq+jyRu/md4WnuxqgP1ubdpNCsYEYPxrzVHD8d6g==}
+  /zod@3.22.4:
+    resolution: {integrity: sha512-iC+8Io04lddc+mVqQ9AZ7OQ2MrUKGN+oIQyq1vemgt46jwCwLfhq7/pwnBnNXXXZb8VTVLKwp9EDkx+ryxIWmg==}
     dev: false
 
   '@cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz':
