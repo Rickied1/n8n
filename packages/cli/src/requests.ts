@@ -4,6 +4,7 @@ import type {
 	ICredentialDataDecryptedObject,
 	IDataObject,
 	INode,
+	ILoadOptions,
 	INodeCredentialTestRequest,
 	INodeCredentials,
 	INodeParameters,
@@ -451,19 +452,19 @@ export declare namespace DynamicNodeParametersRequest {
 		{}
 	>;
 
-	/** GET /dynamic-node-parameters/options */
+	/** POST /dynamic-node-parameters/options */
 	type Options = BaseRequest<{
-		loadOptions?: string;
+		loadOptions?: ILoadOptions;
 	}>;
 
-	/** GET /dynamic-node-parameters/resource-locator-results */
+	/** POST /dynamic-node-parameters/resource-locator-results */
 	type ResourceLocatorResults = BaseRequest<{
 		methodName: string;
 		filter?: string;
 		paginationToken?: string;
 	}>;
 
-	/** GET dynamic-node-parameters/resource-mapper-fields */
+	/** POST dynamic-node-parameters/resource-mapper-fields */
 	type ResourceMapperFields = BaseRequest<{
 		methodName: string;
 	}>;
