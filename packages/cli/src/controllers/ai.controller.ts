@@ -31,8 +31,9 @@ import {
 } from '@/aiAssistant/history/chat_history';
 import { resetToolHistory, toolHistory } from '@/aiAssistant/history/tool_history';
 import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs.tool';
-import { internetSearchTool } from '@/aiAssistant/tools/internet_search.tool';
+import { createInternetSearchTool } from '@/aiAssistant/tools/internet_search.tool';
 import { prepareDebugUserPrompt } from '@/aiAssistant/utils';
+import { N8N_BLOG, N8N_COMMUNITY, N8N_MARKETING_WEBSITE } from '@/aiAssistant/constants';
 
 const errorSuggestionSchema = z.object({
 	suggestion: z.object({
@@ -166,6 +167,11 @@ export class AIController {
 	// ---------------------------------------------------------- UTIL FUNCTIONS ----------------------------------------------------------
 	async askAssistant(message: string, res: express.Response, debug?: boolean) {
 		// ----------------- Tools -----------------
+		// Internet search tool setup:
+		// - In debug mode, use only forum to search for answers, while in free-chat mode use all websites (and more results)
+		const internetToolWebsites = debug ? [N8N_COMMUNITY] : [N8N_MARKETING_WEBSITE, N8N_BLOG, N8N_COMMUNITY];
+		const internetToolMaxResults = debug ? 5 : 10;
+		const internetSearchTool = createInternetSearchTool(internetToolWebsites, internetToolMaxResults);
 		const tools = [n8nInfoTool, internetSearchTool];
 		const toolNames = tools.map((tool) => tool.name);
 
