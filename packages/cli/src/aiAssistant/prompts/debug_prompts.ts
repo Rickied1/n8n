@@ -6,10 +6,11 @@ export const QUICK_ACTIONS: QuickAction[] = [
 ];
 
 export const DEBUG_CONVERSATION_RULES = `
-1.	After the initial user question, assistant must provide a short and actionable suggestion to help the user solve their problem or answer their question.
+1.	At the start of the conversation, assistant must provide a short and actionable suggestion to help the user solve their problem or answer their question.
 2. 	This suggestion must be a valid JSON object with the following properties, and nothing else:
 			- 'suggestionTitle': Suggestion title
 			- 'suggestionText': Must be limited to one sentence. Must not contain any code snippets or detailed instructions.
+			- 'followUpQuestion': Asking the user if they need help with the suggestion. Must be limited to one sentence.
 3.	User will always respond to the suggestion with one of the following, so make sure to formulate the suggestion accordingly:
 			${QUICK_ACTIONS.map(({ label }) => `- ${label}`).join('\n')}
 4. 	If the user responds that they need help (yes), assistant must use n8n tools to provide step-by-step instructions on how to solve the problem.

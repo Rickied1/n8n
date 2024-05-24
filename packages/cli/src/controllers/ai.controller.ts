@@ -187,7 +187,7 @@ export class AIController {
 		if (noMoreHelp) {
 			if (debug) {
 				message =
-					'I have asked for too many new suggestions. Please follow your conversation rules for this case.';
+					'I have asked for too many new suggestions. Please follow the step 7 from your conversation rules to respond.';
 			}
 		}
 

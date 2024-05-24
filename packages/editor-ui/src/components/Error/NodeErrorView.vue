@@ -476,6 +476,7 @@ async function openAssistant() {
 	const availableAuthOptions = getNodeAuthOptions(nodeType);
 	const selectedOption = availableAuthOptions.find((option) => option.value === credentialInUse);
 	// Get node input data for the ai assistant
+	// The idea here is to send just node names and key/value pairs of the input data so we are sending only the necessary info
 	const referencedNodeNames = getReferencedNodes(props.error.node);
 	const nodeOutputs = getNodeOutputs(referencedNodeNames);
 	const inputData = ndvStore.ndvInputData[0].json;
