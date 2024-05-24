@@ -27,7 +27,6 @@ import {
 	clearChatHistory,
 	increaseSuggestionCounter,
 	stringifyHistory,
-	usedQuickActions,
 } from '@/aiAssistant/history/chat_history';
 import { resetToolHistory, toolHistory } from '@/aiAssistant/history/tool_history';
 import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs.tool';
@@ -224,12 +223,14 @@ export class AIController {
 		} catch (error) {
 			// TODO: This can be handled by agentExecutor
 			if (error instanceof Error)
+				console.log('>> ⚠️ <<', `Error: Could not parse LLM output: ${error.toString()}`);
+
 				response = error.toString().replace(/Error: Could not parse LLM output: /, '');
 		}
 		console.log('>> 🤖 <<', response);
 
 		addConversationToHistory(message, response);
-		let debugInfo = '----------------------------------- [DEBUG INFO] -----------------------------------\n';
+		let debugInfo = '--------------------------------- [DEBUG INFO] -----------------------------------\n';
 		debugInfo +=
 			toolHistory.n8n_documentation.length > 0
 				? `📄 N8N DOCS DOCUMENTS USED: \n• ${toolHistory.n8n_documentation.join('\n• ')}\n`
@@ -245,14 +246,14 @@ export class AIController {
 
 		// If users asked for detailed information already, don't show it again until they ask for another suggestion
 		const quickActions = debug ? QUICK_ACTIONS : undefined;
-		if (quickActions) {
-			if (usedQuickActions[QUICK_ACTIONS[0].label] > 0) {
-				QUICK_ACTIONS[0].disabled = true;
-			}
-		}
-		if (message.trim() === QUICK_ACTIONS[1].label) {
-			QUICK_ACTIONS[0].disabled = false;
-		}
+		// if (quickActions) {
+		// 	if (usedQuickActions[QUICK_ACTIONS[0].label] > 0) {
+		// 		QUICK_ACTIONS[0].disabled = true;
+		// 	}
+		// }
+		// if (message.trim() === QUICK_ACTIONS[1].label) {
+		// 	QUICK_ACTIONS[0].disabled = false;
+		// }
 
 		res.end(JSON.stringify({ response, debugInfo, quickActions: noMoreHelp ? [] : quickActions }));
 	}

@@ -29,7 +29,7 @@ export const resetSuggestionsCounter = (label: string) => {
 
 export const checkIfAllQuickActionsUsed = () => {
 	// Check if any of the quick actions have been used more than three times
-	return QUICK_ACTIONS.some(({ label }) => usedQuickActions[label] >= 3);
+	return QUICK_ACTIONS.some(({ label }) => usedQuickActions[label] > 3);
 }
 
 export const getHumanMessages = (history: string[]) => {

@@ -511,7 +511,7 @@ export const useAIStore = defineStore('ai', () => {
 				id: newMessageId,
 				arguments: {
 					suggestions: quickReplies,
-					async onReplySelected({ label, key }: { action: string; label: string }) {
+					async onReplySelected({ label }: { label: string; prompt: string }) {
 						await sendMessage(label);
 						// Remove the quick replies so only user message is shown
 						messages.value = messages.value.filter((message) => {

@@ -1,19 +1,27 @@
 import { QuickAction } from "../types";
 
 export const QUICK_ACTIONS: QuickAction[] = [
-	{ label: 'Yes, help me fix the issue', key: 'more_details', disabled: false},
-	{ label: 'No, try something else', key: 'another_suggestion', disabled: false},
+	{
+		key: 'more_details',
+		label: 'Yes, help me fix the issue',
+		disabled: false
+	},
+	{
+		key: 'another_suggestion',
+		label: 'No, try something else',
+		disabled: false
+	},
 ];
 
 export const DEBUG_CONVERSATION_RULES = `
-1.	At the start of the conversation, assistant must provide a short and actionable suggestion to help the user solve their problem or answer their question.
+1.	At the start of the conversation, assistant must provide a short and actionable suggestion to help the user solve their problem.
 2. 	This suggestion must be a valid JSON object with the following properties, and nothing else:
 			- 'suggestionTitle': Suggestion title
 			- 'suggestionText': Must be limited to one sentence. Must not contain any code snippets or detailed instructions.
 			- 'followUpQuestion': Asking the user if they need help with the suggestion. Must be limited to one sentence.
 3.	User will always respond to the suggestion with one of the following, so make sure to formulate the suggestion accordingly:
 			${QUICK_ACTIONS.map(({ label }) => `- ${label}`).join('\n')}
-4. 	If the user responds that they need help (yes), assistant must use n8n tools to provide step-by-step instructions on how to solve the problem.
+4. 	If the user responds that they need help (yes), assistant MUST use n8n tools to provide step-by-step instructions on how to solve the problem.
 5. 	If the user responds that they need another suggestion (no), start the process again from step 1 but follow also the following rules:
 6.	At this point, assistant must use it's tools to formulate a new suggestion
 		Each new suggestion must be different from the previous ones and must provide a new direction to the user.
@@ -46,8 +54,6 @@ CONVERSATION RULES:
 ------
 
 ${DEBUG_CONVERSATION_RULES}
-
-When using information from tools, assistant must always prioritize the information from the official n8n documentation over the other internet sources.
 
 This is some additional information about n8n and it's users that assistant should be aware of:
 - When the user is asking for help regarding an error in their node, assistant must remember that the user is already working on their n8n workflow and should skip the basic setup instructions
