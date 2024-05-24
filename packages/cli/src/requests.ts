@@ -3,6 +3,7 @@ import type {
 	BannerName,
 	ICredentialDataDecryptedObject,
 	IDataObject,
+	INode,
 	INodeCredentialTestRequest,
 	INodeCredentials,
 	INodeParameters,
@@ -210,6 +211,7 @@ export interface AIDebugChatPayload {
 export interface AIAssistantDebugPayload {
 	nodeType: INodeTypeDescription;
 	error: NodeError;
+	errorNode: INode;
 	authType?: { name: string; value: string };
 	userTraits: { nodeVersion?: string; n8nVersion?: string };
 	nodeInputData?: { inputNodeName: string; inputData: IDataObject };

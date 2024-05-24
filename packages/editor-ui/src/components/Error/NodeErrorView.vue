@@ -446,10 +446,16 @@ function getReferencedNodes(node: INode): string[] {
 }
 
 async function openAssistant() {
-	const nodeType = useNodeTypesStore().getNodeType(
+	let nodeType = useNodeTypesStore().getNodeType(
 		props.error.node?.type,
 		props.error.node?.typeVersion,
 	);
+	if (!nodeType && ndvStore.activeNode) {
+		nodeType = useNodeTypesStore().getNodeType(
+			ndvStore.activeNode.type,
+			ndvStore.activeNode.typeVersion,
+		);
+	}
 	if (!nodeType) {
 		return;
 	}
@@ -469,15 +475,17 @@ async function openAssistant() {
 		await aiStore.startNewDebugSession(props.error);
 		return;
 	}
+	// Some error objects (like `Invalid syntax`) do not have the node, so fallback to the active node
+	const node = props.error.node || ndvStore.activeNode;
 
 	// Get node credentials details for the ai assistant
 	const authField = getMainAuthField(nodeType);
-	const credentialInUse = props.error.node.parameters[authField?.name ?? ''];
+	const credentialInUse = node.parameters[authField?.name ?? ''];
 	const availableAuthOptions = getNodeAuthOptions(nodeType);
 	const selectedOption = availableAuthOptions.find((option) => option.value === credentialInUse);
 	// Get node input data for the ai assistant
 	// The idea here is to send just node names and key/value pairs of the input data so we are sending only the necessary info
-	const referencedNodeNames = getReferencedNodes(props.error.node);
+	const referencedNodeNames = getReferencedNodes(node);
 	const nodeOutputs = getNodeOutputs(referencedNodeNames);
 	const inputData = ndvStore.ndvInputData[0].json;
 	const inputNodeName = ndvStore.input.nodeName;
@@ -485,10 +493,12 @@ async function openAssistant() {
 		inputNodeName,
 		inputData,
 	};
+	const errorNode = props.error.node || ndvStore.activeNode;
 	aiStore.debugSessionInProgress = true;
 	await aiStore.debugWithAssistant(
 		nodeType,
 		props.error,
+		errorNode,
 		selectedOption,
 		nodeInputData,
 		nodeOutputs,

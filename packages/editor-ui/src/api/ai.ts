@@ -1,7 +1,7 @@
 import type { IRestApiContext, Schema } from '@/Interface';
 import type { DebugChatPayload } from '@/stores/ai.store';
 import { makeRestApiRequest } from '@/utils/apiUtils';
-import type { IDataObject, INodeTypeDescription, NodeError } from 'n8n-workflow';
+import type { IDataObject, INode, INodeTypeDescription, NodeError } from 'n8n-workflow';
 
 export interface GenerateCurlPayload {
 	service: string;
@@ -102,6 +102,7 @@ export const debugWithAssistant = async (
 	payload: {
 		nodeType?: INodeTypeDescription;
 		error?: NodeError;
+		errorNode?: INode;
 		authType?: { name: string; value: string };
 		userTraits?: { nodeVersion?: string; n8nVersion?: string };
 		nodeInputData?: { inputNodeName?: string; inputData?: IDataObject };

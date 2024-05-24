@@ -4,6 +4,7 @@ import { AssignmentCollectionValue, IDataObject, INode, INodeTypeDescription, No
 export const prepareDebugUserPrompt = (
 	nodeType: INodeTypeDescription,
 	error: NodeError,
+	errorNode: INode,
 	authType?: { name: string; value: string },
 	userTraits?: { nodeVersion?: string; n8nVersion?: string },
 	nodeInputData?: { inputNodeName: string; inputData: IDataObject },
@@ -11,9 +12,9 @@ export const prepareDebugUserPrompt = (
 ) => {
 	// Authentication info
 	let authPrompt = `I am using the following authentication type: ${authType?.name}`;
-	if (!authType && error.node.credentials) {
-		authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(error.node.credentials)}`;
-	} else if (!authType && !error.node.credentials) {
+	if (!authType && errorNode.credentials) {
+		authPrompt = `This is the JSON object that represents n8n credentials for the this node: ${JSON.stringify(errorNode.credentials)}`;
+	} else if (!authType && !errorNode.credentials) {
 		authPrompt = '';
 	}
 	// Error info
@@ -39,7 +40,7 @@ export const prepareDebugUserPrompt = (
 		I am having the following error in my ${nodeType.displayName} node: ${errorMessage} ${error.description ? `- ${error.description}` : ''}
 		- Here is some more information about my workflow and myself that you can use to provide a solution:
 			- This is the JSON object that represents the node that I am having an error in, you can use it to inspect current node parameter values:
-				${JSON.stringify(prepareNodeParameterValues(error.node))}
+				${JSON.stringify(prepareNodeParameterValues(errorNode))}
 			${authPrompt ? '- ' + authPrompt : ''}
 			${userTraits?.n8nVersion ? `- I am using n8n version: ${userTraits.n8nVersion}` : ''}
 			${userTraits?.nodeVersion ? `- Version of the ${nodeType.displayName} node that I am having an error in: ${userTraits.nodeVersion}` : ''}

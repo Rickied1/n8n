@@ -13,6 +13,7 @@ import { useUsersStore } from '@/stores/users.store';
 import { useNDVStore } from '@/stores/ndv.store';
 import type { ChatMessage } from '@n8n/chat/types';
 import {
+	INode,
 	jsonParse,
 	type IDataObject,
 	type INodeTypeDescription,
@@ -547,6 +548,7 @@ export const useAIStore = defineStore('ai', () => {
 	async function debugWithAssistant(
 		nodeType: INodeTypeDescription,
 		error: NodeError,
+		errorNode: INode,
 		authType?: { name: string; value: string },
 		nodeInputData?: { inputNodeName?: string; inputData?: IDataObject },
 		referencedNodesData?: { [key: string]: IDataObject },
@@ -559,13 +561,13 @@ export const useAIStore = defineStore('ai', () => {
 		let userTraits: { nodeVersion?: string; n8nVersion?: string } = {};
 		if (error) {
 			userTraits = {
-				nodeVersion: nodeVersionTag(error.node),
+				nodeVersion: nodeVersionTag(errorNode),
 				n8nVersion: n8nVersion.value,
 			};
 		}
 		await aiApi.debugWithAssistant(
 			rootStore.getRestApiContext,
-			{ nodeType, error, authType, userTraits, nodeInputData, referencedNodesData },
+			{ nodeType, error, errorNode, authType, userTraits, nodeInputData, referencedNodesData },
 			onMessageReceived,
 		);
 		waitingForResponse.value = false;
