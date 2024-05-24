@@ -21,6 +21,7 @@ import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { ApplicationError } from 'n8n-workflow';
 import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
 import {
+	addConversationToHistory,
 	chatHistory,
 	checkIfAllQuickActionsUsed,
 	clearChatHistory,
@@ -221,20 +222,19 @@ export class AIController {
 		}
 		console.log('>> 🤖 <<', response);
 
-		chatHistory.push(`Human: ${message}`);
-		chatHistory.push(`Assistant: ${response}`);
-		let debugInfo = '-------------- DEBUG INFO --------------\n';
+		addConversationToHistory(message, response);
+		let debugInfo = '----------------------------------- [DEBUG INFO] -----------------------------------\n';
 		debugInfo +=
 			toolHistory.n8n_documentation.length > 0
-				? `N8N DOCS DOCUMENTS USED: ${toolHistory.n8n_documentation.join(', ')}\n`
+				? `📄 N8N DOCS DOCUMENTS USED: \n• ${toolHistory.n8n_documentation.join('\n• ')}\n`
 				: '';
 		debugInfo +=
 			toolHistory.internet_search.length > 0
-				? `FORUM PAGES USED: ${toolHistory.internet_search.join(',')}\n`
+				? `🌐 INTERNET PAGES USED: \n• ${toolHistory.internet_search.join('\n• ')}\n`
 				: '';
 		debugInfo +=
 			toolHistory.n8n_documentation.length === 0 && toolHistory.internet_search.length === 0
-				? 'NO TOOLS USED'
+				? '🧰 NO TOOLS USED'
 				: '';
 
 		// If users asked for detailed information already, don't show it again until they ask for another suggestion

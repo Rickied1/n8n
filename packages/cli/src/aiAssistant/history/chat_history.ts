@@ -1,3 +1,4 @@
+import { CHAT_HISTORY_CONVERSATION_LIMIT } from "../constants";
 import { QUICK_ACTIONS } from "../prompts/debug_prompts";
 
 // ReAct agent history is string, according to the docs:
@@ -33,6 +34,16 @@ export const checkIfAllQuickActionsUsed = () => {
 
 export const getHumanMessages = (history: string[]) => {
 	return history.filter((message, index) => message.startsWith('Human:'));
+};
+
+export const addConversationToHistory = (userMessage: string, systemMessage: string) => {
+	// If history has more than 5 conversations, remove the first one
+	if (chatHistory.length >= CHAT_HISTORY_CONVERSATION_LIMIT * 2) {
+		chatHistory.shift();
+		chatHistory.shift();
+	}
+	chatHistory.push(`Human: ${userMessage}`);
+	chatHistory.push(`Assistant: ${systemMessage}`);
 };
 
 export const clearChatHistory = () => {

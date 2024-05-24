@@ -136,6 +136,7 @@ const messageComponents = options.messageComponents ?? {};
 			font-size: inherit;
 			margin: 0;
 			white-space: pre-wrap;
+			word-break: break-all;
 			box-sizing: border-box;
 			padding: var(--chat--spacing);
 			background: var(--chat--message--pre--background);
