@@ -19,7 +19,7 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { ApplicationError } from 'n8n-workflow';
-import { QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
+import { MORE_DETAILS_USER_PROMPT, NO_MORE_SUGGESTIONS_PROMPT, QUICK_ACTIONS, REACT_DEBUG_PROMPT, SUGGESTION_USER_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
 import {
 	addConversationToHistory,
 	chatHistory,
@@ -182,13 +182,6 @@ export class AIController {
 
 		// Hard-stop if human asks for too many suggestions
 		increaseSuggestionCounter(message.trim());
-		const noMoreHelp = checkIfAllQuickActionsUsed();
-		if (noMoreHelp) {
-			if (debug) {
-				message =
-					'I have asked for too many new suggestions. Please follow the step 7 from your conversation rules to respond.';
-			}
-		}
 
 		const agent = await createReactAgent({
 			llm: assistantModel,
@@ -202,12 +195,26 @@ export class AIController {
 			returnIntermediateSteps: true,
 		});
 
-		console.log('\n>> 🤷 <<', message.trim());
+		// TODO: This is simplified user intent detection (yes/no)
+		//	- We should use another LLM call here to detect user intent more accurately
+		let userMessage = message.trim();
+		const noMoreHelp = checkIfAllQuickActionsUsed();
+		if (noMoreHelp) {
+			if (debug) {
+				userMessage = NO_MORE_SUGGESTIONS_PROMPT;
+			}
+		}
+		else if (userMessage.toLowerCase().startsWith('yes')) {
+			userMessage = `Yes, I need a detailed guide on how to solve the issue.\n${MORE_DETAILS_USER_PROMPT}`;
+		} else {
+			userMessage = `${userMessage}\n${SUGGESTION_USER_PROMPT}`;
+		}
+		console.log('\n>> 🤷 <<', userMessage);
 		let response = '';
 		try {
-			// TODO: Add streaming & LangSmith tracking
+			// TODO: Add streaming
 			const result = await agentExecutor.invoke({
-				input: message,
+				input: userMessage,
 				chat_history: stringifyHistory(chatHistory),
 				tool_names: toolNames,
 			});
@@ -221,7 +228,7 @@ export class AIController {
 			// console.log('-----------------------------------------------------------------------------');
 			// console.log();
 		} catch (error) {
-			// TODO: This can be handled by agentExecutor
+			// TODO: This can be handled by agentExecutor, or we need to instruct the agent to return 'Final answer: ...'
 			if (error instanceof Error)
 				console.log('>> ⚠️ <<', `Error: Could not parse LLM output: ${error.toString()}`);
 
@@ -229,7 +236,7 @@ export class AIController {
 		}
 		console.log('>> 🤖 <<', response);
 
-		addConversationToHistory(message, response);
+		addConversationToHistory(userMessage, response);
 		let debugInfo = '--------------------------------- [DEBUG INFO] -----------------------------------\n';
 		debugInfo +=
 			toolHistory.n8n_documentation.length > 0

@@ -1,5 +1,5 @@
-import { AssignmentSetField } from "n8n-nodes-base/nodes/Set/v2/helpers/interfaces";
 import { AssignmentCollectionValue, IDataObject, INode, INodeTypeDescription, NodeError } from "n8n-workflow";
+import { SUGGESTION_USER_PROMPT } from "./prompts/debug_prompts";
 
 export const prepareDebugUserPrompt = (
 	nodeType: INodeTypeDescription,
@@ -47,7 +47,10 @@ export const prepareDebugUserPrompt = (
 			${nodeInputPrompt ? `- ${nodeInputPrompt}. Use this to help me fix expressions that reference this data` : ''}
 			${referencedNodesPrompt ? `- ${referencedNodesPrompt}. Use this to help me fix expressions that reference any of these nodes` : ''}
 		`;
-	return userPrompt;
+	return `
+	${userPrompt}
+	${SUGGESTION_USER_PROMPT}
+	`;
 }
 
 export const prepareNodeParameterValues = (node: INode) => {

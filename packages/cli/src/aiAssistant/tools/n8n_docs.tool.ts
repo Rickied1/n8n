@@ -3,13 +3,14 @@ import { Pinecone } from '@pinecone-database/pinecone';
 import { OpenAIEmbeddings } from '@langchain/openai';
 import { toolHistory } from '../history/tool_history';
 import { DynamicTool } from '@langchain/core/tools';
+import { PINECONE_INDEX_NAME, PINECONE_NAMESPACE } from '../constants';
 
 export const searchDocsVectorStore = async (question: string) => {
 	// ----------------- Vector store -----------------
 	const pc = new Pinecone({
 		apiKey: process.env.N8N_AI_PINECONE_API_KEY ?? '',
 	});
-	const index = pc.Index('n8n-docs');
+	const index = pc.Index(PINECONE_INDEX_NAME);
 	const vectorStore = await PineconeStore.fromExistingIndex(
 		new OpenAIEmbeddings({
 			openAIApiKey: process.env.N8N_AI_OPENAI_API_KEY,
@@ -18,6 +19,7 @@ export const searchDocsVectorStore = async (question: string) => {
 		}),
 		{
 			pineconeIndex: index,
+			namespace: PINECONE_NAMESPACE,
 		},
 	);
 	// ----------------- Get top chunks matching query -----------------

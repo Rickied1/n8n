@@ -447,7 +447,7 @@ export const useAIStore = defineStore('ai', () => {
 		}
 
 		let newMessageText = jsonResponse?.response ?? messageChunk;
-		let followUpQuestion = '';
+		let followUp = '';
 		if (jsonResponse?.response) {
 			try {
 				// Strip everything around curly braces from jsonResponse.response
@@ -458,15 +458,15 @@ export const useAIStore = defineStore('ai', () => {
 					justJSON = jsonResponse.response.slice(jsonStart, jsonEnd + 1);
 				}
 				const jsonSuggestion: {
-					suggestionTitle?: string;
-					suggestionText?: string;
-					followUpQuestion?: string;
+					title?: string;
+					text?: string;
+					followUp?: string;
 				} = JSON.parse(justJSON);
-				if (jsonSuggestion.suggestionTitle && jsonSuggestion.suggestionText) {
-					newMessageText = `### ${jsonSuggestion.suggestionTitle}\r\n\n ${jsonSuggestion.suggestionText}`;
+				if (jsonSuggestion.title && jsonSuggestion.text) {
+					newMessageText = `### ${jsonSuggestion.title}\r\n\n ${jsonSuggestion.text}`;
 				}
-				if (jsonSuggestion.followUpQuestion) {
-					followUpQuestion = jsonSuggestion.followUpQuestion;
+				if (jsonSuggestion.followUp) {
+					followUp = jsonSuggestion.followUp;
 				}
 			} catch (error) {
 				// newMessageText = messageChunk;
@@ -481,10 +481,10 @@ export const useAIStore = defineStore('ai', () => {
 			type: 'text',
 			id: Math.random().toString(),
 		});
-		if (followUpQuestion) {
+		if (followUp) {
 			messages.value.push({
 				createdAt: new Date().toISOString(),
-				text: followUpQuestion,
+				text: followUp,
 				sender: 'bot',
 				type: 'text',
 				id: Math.random().toString(),
