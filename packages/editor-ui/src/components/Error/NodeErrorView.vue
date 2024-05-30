@@ -755,7 +755,7 @@ async function openAssistant() {
 		align-items: center;
 		gap: var(--spacing-xs);
 		padding: var(--spacing-xs) var(--spacing-s) var(--spacing-3xs) var(--spacing-s);
-		color: var(--color-ndv-output-error-message);
+		color: var(--color-danger);
 		font-weight: var(--font-weight-bold);
 		font-size: var(--font-size-s);
 	}
