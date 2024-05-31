@@ -59,6 +59,7 @@ export const prepareNodeParameterValues = (node: INode) => {
 	}
 	// Get fields from the Set node
 	// TODO: We'll probably want to massage the data from some other node types as well
+	// TODO: There is a similar logic in the front-end (NodeErrorView.vue), we should process the current node there also
 	if (node.type === 'n8n-nodes-base.set' && node.parameters.assignments) {
 		const fields: Record<string, string> = {};
 		const assignments = node.parameters.assignments as AssignmentCollectionValue;

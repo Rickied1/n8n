@@ -395,6 +395,8 @@ function getNodeOutputs(nodeNames: string[]): { [key: string]: IDataObject } {
 			return;
 		}
 		// TODO: Take into account multiple output indexes and multiple outputs
+		// Also there is a similar logic ton the back-end that does the same thing only for the current node
+		// Ideally, this all should be one in one place (probably here, so we only send the processed data to back-end)
 		const output = nodeOutput[0]?.data?.main?.[0]?.[0]?.json;
 		if (output) {
 			nodeOutputs[nodeName] = output;
