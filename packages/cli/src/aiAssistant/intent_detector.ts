@@ -60,9 +60,10 @@ export const getNextUserPrompt = async (userMessage: string, assistantMessage: s
 				prompt: `No, I need another suggestion.\n${SUGGESTION_USER_PROMPT}`,
 			}
 		default:
+			// Return original user message but ask for the same format so the conversation can continue
 			return {
 				detectedIntent: USER_INTENT.UNKNOWN,
-				prompt: userMessage,
+				prompt: `${userMessage}\n${SUGGESTION_USER_PROMPT}`,
 			};
 	}
 }

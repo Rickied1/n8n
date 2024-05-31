@@ -15,6 +15,7 @@ export const QUICK_ACTIONS: QuickAction[] = [
 
 // We are sending these prompts instead of the actual user messages to the LLM based on the user's intent towards the follo-up question
 // This way we can control the conversation flow and make sure the agent is responding as expected
+// TODO: Add instructions not to repeat the same suggestions and detailed instructions
 
 export const SUGGESTION_USER_PROMPT = `
 Your answer must be a valid JSON object with the following properties:
