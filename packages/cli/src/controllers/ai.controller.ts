@@ -208,10 +208,16 @@ export class AIController {
 				const lastFollowUpQuestion = getLastFollowUpQuestion(chatHistory);
 				// Only if there is a follow-up question, we don't want to alter the initial debug prompt
 				if (lastFollowUpQuestion) {
+					// TODO: Unknown user intent will break the flow because agent doesn't respond with follow-up question
+					// we need to handle it by asking it to use JSON format with followUp key
 					const detectorResult = await getNextUserPrompt(userMessage, lastFollowUpQuestion);
 					userMessage =  detectorResult.prompt;
 					increaseHelpCounter(detectorResult.detectedIntent);
 				}
+				// First response is also the suggestion, if we want to count that:
+				// else {
+				// 	increaseHelpCounter(USER_INTENT.NEEDS_ANOTHER_SUGGESTION);
+				// }
 			}
 		}
 		console.log('\n>> 🤷 <<', userMessage);
