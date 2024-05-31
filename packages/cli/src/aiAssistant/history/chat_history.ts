@@ -1,6 +1,6 @@
 import { CHAT_HISTORY_CONVERSATION_LIMIT } from "../constants";
 import { QUICK_ACTIONS } from "../prompts/debug_prompts";
-import { USER_INTENT } from "../types";
+import { AssistantAnswer, USER_INTENT } from "../types";
 
 // ReAct agent history is string, according to the docs:
 // https://js.langchain.com/v0.1/docs/modules/agents/agent_types/react/#using-with-chat-history
@@ -58,7 +58,7 @@ export const getLastFollowUpQuestion = (history: string[]) => {
 	if (lastAssistantMessage && lastAssistantMessage.startsWith('Assistant: ')) {
 		try {
 			// TODO: Extract this to type
-			const parsedMessage: { title: string, text: string, followUp: string } = JSON.parse(lastAssistantMessage.replace('Assistant: ', ''));
+			const parsedMessage: AssistantAnswer = JSON.parse(lastAssistantMessage.replace('Assistant: ', ''));
 			return parsedMessage.followUp;
 		} catch (error) {
 			return null;

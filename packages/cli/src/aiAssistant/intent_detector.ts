@@ -1,6 +1,6 @@
 import { ChatOpenAI } from "@langchain/openai";
 import { MORE_DETAILS_USER_PROMPT, QUICK_ACTIONS, SUGGESTION_USER_PROMPT } from "./prompts/debug_prompts";
-import { USER_INTENT } from "./types";
+import { IntentDetectionResult, USER_INTENT } from "./types";
 import { ChatPromptTemplate } from "@langchain/core/prompts";
 import { INTENT_DETECT_PROMPT } from "./prompts/intent_detection_prompt";
 
@@ -20,6 +20,8 @@ const intentDetectionModel = new ChatOpenAI({
 export const detectUserIntent = async (question: string, answer: string): Promise<USER_INTENT> => {
 	const moreDetailsQuickAction = QUICK_ACTIONS.find((action) => action.key === 'more_details');
 	const anotherSuggestionQuickAction = QUICK_ACTIONS.find((action) => action.key === 'another_suggestion');
+	// Try to map the answer to the quick actions before using the model
+	// TODO: maybe we can remove the startsWith check and just use the quick actions as is
 	if (answer === moreDetailsQuickAction?.label || answer.toLowerCase().includes('yes')) {
 		return USER_INTENT.NEEDS_MORE_DETAILS;
 	} else if (answer === anotherSuggestionQuickAction?.label || answer.toLowerCase().includes('no')) {
@@ -43,7 +45,7 @@ export const detectUserIntent = async (question: string, answer: string): Promis
  * @returns
  */
 
-export const getNextUserPrompt = async (userMessage: string, assistantMessage: string): Promise<{ detectedIntent: USER_INTENT, prompt: string }> => {
+export const getNextUserPrompt = async (userMessage: string, assistantMessage: string): Promise<IntentDetectionResult> => {
 	const intent = await detectUserIntent(assistantMessage, userMessage);
 	console.log('>> 🎰 INTENT DETECTOR <<', intent);
 	switch (intent) {
