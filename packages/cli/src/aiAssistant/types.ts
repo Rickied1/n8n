@@ -5,3 +5,9 @@ export type QuickAction = {
 	key: string;
 	disabled: boolean;
 };
+
+export enum USER_INTENT {
+	NEEDS_MORE_DETAILS = 'Asking for more details',
+	NEEDS_ANOTHER_SUGGESTION = 'Needs another suggestion',
+	UNKNOWN = 'Unknown',
+}

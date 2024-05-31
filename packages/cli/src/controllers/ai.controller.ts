@@ -19,12 +19,13 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { ApplicationError } from 'n8n-workflow';
-import { MORE_DETAILS_USER_PROMPT, NO_MORE_SUGGESTIONS_PROMPT, QUICK_ACTIONS, REACT_DEBUG_PROMPT, SUGGESTION_USER_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
+import { NO_MORE_SUGGESTIONS_PROMPT, QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
 import {
 	addConversationToHistory,
 	chatHistory,
 	checkIfAllQuickActionsUsed,
 	clearChatHistory,
+	getLastFollowUpQuestion,
 	increaseSuggestionCounter,
 	stringifyHistory,
 } from '@/aiAssistant/history/chat_history';
@@ -33,6 +34,7 @@ import { n8nInfoTool, searchDocsVectorStore } from '@/aiAssistant/tools/n8n_docs
 import { createInternetSearchTool } from '@/aiAssistant/tools/internet_search.tool';
 import { prepareDebugUserPrompt } from '@/aiAssistant/utils';
 import { N8N_BLOG, N8N_COMMUNITY, N8N_MARKETING_WEBSITE } from '@/aiAssistant/constants';
+import { getNextUserPrompt } from '@/aiAssistant/intent_detector';
 
 const errorSuggestionSchema = z.object({
 	suggestion: z.object({
@@ -180,8 +182,6 @@ export class AIController {
 			? ChatPromptTemplate.fromTemplate(REACT_DEBUG_PROMPT)
 			: ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
 
-		// Hard-stop if human asks for too many suggestions
-		increaseSuggestionCounter(message.trim());
 
 		const agent = await createReactAgent({
 			llm: assistantModel,
@@ -195,19 +195,20 @@ export class AIController {
 			returnIntermediateSteps: true,
 		});
 
-		// TODO: This is simplified user intent detection (yes/no)
-		//	- We should use another LLM call here to detect user intent more accurately
 		let userMessage = message.trim();
 		const noMoreHelp = checkIfAllQuickActionsUsed();
 		if (noMoreHelp) {
 			if (debug) {
 				userMessage = NO_MORE_SUGGESTIONS_PROMPT;
 			}
-		}
-		else if (userMessage.toLowerCase().startsWith('yes')) {
-			userMessage = `Yes, I need a detailed guide on how to solve the issue.\n${MORE_DETAILS_USER_PROMPT}`;
 		} else {
-			userMessage = `${userMessage}\n${SUGGESTION_USER_PROMPT}`;
+			const lastFollowUpQuestion = getLastFollowUpQuestion(chatHistory);
+			if (lastFollowUpQuestion) {
+				const detectorResult = await getNextUserPrompt(userMessage, lastFollowUpQuestion);
+				userMessage =  detectorResult.prompt;
+				// Hard-stop if human asks for too many suggestions
+				increaseSuggestionCounter(detectorResult.detectedIntent);
+			}
 		}
 		console.log('\n>> 🤷 <<', userMessage);
 		let response = '';
