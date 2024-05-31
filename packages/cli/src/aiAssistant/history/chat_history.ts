@@ -12,11 +12,11 @@ export let chatHistory: string[] = [];
 export const stringifyHistory = (history: string[]) => history.join('\n');
 
 // Track used quick actions so we can alter them as the conversation progresses
-export const usedQuickActions: Record<string, number> ={
+export const usedHelp: Record<string, number> ={
 	...QUICK_ACTIONS.reduce((acc, { label }) => ({ ...acc, [label]: 0 }), {}),
 }
 
-export const increaseSuggestionCounter = (userIntent: USER_INTENT) => {
+export const increaseHelpCounter = (userIntent: USER_INTENT) => {
 	const needsMoreDetailsQuickAction = QUICK_ACTIONS.find((action) => action.key === 'more_details');
 	const needsAnotherSuggestionQuickAction = QUICK_ACTIONS.find((action) => action.key === 'another_suggestion');
 	if (!needsMoreDetailsQuickAction || !needsAnotherSuggestionQuickAction) {
@@ -24,24 +24,24 @@ export const increaseSuggestionCounter = (userIntent: USER_INTENT) => {
 	}
 	switch (userIntent) {
 		case USER_INTENT.NEEDS_MORE_DETAILS:
-			usedQuickActions[needsMoreDetailsQuickAction.label]++;
+			usedHelp[needsMoreDetailsQuickAction.label]++;
 			break;
 		case USER_INTENT.NEEDS_ANOTHER_SUGGESTION:
-			usedQuickActions[needsAnotherSuggestionQuickAction.label]++;
+			usedHelp[needsAnotherSuggestionQuickAction.label]++;
 			break;
 	}
-	console.log('>> 🎰 USED QUICK ACTIONS <<', usedQuickActions);
+	console.log('>> 🎰 USED QUICK ACTIONS <<', usedHelp);
 }
 
 export const resetSuggestionsCounter = (label: string) => {
-	if (label in usedQuickActions) {
-		usedQuickActions[label] = 0;
+	if (label in usedHelp) {
+		usedHelp[label] = 0;
 	}
 }
 
-export const checkIfAllQuickActionsUsed = () => {
+export const checkIfAllHelpUsed = () => {
 	// Check if any of the quick actions have been used more than three times
-	return QUICK_ACTIONS.some(({ label }) => usedQuickActions[label] >= 3);
+	return QUICK_ACTIONS.some(({ label }) => usedHelp[label] >= 3);
 }
 
 export const getHumanMessages = (history: string[]) => {
@@ -57,7 +57,6 @@ export const getLastFollowUpQuestion = (history: string[]) => {
 	const lastAssistantMessage = getLastAssistantMessage(history);
 	if (lastAssistantMessage && lastAssistantMessage.startsWith('Assistant: ')) {
 		try {
-			// TODO: Extract this to type
 			const parsedMessage: AssistantAnswer = JSON.parse(lastAssistantMessage.replace('Assistant: ', ''));
 			return parsedMessage.followUp;
 		} catch (error) {
@@ -79,8 +78,8 @@ export const addConversationToHistory = (userMessage: string, systemMessage: str
 
 export const clearChatHistory = () => {
 	chatHistory = [];
-	for (const key in usedQuickActions) {
-		usedQuickActions[key] = 0;
+	for (const key in usedHelp) {
+		usedHelp[key] = 0;
 	}
 	QUICK_ACTIONS.forEach((action) => {
 		action.disabled = false;

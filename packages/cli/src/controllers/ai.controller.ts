@@ -23,10 +23,10 @@ import { NO_MORE_SUGGESTIONS_PROMPT, QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@
 import {
 	addConversationToHistory,
 	chatHistory,
-	checkIfAllQuickActionsUsed,
+	checkIfAllHelpUsed,
 	clearChatHistory,
 	getLastFollowUpQuestion,
-	increaseSuggestionCounter,
+	increaseHelpCounter,
 	stringifyHistory,
 } from '@/aiAssistant/history/chat_history';
 import { resetToolHistory, toolHistory } from '@/aiAssistant/history/tool_history';
@@ -196,18 +196,22 @@ export class AIController {
 		});
 
 		let userMessage = message.trim();
-		const noMoreHelp = checkIfAllQuickActionsUsed();
-		if (noMoreHelp) {
-			if (debug) {
-				userMessage = NO_MORE_SUGGESTIONS_PROMPT;
-			}
-		} else {
-			const lastFollowUpQuestion = getLastFollowUpQuestion(chatHistory);
-			if (lastFollowUpQuestion) {
-				const detectorResult = await getNextUserPrompt(userMessage, lastFollowUpQuestion);
-				userMessage =  detectorResult.prompt;
-				// Hard-stop if human asks for too many suggestions
-				increaseSuggestionCounter(detectorResult.detectedIntent);
+		let noMoreHelp = false;
+		// In debug mode, use pre-made user prompts to control the conversation flow
+		if (debug) {
+			noMoreHelp = checkIfAllHelpUsed();
+			// Hard-stop if human asks for too many suggestions
+			if (noMoreHelp) {
+					userMessage = NO_MORE_SUGGESTIONS_PROMPT;
+			} else {
+				// Detect user intention and map it to the correct prompt
+				const lastFollowUpQuestion = getLastFollowUpQuestion(chatHistory);
+				// Only if there is a follow-up question, we don't want to alter the initial debug prompt
+				if (lastFollowUpQuestion) {
+					const detectorResult = await getNextUserPrompt(userMessage, lastFollowUpQuestion);
+					userMessage =  detectorResult.prompt;
+					increaseHelpCounter(detectorResult.detectedIntent);
+				}
 			}
 		}
 		console.log('\n>> 🤷 <<', userMessage);
@@ -252,17 +256,7 @@ export class AIController {
 				? '🧰 NO TOOLS USED'
 				: '';
 
-		// If users asked for detailed information already, don't show it again until they ask for another suggestion
 		const quickActions = debug ? QUICK_ACTIONS : undefined;
-		// if (quickActions) {
-		// 	if (usedQuickActions[QUICK_ACTIONS[0].label] > 0) {
-		// 		QUICK_ACTIONS[0].disabled = true;
-		// 	}
-		// }
-		// if (message.trim() === QUICK_ACTIONS[1].label) {
-		// 	QUICK_ACTIONS[0].disabled = false;
-		// }
-
 		res.end(JSON.stringify({ response, debugInfo, quickActions: noMoreHelp ? [] : quickActions }));
 	}
 
