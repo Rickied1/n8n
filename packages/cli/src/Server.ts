@@ -191,6 +191,12 @@ export class Server extends AbstractServer {
 		controllers.forEach((controller) => registerController(app, controller));
 	}
 
+	async configureProxyEndpoints(): Promise<void> {
+		const aiController = Container.get(AIController);
+		this.app.use('/rest/ai', aiController.debugWithAssistant);
+		registerController(this.app, AIController);
+	}
+
 	async configure(): Promise<void> {
 		if (config.getEnv('endpoints.metrics.enable')) {
 			const { MetricsService } = await import('@/services/metrics.service');

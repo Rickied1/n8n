@@ -92,6 +92,10 @@ export abstract class AbstractServer {
 		// Additional configuration in derived classes
 	}
 
+	async configureProxyEndpoints(): Promise<void> {
+		// Additional configuration in derived classes
+	}
+
 	private async setupErrorHandlers() {
 		const { app } = this;
 
@@ -232,6 +236,9 @@ export abstract class AbstractServer {
 				send(async (req) => await testWebhooks.cancelWebhook(req.params.id)),
 			);
 		}
+
+		// Setup proxy endpoints before body parsing
+		await this.configureProxyEndpoints();
 
 		// Setup body parsing middleware after the webhook handlers are setup
 		this.app.use(bodyParser);

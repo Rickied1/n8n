@@ -19,7 +19,11 @@ import { z } from 'zod';
 import zodToJsonSchema from 'zod-to-json-schema';
 import { ChatMessageHistory } from 'langchain/stores/message/in_memory';
 import { ApplicationError } from 'n8n-workflow';
-import { NO_MORE_SUGGESTIONS_PROMPT, QUICK_ACTIONS, REACT_DEBUG_PROMPT } from '@/aiAssistant/prompts/debug_prompts';
+import {
+	NO_MORE_SUGGESTIONS_PROMPT,
+	QUICK_ACTIONS,
+	REACT_DEBUG_PROMPT,
+} from '@/aiAssistant/prompts/debug_prompts';
 import {
 	addConversationToHistory,
 	chatHistory,
@@ -35,6 +39,7 @@ import { createInternetSearchTool } from '@/aiAssistant/tools/internet_search.to
 import { prepareDebugUserPrompt } from '@/aiAssistant/utils';
 import { N8N_BLOG, N8N_COMMUNITY, N8N_MARKETING_WEBSITE } from '@/aiAssistant/constants';
 import { getNextUserPrompt } from '@/aiAssistant/intent_detector';
+import proxy from 'express-http-proxy';
 
 const errorSuggestionSchema = z.object({
 	suggestion: z.object({
@@ -97,22 +102,41 @@ export class AIController {
 		await this.askAssistant(message, res);
 	}
 
+	debugWithAssistant = proxy('http://127.0.0.1:3000/ai-assistant', {});
+
 	/**
 	 * Debug n8n error using the agent that has access to different tools.
 	 * THIS IS THE DEBUG MODE
 	 */
-	@Post('/debug-with-assistant', { skipAuth: true })
-	async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
-		const { nodeType, error, errorNode, authType, message, userTraits, nodeInputData, referencedNodesData } = req.body;
-		resetToolHistory();
-		if (message) {
-			await this.askAssistant(`${message}\n`, res, true);
-			return;
-		}
-		clearChatHistory();
-		const userPrompt = prepareDebugUserPrompt(nodeType, error, errorNode, authType, userTraits, nodeInputData, referencedNodesData);
-		await this.askAssistant(userPrompt, res, true);
-	}
+	// @Post('/debug-with-assistant', { skipAuth: true })
+	// async debugWithAssistant(req: AIRequest.AssistantDebug, res: express.Response) {
+	// 	const {
+	// 		nodeType,
+	// 		error,
+	// 		errorNode,
+	// 		authType,
+	// 		message,
+	// 		userTraits,
+	// 		nodeInputData,
+	// 		referencedNodesData,
+	// 	} = req.body;
+	// 	resetToolHistory();
+	// 	if (message) {
+	// 		await this.askAssistant(`${message}\n`, res, true);
+	// 		return;
+	// 	}
+	// 	clearChatHistory();
+	// 	const userPrompt = prepareDebugUserPrompt(
+	// 		nodeType,
+	// 		error,
+	// 		errorNode,
+	// 		authType,
+	// 		userTraits,
+	// 		nodeInputData,
+	// 		referencedNodesData,
+	// 	);
+	// 	await this.askAssistant(userPrompt, res, true);
+	// }
 
 	/**
 	 * Chat with pinecone vector store that contains n8n documentation.
@@ -170,9 +194,14 @@ export class AIController {
 		// ----------------- Tools -----------------
 		// Internet search tool setup:
 		// - In debug mode, use only forum to search for answers, while in free-chat mode use all websites (and more results)
-		const internetToolWebsites = debug ? [N8N_COMMUNITY] : [N8N_MARKETING_WEBSITE, N8N_BLOG, N8N_COMMUNITY];
+		const internetToolWebsites = debug
+			? [N8N_COMMUNITY]
+			: [N8N_MARKETING_WEBSITE, N8N_BLOG, N8N_COMMUNITY];
 		const internetToolMaxResults = debug ? 5 : 10;
-		const internetSearchTool = createInternetSearchTool(internetToolWebsites, internetToolMaxResults);
+		const internetSearchTool = createInternetSearchTool(
+			internetToolWebsites,
+			internetToolMaxResults,
+		);
 		const tools = [n8nInfoTool, internetSearchTool];
 		const toolNames = tools.map((tool) => tool.name);
 
@@ -181,7 +210,6 @@ export class AIController {
 		const chatPrompt = debug
 			? ChatPromptTemplate.fromTemplate(REACT_DEBUG_PROMPT)
 			: ChatPromptTemplate.fromTemplate(REACT_CHAT_PROMPT);
-
 
 		const agent = await createReactAgent({
 			llm: assistantModel,
@@ -202,14 +230,14 @@ export class AIController {
 			noMoreHelp = checkIfAllHelpUsed();
 			// Hard-stop if human asks for too many suggestions
 			if (noMoreHelp) {
-					userMessage = NO_MORE_SUGGESTIONS_PROMPT;
+				userMessage = NO_MORE_SUGGESTIONS_PROMPT;
 			} else {
 				// Detect user intention and map it to the correct prompt
 				const lastFollowUpQuestion = getLastFollowUpQuestion(chatHistory);
 				// Only if there is a follow-up question, we don't want to alter the initial debug prompt
 				if (lastFollowUpQuestion) {
 					const detectorResult = await getNextUserPrompt(userMessage, lastFollowUpQuestion);
-					userMessage =  detectorResult.prompt;
+					userMessage = detectorResult.prompt;
 					increaseHelpCounter(detectorResult.detectedIntent);
 				}
 				// First response is also the suggestion, if we want to count that:
@@ -241,12 +269,13 @@ export class AIController {
 			if (error instanceof Error)
 				console.log('>> ⚠️ <<', `Error: Could not parse LLM output: ${error.toString()}`);
 
-				response = error.toString().replace(/Error: Could not parse LLM output: /, '');
+			response = error.toString().replace(/Error: Could not parse LLM output: /, '');
 		}
 		console.log('>> 🤖 <<', response);
 
 		addConversationToHistory(userMessage, response);
-		let debugInfo = '--------------------------------- [DEBUG INFO] -----------------------------------\n';
+		let debugInfo =
+			'--------------------------------- [DEBUG INFO] -----------------------------------\n';
 		debugInfo +=
 			toolHistory.n8n_documentation.length > 0
 				? `📄 N8N DOCS DOCUMENTS USED: \n• ${toolHistory.n8n_documentation.join('\n• ')}\n`

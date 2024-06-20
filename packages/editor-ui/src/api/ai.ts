@@ -114,7 +114,7 @@ export const debugWithAssistant = async (
 	const headers = {
 		'Content-Type': 'application/json',
 	};
-	const response = await fetch(`${context.baseUrl}/ai/debug-with-assistant`, {
+	const response = await fetch(`${context.baseUrl}/ai/ai-assistant/error-debug`, {
 		headers,
 		method: 'POST',
 		credentials: 'include',
@@ -225,7 +225,7 @@ export const debugChatWithAiErrorHelper = async (
 	const headers = {
 		'Content-Type': 'application/json',
 	};
-	const response = await fetch(`${context.baseUrl}/ai/debug-chat`, {
+	const response = await fetch(`${context.baseUrl}/ai/ai-assistant/code-node-debug`, {
 		headers,
 		method: 'POST',
 		credentials: 'include',
