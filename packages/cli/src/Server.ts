@@ -73,6 +73,9 @@ import { BadRequestError } from './errors/response-errors/bad-request.error';
 import { OrchestrationService } from '@/services/orchestration.service';
 import { ProjectController } from './controllers/project.controller';
 import { RoleController } from './controllers/role.controller';
+import { License } from './License';
+import { AuthService } from './auth/auth.service';
+import { getAiServiceProxyMiddleware } from '@n8n_io/ai-assistant-sdk';
 
 const exec = promisify(callbackExec);
 
@@ -192,9 +195,17 @@ export class Server extends AbstractServer {
 	}
 
 	async configureProxyEndpoints(): Promise<void> {
-		const aiController = Container.get(AIController);
-		this.app.use('/rest/ai', aiController.debugWithAssistant);
-		registerController(this.app, AIController);
+		const licenseService = Container.get(License);
+		const licenseCert = await licenseService.loadCertStr();
+		const authService = Container.get(AuthService);
+		const consumerId = licenseService.getConsumerId();
+
+		this.app.use(
+			'/rest/ai',
+			cookieParser(),
+			authService.authMiddleware,
+			getAiServiceProxyMiddleware({ licenseCert, consumerId, n8nVersion: N8N_VERSION }),
+		);
 	}
 
 	async configure(): Promise<void> {

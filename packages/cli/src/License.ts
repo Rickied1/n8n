@@ -112,12 +112,19 @@ export class License {
 		}
 	}
 
+	getConsumerId() {
+		return this.manager?.getConsumerId() ?? 'unknown';
+	}
+
 	async loadCertStr(): Promise<TLicenseBlock> {
 		// if we have an ephemeral license, we don't want to load it from the database
+
 		const ephemeralLicense = config.get('license.cert');
+
 		if (ephemeralLicense) {
 			return ephemeralLicense;
 		}
+
 		const databaseSettings = await this.settingsRepository.findOne({
 			where: {
 				key: SETTINGS_LICENSE_CERT_KEY,

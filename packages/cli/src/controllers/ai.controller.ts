@@ -39,7 +39,6 @@ import { createInternetSearchTool } from '@/aiAssistant/tools/internet_search.to
 import { prepareDebugUserPrompt } from '@/aiAssistant/utils';
 import { N8N_BLOG, N8N_COMMUNITY, N8N_MARKETING_WEBSITE } from '@/aiAssistant/constants';
 import { getNextUserPrompt } from '@/aiAssistant/intent_detector';
-import proxy from 'express-http-proxy';
 
 const errorSuggestionSchema = z.object({
 	suggestion: z.object({
@@ -81,7 +80,7 @@ const assistantModel = new ChatOpenAI({
 	streaming: true,
 });
 
-@RestController('/ai')
+@RestController('/nojodas')
 export class AIController {
 	constructor(
 		private readonly aiService: AIService,
@@ -101,8 +100,6 @@ export class AIController {
 		resetToolHistory();
 		await this.askAssistant(message, res);
 	}
-
-	debugWithAssistant = proxy('http://127.0.0.1:3000/ai-assistant', {});
 
 	/**
 	 * Debug n8n error using the agent that has access to different tools.
