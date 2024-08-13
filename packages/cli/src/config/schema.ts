@@ -341,7 +341,7 @@ export const schema = {
 			env: 'N8N_RESTRICT_FILE_ACCESS_TO',
 		},
 		blockFileAccessToN8nFiles: {
-			doc: 'If set to true it will block access to all files in the ".n8n" directory and user defined config files.',
+			doc: 'If set to true it will block access to all files in the ".n8n" directory, the static cache dir at ~/.cache/n8n/public, and user defined config files.',
 			format: Boolean,
 			default: true,
 			env: 'N8N_BLOCK_FILE_ACCESS_TO_N8N_FILES',
@@ -679,6 +679,15 @@ export const schema = {
 			format: Boolean,
 			default: false,
 			env: 'N8N_AI_ENABLED',
+		},
+	},
+
+	aiAssistant: {
+		baseUrl: {
+			doc: 'Base URL of the AI assistant service',
+			format: String,
+			default: 'https://ai-assistant.n8n.io',
+			env: 'N8N_AI_ASSISTANT_BASE_URL',
 		},
 	},
 

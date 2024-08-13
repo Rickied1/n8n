@@ -418,6 +418,12 @@ export declare namespace DynamicNodeParametersRequest {
 	type ResourceMapperFields = BaseRequest<{
 		methodName: string;
 	}>;
+
+	/** POST /dynamic-node-parameters/action-result */
+	type ActionResult = BaseRequest<{
+		handler: string;
+		payload: IDataObject | string | undefined;
+	}>;
 }
 
 // ----------------------------------
@@ -599,4 +605,12 @@ export declare namespace NpsSurveyRequest {
 	// type NpsSurveyUpdate = AuthenticatedRequest<{}, {}, NpsSurveyState>;
 	// once some schema validation is added
 	type NpsSurveyUpdate = AuthenticatedRequest<{}, {}, unknown>;
+}
+
+// ----------------------------------
+//             /ai-assistant
+// ----------------------------------
+
+export declare namespace AiAssistantRequest {
+	type Chat = AuthenticatedRequest<{}, {}, object>;
 }
