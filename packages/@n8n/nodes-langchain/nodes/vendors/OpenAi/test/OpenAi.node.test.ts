@@ -92,7 +92,7 @@ describe('OpenAi, Assistant resource', () => {
 						file_ids: [],
 					},
 					file_search: {
-						vector_stores: [
+						vector_store_ids: [
 							{
 								file_ids: [],
 							},
@@ -208,7 +208,7 @@ describe('OpenAi, Assistant resource', () => {
 						file_ids: [],
 					},
 					file_search: {
-						vector_stores: [
+						vector_store_ids: [
 							{
 								file_ids: [],
 							},

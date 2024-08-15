@@ -127,6 +127,7 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		codeInterpreter,
 		knowledgeRetrieval,
 		file_ids,
+		vector_store_ids,
 		removeCustomTools,
 		temperature,
 		topP,
@@ -148,6 +149,24 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 				{ itemIndex: i },
 			);
 		}
+	// do we even need to check for vector_store_ids? this should be assigned by OpenAI
+	/* Update the assistant to use the new Vector Store
+	await openai.beta.assistants.update(assistant.id, {
+  		tool_resources: { file_search: { vector_store_ids: [vectorStore.id] } },
+	});
+	**/
+
+	if (vector_store_ids) {
+		// only check if vector_store_ids is empty array or has 1 item (should not have more!)
+		let vectore_stores = file_ids;
+
+		if ((file_ids as IDataObject[]).length > 1) {
+			throw new NodeOperationError(
+				this.getNode(),
+				'There can be a maximum of 1 vector store attached to the assistant.',
+				{ itemIndex: i },
+			);
+		}
 
 		body.tool_resources = {
 			...((body.tool_resources as object) ?? {}),
@@ -155,11 +174,7 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 				file_ids,
 			},
 			file_search: {
-				vector_stores: [
-					{
-						file_ids,
-					},
-				],
+				vector_store_ids: [vectorStore.id]
 			},
 		};
 	}

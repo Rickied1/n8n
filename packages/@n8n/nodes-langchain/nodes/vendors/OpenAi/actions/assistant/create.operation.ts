@@ -260,7 +260,7 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		body.tool_resources = {
 			...((body.tool_resources as object) ?? {}),
 			file_search: {
-				vector_stores: [
+				vector_store_ids: [
 					{
 						file_ids,
 					},
