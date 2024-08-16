@@ -733,6 +733,10 @@ export class Clockify implements INodeType {
 
 						const timeEntryId = this.getNodeParameter('timeEntryId', i) as string;
 
+						const additionalFields = this.getNodeParameter('additionalFields', i);
+
+						Object.assign(qs, additionalFields);
+
 						responseData = await clockifyApiRequest.call(
 							this,
 							'GET',
