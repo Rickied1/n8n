@@ -127,7 +127,6 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 		codeInterpreter,
 		knowledgeRetrieval,
 		file_ids,
-		vector_store_ids,
 		removeCustomTools,
 		temperature,
 		topP,
@@ -136,6 +135,30 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const assistantDescription = options.description as string;
 
 	const body: IDataObject = {};
+
+	// getting the assistant details to declare tools and tool_resources
+	const assistant: IDataObject =
+		((
+			await apiRequest.call(this, 'GET', `/assistants/${assistantId}`, {
+				headers: {
+					'OpenAI-Beta': 'assistants=v2',
+				},
+			})
+		));
+	let tools = assistant.tools as IDataObject[] || [];
+	let vector_store_ids = assistant.tool_resources.file_search?.vector_store_ids as IDataObject[] || {};
+	/**
+	"tool_resources": {
+        "file_search": {
+            "vector_store_ids": [
+                "vs_H8AzUn19GBGNU0i7tds8uCcR"
+            ]
+        },
+        "code_interpreter": {
+            "file_ids": []
+        }
+    },
+	*/
 
 	if (file_ids) {
 		let files = file_ids;
@@ -149,34 +172,17 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 				{ itemIndex: i },
 			);
 		}
-	// do we even need to check for vector_store_ids? this should be assigned by OpenAI
-	/* Update the assistant to use the new Vector Store
-	await openai.beta.assistants.update(assistant.id, {
-  		tool_resources: { file_search: { vector_store_ids: [vectorStore.id] } },
-	});
-	**/
+	}
 
-	if (vector_store_ids) {
-		// only check if vector_store_ids is empty array or has 1 item (should not have more!)
-		let vectore_stores = file_ids;
-
-		if ((file_ids as IDataObject[]).length > 1) {
-			throw new NodeOperationError(
-				this.getNode(),
-				'There can be a maximum of 1 vector store attached to the assistant.',
-				{ itemIndex: i },
-			);
-		}
-
-		body.tool_resources = {
-			...((body.tool_resources as object) ?? {}),
-			code_interpreter: {
-				file_ids,
-			},
-			file_search: {
-				vector_store_ids: [vectorStore.id]
-			},
-		};
+	body.tool_resources = {
+		...((body.tool_resources as object) ?? {}),
+		code_interpreter: {
+			file_ids,
+		},
+		file_search: {
+			vector_store_ids, // Ria: need to make sure this resolves to the correct data structure !
+		},
+	};
 	}
 
 	if (modelId) {
@@ -202,15 +208,6 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	if (topP) {
 		body.topP = topP;
 	}
-
-	let tools =
-		((
-			await apiRequest.call(this, 'GET', `/assistants/${assistantId}`, {
-				headers: {
-					'OpenAI-Beta': 'assistants=v2',
-				},
-			})
-		).tools as IDataObject[]) || [];
 
 	if (codeInterpreter && !tools.find((tool) => tool.type === 'code_interpreter')) {
 		tools.push({

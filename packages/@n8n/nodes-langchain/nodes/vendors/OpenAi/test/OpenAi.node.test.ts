@@ -92,11 +92,7 @@ describe('OpenAi, Assistant resource', () => {
 						file_ids: [],
 					},
 					file_search: {
-						vector_store_ids: [
-							{
-								file_ids: [],
-							},
-						],
+						vector_store_ids: [],
 					},
 				},
 				tools: [{ type: 'code_interpreter' }, { type: 'file_search' }],
@@ -208,11 +204,7 @@ describe('OpenAi, Assistant resource', () => {
 						file_ids: [],
 					},
 					file_search: {
-						vector_store_ids: [
-							{
-								file_ids: [],
-							},
-						],
+						vector_store_ids: [],
 					},
 				},
 				tools: [{ type: 'existing_tool' }, { type: 'code_interpreter' }, { type: 'file_search' }],
