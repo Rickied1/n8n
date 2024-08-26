@@ -137,16 +137,14 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 	const body: IDataObject = {};
 
 	// getting the assistant details to declare tools and tool_resources
-	const assistant: IDataObject =
-		((
-			await apiRequest.call(this, 'GET', `/assistants/${assistantId}`, {
-				headers: {
-					'OpenAI-Beta': 'assistants=v2',
-				},
-			})
-		));
-	let tools = assistant.tools as IDataObject[] || [];
-	let vector_store_ids = assistant.tool_resources.file_search?.vector_store_ids as IDataObject[] || {};
+	const assistant: IDataObject = await apiRequest.call(this, 'GET', `/assistants/${assistantId}`, {
+		headers: {
+			'OpenAI-Beta': 'assistants=v2',
+		},
+	});
+	let tools = (assistant.tools as IDataObject[]) || [];
+	const vector_store_ids =
+		(assistant.tool_resources?.file_search?.vector_store_ids as IDataObject[]) || {};
 	/**
 	"tool_resources": {
         "file_search": {
@@ -172,17 +170,16 @@ export async function execute(this: IExecuteFunctions, i: number): Promise<INode
 				{ itemIndex: i },
 			);
 		}
-	}
 
-	body.tool_resources = {
-		...((body.tool_resources as object) ?? {}),
-		code_interpreter: {
-			file_ids,
-		},
-		file_search: {
-			vector_store_ids, // Ria: need to make sure this resolves to the correct data structure !
-		},
-	};
+		body.tool_resources = {
+			...((body.tool_resources as object) ?? {}),
+			code_interpreter: {
+				file_ids,
+			},
+			file_search: {
+				vector_store_ids, // Ria: need to make sure this resolves to the correct data structure !
+			},
+		};
 	}
 
 	if (modelId) {
