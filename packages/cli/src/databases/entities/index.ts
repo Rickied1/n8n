@@ -31,7 +31,7 @@ import { ExecutionData } from './execution-data';
 import { WorkflowHistory } from './workflow-history';
 import { Project } from './project';
 import { ProjectRelation } from './project-relation';
-import { ProcessedData } from './ProcessedData';
+import { ProcessedData } from './processed-data';
 import { InvalidAuthToken } from './invalid-auth-token';
 import { AnnotationTagEntity } from './annotation-tag-entity';
 import { AnnotationTagMapping } from './annotation-tag-mapping';
