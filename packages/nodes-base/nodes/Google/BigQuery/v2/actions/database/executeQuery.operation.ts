@@ -11,6 +11,7 @@ import type { ResponseWithJobReference } from '../../helpers/interfaces';
 import { prepareOutput } from '../../helpers/utils';
 import { googleBigQueryApiRequestAllItems, googleBigQueryApiRequest } from '../../transport';
 import { getResolvables, updateDisplayOptions } from '@utils/utilities';
+import { query } from 'express';
 
 const properties: INodeProperties[] = [
 	{
@@ -180,6 +181,7 @@ export async function execute(this: IExecuteFunctions): Promise<INodeExecutionDa
 				timeoutMs?: number;
 				rawOutput?: boolean;
 				useLegacySql?: boolean;
+				// RIA: add option here
 			};
 
 			const projectId = this.getNodeParameter('projectId', i, undefined, {
@@ -262,6 +264,20 @@ export async function execute(this: IExecuteFunctions): Promise<INodeExecutionDa
 					undefined,
 					qs,
 				);
+				// RIA: check schema and apply conversion
+				const bigQueryDataTypes = queryResponse.schema.fields.map((colum) => colum.type);
+				console.log(bigQueryDataTypes);
+				const bigQueryDataRows = queryResponse.rows;
+				for (let i = 0; i < bigQueryDataRows.length; i++) {
+					for (let j = 0; j < bigQueryDataRows[i].f.length; j++) {
+						if (bigQueryDataTypes[j] === 'INTEGER' || bigQueryDataTypes[j] === 'NUMERIC') {
+							// make separate function for easier maintenance later
+							bigQueryDataRows[i].f[j].v = Number(bigQueryDataRows[i].f[j].v);
+						}
+					}
+					console.log(bigQueryDataRows[i].f);
+				}
+				// RIA: end
 
 				returnData.push(...prepareOutput.call(this, queryResponse, i, raw, includeSchema));
 			} else {
