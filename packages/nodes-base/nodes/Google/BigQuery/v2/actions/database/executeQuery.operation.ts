@@ -11,7 +11,6 @@ import type { ResponseWithJobReference } from '../../helpers/interfaces';
 import { prepareOutput } from '../../helpers/utils';
 import { googleBigQueryApiRequestAllItems, googleBigQueryApiRequest } from '../../transport';
 import { getResolvables, updateDisplayOptions } from '@utils/utilities';
-import { query } from 'express';
 
 const properties: INodeProperties[] = [
 	{
