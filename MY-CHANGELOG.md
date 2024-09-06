@@ -23,6 +23,6 @@ This changelog tracks the modifications made in this fork of the n8n project.
 
 - Improved build script to work consistently across Windows, macOS, and Linux
 
-## [1.0.0] - YYYY-MM-DD
+## [1.0.0] - 2024-09-05
 
-- Initial fork from n8n official repository (replace with the actual date and version you forked from)
+- Initial fork from n8n official repository
