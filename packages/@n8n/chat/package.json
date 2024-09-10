@@ -5,7 +5,7 @@
     "dev": "pnpm run storybook",
     "build": "pnpm build:vite && pnpm build:bundle",
     "build:vite": "vite build",
-    "build:bundle": "INCLUDE_VUE=true vite build",
+    "build:bundle": "cross-env INCLUDE_VUE=true vite build",
     "preview": "vite preview",
     "test:dev": "vitest",
     "test": "vitest run",
@@ -43,6 +43,7 @@
     "vue-markdown-render": "catalog:frontend"
   },
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "@iconify-json/mdi": "^1.1.54",
     "@n8n/storybook": "workspace:*",
     "@vitest/coverage-v8": "catalog:frontend",

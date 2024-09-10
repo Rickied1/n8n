@@ -102,3 +102,7 @@ Proprietary licenses are available for enterprise customers. [Get in touch](mail
 
 Additional information about the license model can be found in the
 [docs](https://docs.n8n.io/reference/license/).
+
+## Custom Changes
+
+This fork contains custom modifications. Please refer to [MY-CHANGELOG.md] for a detailed list of changes specific to this fork.

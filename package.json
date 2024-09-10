@@ -35,7 +35,8 @@
     "test:nodes": "turbo run test:nodes --concurrency=1",
     "watch": "turbo run watch --parallel",
     "webhook": "./packages/cli/bin/n8n webhook",
-    "worker": "./packages/cli/bin/n8n worker"
+    "worker": "./packages/cli/bin/n8n worker",
+    "n8n": "node packages/cli/bin/n8n"
   },
   "devDependencies": {
     "@n8n_io/eslint-config": "workspace:*",
