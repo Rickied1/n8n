@@ -143,6 +143,14 @@ const properties: INodeProperties[] = [
 				description:
 					"Whether to use BigQuery's legacy SQL dialect for this query. If set to false, the query will use BigQuery's standard SQL.",
 			},
+			{
+				displayName: 'Return Integers as Numbers',
+				name: 'returnAsNumbers',
+				type: 'boolean',
+				default: false,
+				description:
+					'Whether all integer values will be returned as numbers. If set to false, all integer values will be returned as strings.',
+			},
 		],
 	},
 ];
@@ -180,7 +188,7 @@ export async function execute(this: IExecuteFunctions): Promise<INodeExecutionDa
 				timeoutMs?: number;
 				rawOutput?: boolean;
 				useLegacySql?: boolean;
-				// RIA: add option here
+				returnAsNumbers?: boolean;
 			};
 
 			const projectId = this.getNodeParameter('projectId', i, undefined, {
@@ -263,32 +271,32 @@ export async function execute(this: IExecuteFunctions): Promise<INodeExecutionDa
 					undefined,
 					qs,
 				);
-				// get data types from schema
-				const bigQuerySchema: IDataObject = queryResponse?.schema as IDataObject;
-				const bigQueryFields: IDataObject[] = bigQuerySchema.fields as IDataObject[];
-				const bigQueryDataTypes: string[] = bigQueryFields?.map(
-					(field: IDataObject) => field.type as string,
-				);
-				console.log(bigQueryDataTypes);
-
-				// get rows and apply data types
-				const bigQueryDataRows: IDataObject[] = queryResponse.rows as IDataObject[];
-				// turn this for loop separate function for easier maintenance later
-				for (let k = 0; k < bigQueryDataRows.length; k++) {
-					const row = bigQueryDataRows[k];
-					if (!row || !row.f || !Array.isArray(row.f)) {
-						continue; // Skip this row if it's null or doesn't have 'f' as an array
-					}
-					for (let j = 0; j < (row.f as IDataObject[])?.length; j++) {
-						const field: IDataObject = row.f[j];
-						if (field && typeof field === 'object' && 'v' in field) {
-							const value = field.v;
-							if (bigQueryDataTypes[j] === 'INTEGER' || bigQueryDataTypes[j] === 'NUMERIC') {
-								field.v = Number(value);
+				if (body.returnAsNumbers === true) {
+					const bigQueryNumberDataTypes = ['INTEGER', 'NUMERIC', 'FLOAT', 'BIGNUMERIC']; // https://cloud.google.com/bigquery/docs/schemas#standard_sql_data_types
+					// get data types from schema
+					const bigQuerySchema: IDataObject = queryResponse?.schema as IDataObject;
+					const bigQueryFields: IDataObject[] = bigQuerySchema.fields as IDataObject[];
+					const bigQueryDataTypes: string[] = bigQueryFields?.map(
+						(field: IDataObject) => field.type as string,
+					);
+					// get rows and apply data types
+					const bigQueryDataRows: IDataObject[] = queryResponse.rows as IDataObject[];
+					// turn this for loop separate function for easier maintenance later
+					for (let k = 0; k < bigQueryDataRows.length; k++) {
+						const row = bigQueryDataRows[k];
+						if (!row || !row.f || !Array.isArray(row.f)) {
+							continue; // Skip this row if it's null or doesn't have 'f' as an array
+						}
+						for (let j = 0; j < (row.f as IDataObject[])?.length; j++) {
+							const field: IDataObject = row.f[j];
+							if (field && typeof field === 'object' && 'v' in field) {
+								const value = field.v;
+								if (bigQueryDataTypes[j] in bigQueryNumberDataTypes) {
+									field.v = Number(value);
+								}
 							}
 						}
 					}
-					console.log(bigQueryDataRows[k].f);
 				}
 
 				returnData.push(...prepareOutput.call(this, queryResponse, i, raw, includeSchema));
