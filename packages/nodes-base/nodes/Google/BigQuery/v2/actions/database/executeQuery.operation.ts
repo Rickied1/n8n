@@ -263,20 +263,33 @@ export async function execute(this: IExecuteFunctions): Promise<INodeExecutionDa
 					undefined,
 					qs,
 				);
-				// RIA: check schema and apply conversion
-				const bigQueryDataTypes = queryResponse.schema.fields.map((colum) => colum.type);
+				// get data types from schema
+				const bigQuerySchema: IDataObject = queryResponse?.schema as IDataObject;
+				const bigQueryFields: IDataObject[] = bigQuerySchema.fields as IDataObject[];
+				const bigQueryDataTypes: string[] = bigQueryFields?.map(
+					(field: IDataObject) => field.type as string,
+				);
 				console.log(bigQueryDataTypes);
-				const bigQueryDataRows = queryResponse.rows;
-				for (let i = 0; i < bigQueryDataRows.length; i++) {
-					for (let j = 0; j < bigQueryDataRows[i].f.length; j++) {
-						if (bigQueryDataTypes[j] === 'INTEGER' || bigQueryDataTypes[j] === 'NUMERIC') {
-							// make separate function for easier maintenance later
-							bigQueryDataRows[i].f[j].v = Number(bigQueryDataRows[i].f[j].v);
+
+				// get rows and apply data types
+				const bigQueryDataRows: IDataObject[] = queryResponse.rows as IDataObject[];
+				// turn this for loop separate function for easier maintenance later
+				for (let k = 0; k < bigQueryDataRows.length; k++) {
+					const row = bigQueryDataRows[k];
+					if (!row || !row.f || !Array.isArray(row.f)) {
+						continue; // Skip this row if it's null or doesn't have 'f' as an array
+					}
+					for (let j = 0; j < (row.f as IDataObject[])?.length; j++) {
+						const field: IDataObject = row.f[j];
+						if (field && typeof field === 'object' && 'v' in field) {
+							const value = field.v;
+							if (bigQueryDataTypes[j] === 'INTEGER' || bigQueryDataTypes[j] === 'NUMERIC') {
+								field.v = Number(value);
+							}
 						}
 					}
-					console.log(bigQueryDataRows[i].f);
+					console.log(bigQueryDataRows[k].f);
 				}
-				// RIA: end
 
 				returnData.push(...prepareOutput.call(this, queryResponse, i, raw, includeSchema));
 			} else {
