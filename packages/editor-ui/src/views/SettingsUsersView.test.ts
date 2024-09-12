@@ -119,6 +119,7 @@ describe('SettingsUsersView', () => {
 	it('disables the invite button on SAML login', async () => {
 		const pinia = createTestingPinia({ initialState: getInitialState() });
 		const ssoStore = useSSOStore(pinia);
+		// @ts-expect-error updating a readonly property
 		ssoStore.isSamlLoginEnabled = true;
 
 		const { getByTestId } = renderView({ pinia });

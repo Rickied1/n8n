@@ -4,8 +4,8 @@ import Avatar from 'vue-boring-avatars';
 import { getInitials } from '../../utils/labelUtil';
 
 interface AvatarProps {
-	firstName: string;
-	lastName: string;
+	firstName?: string;
+	lastName?: string;
 	size?: 'xsmall' | 'small' | 'medium' | 'large';
 	colors?: string[];
 }

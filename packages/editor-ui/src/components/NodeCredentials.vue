@@ -510,7 +510,7 @@ function getCredentialsFieldLabel(credentialType: INodeCredentialDescription): s
 					data-test-id="node-credentials-select"
 				>
 					<N8nSelect
-						:model-value="getSelectedId(credentialTypeDescription.name)"
+						:model-value="getSelectedId(credentialTypeDescription.name)!"
 						:placeholder="
 							getSelectPlaceholder(
 								credentialTypeDescription.name,

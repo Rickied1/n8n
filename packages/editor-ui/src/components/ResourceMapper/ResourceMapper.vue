@@ -28,7 +28,7 @@ type Props = {
 	inputSize: string;
 	labelSize: string;
 	dependentParametersValues?: string | null;
-	teleported: boolean;
+	teleported?: boolean;
 };
 
 const nodeTypesStore = useNodeTypesStore();

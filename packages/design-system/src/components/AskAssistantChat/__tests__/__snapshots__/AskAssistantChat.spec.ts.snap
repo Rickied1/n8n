@@ -1184,7 +1184,6 @@ exports[`AskAssistantChat > renders streaming chat correctly 1`] = `
 <div>
   <div
     class="container"
-    isstreaming="true"
   >
     <div
       class="header"
@@ -1328,7 +1327,9 @@ exports[`AskAssistantChat > renders streaming chat correctly 1`] = `
             </div>
             
             <!--v-if-->
-            <!--v-if-->
+            <span
+              class="blinking-cursor"
+            />
           </div>
           <!--v-if-->
         </div>

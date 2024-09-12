@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { PropType } from 'vue';
 import { computed, ref, useAttrs } from 'vue';
 import { ElSelect } from 'element-plus';
 import type { SelectSize } from 'n8n-design-system/types';
@@ -7,50 +6,28 @@ import { isEventBindingElementAttribute } from '../../utils';
 
 type InnerSelectRef = InstanceType<typeof ElSelect>;
 
-const props = defineProps({
-	...ElSelect.props,
-	modelValue: {},
-	size: {
-		type: String as PropType<SelectSize>,
-		default: 'large',
+const props = withDefaults(
+	defineProps<{
+		modelValue: string | number | boolean | string[];
+		size?: SelectSize;
+		placeholder?: string;
+		teleported?: boolean;
+		disabled?: boolean;
+		filterable?: boolean;
+		defaultFirstOption?: boolean;
+		multiple?: boolean;
+		loading?: boolean;
+		loadingText?: string;
+		popperClass?: string;
+		popperAppendToBody?: boolean;
+		limitPopperWidth?: boolean;
+		noDataText?: string;
+	}>(),
+	{
+		size: 'large',
+		teleported: true,
 	},
-	placeholder: {
-		type: String,
-	},
-	disabled: {
-		type: Boolean,
-	},
-	filterable: {
-		type: Boolean,
-	},
-	defaultFirstOption: {
-		type: Boolean,
-	},
-	multiple: {
-		type: Boolean,
-	},
-	filterMethod: {
-		type: Function,
-	},
-	loading: {
-		type: Boolean,
-	},
-	loadingText: {
-		type: String,
-	},
-	popperClass: {
-		type: String,
-	},
-	popperAppendToBody: {
-		type: Boolean,
-	},
-	limitPopperWidth: {
-		type: Boolean,
-	},
-	noDataText: {
-		type: String,
-	},
-});
+);
 
 const attrs = useAttrs();
 const innerSelect = ref<InnerSelectRef | null>(null);

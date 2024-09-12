@@ -98,7 +98,7 @@ describe('AskAssistantChat', () => {
 						read: false,
 					},
 				],
-				isStreaming: true,
+				streaming: true,
 			},
 		});
 		expect(container).toMatchSnapshot();
