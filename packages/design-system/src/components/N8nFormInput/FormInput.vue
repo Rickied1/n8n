@@ -219,7 +219,7 @@ defineExpose({ inputRef });
 				v-else-if="type === 'select' || type === 'multi-select'"
 				ref="inputRef"
 				:class="{ [$style.multiSelectSmallTags]: tagSize === 'small' }"
-				:model-value="modelValue!"
+				:model-value="modelValue"
 				:placeholder="placeholder"
 				:multiple="type === 'multi-select'"
 				:disabled="disabled"
