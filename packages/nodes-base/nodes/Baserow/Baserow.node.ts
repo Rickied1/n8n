@@ -21,9 +21,11 @@ import { operationFields } from './OperationDescription';
 import type {
 	BaserowCredentials,
 	FieldsUiValues,
+	FileOperation,
 	GetAllAdditionalOptions,
 	LoadedResource,
-	Operation,
+	Resource,
+	RowOperation,
 	Row,
 } from './types';
 
@@ -54,6 +56,10 @@ export class Baserow implements INodeType {
 				type: 'options',
 				noDataExpression: true,
 				options: [
+					{
+						name: 'File',
+						value: 'file',
+					},
 					{
 						name: 'Row',
 						value: 'row',
@@ -104,6 +110,32 @@ export class Baserow implements INodeType {
 					},
 				],
 				default: 'getAll',
+			},
+			{
+				displayName: 'Operation',
+				name: 'operation',
+				type: 'options',
+				noDataExpression: true,
+				displayOptions: {
+					show: {
+						resource: ['file'],
+					},
+				},
+				options: [
+					{
+						name: 'Upload',
+						value: 'upload',
+						description: 'Upload a file',
+						action: 'Upload a file',
+					},
+					{
+						name: 'Upload via URL',
+						value: 'upload-via-url',
+						description: 'Upload a file via URL',
+						action: 'Upload a file via URL',
+					},
+				],
+				default: 'upload',
 			},
 			...operationFields,
 		],
@@ -158,7 +190,8 @@ export class Baserow implements INodeType {
 		const items = this.getInputData();
 		const mapper = new TableFieldMapper();
 		const returnData: INodeExecutionData[] = [];
-		const operation = this.getNodeParameter('operation', 0) as Operation;
+		const resource = this.getNodeParameter('resource', 0) as Resource;
+		const operation = this.getNodeParameter('operation', 0) as RowOperation | FileOperation;
 
 		const tableId = this.getNodeParameter('tableId', 0) as string;
 		const credentials = await this.getCredentials<BaserowCredentials>('baserowApi');
@@ -168,7 +201,7 @@ export class Baserow implements INodeType {
 
 		for (let i = 0; i < items.length; i++) {
 			try {
-				if (operation === 'getAll') {
+				if (resource === 'row' && operation === 'getAll') {
 					// ----------------------------------
 					//             getAll
 					// ----------------------------------
@@ -218,7 +251,7 @@ export class Baserow implements INodeType {
 						{ itemData: { item: i } },
 					);
 					returnData.push(...executionData);
-				} else if (operation === 'get') {
+				} else if (resource === 'row' && operation === 'get') {
 					// ----------------------------------
 					//             get
 					// ----------------------------------
@@ -235,7 +268,7 @@ export class Baserow implements INodeType {
 						{ itemData: { item: i } },
 					);
 					returnData.push(...executionData);
-				} else if (operation === 'create') {
+				} else if (resource === 'row' && operation === 'create') {
 					// ----------------------------------
 					//             create
 					// ----------------------------------
@@ -274,7 +307,7 @@ export class Baserow implements INodeType {
 						{ itemData: { item: i } },
 					);
 					returnData.push(...executionData);
-				} else if (operation === 'update') {
+				} else if (resource === 'row' && operation === 'update') {
 					// ----------------------------------
 					//             update
 					// ----------------------------------
@@ -315,7 +348,7 @@ export class Baserow implements INodeType {
 						{ itemData: { item: i } },
 					);
 					returnData.push(...executionData);
-				} else if (operation === 'delete') {
+				} else if (resource === 'row' && operation === 'delete') {
 					// ----------------------------------
 					//             delete
 					// ----------------------------------
@@ -329,6 +362,23 @@ export class Baserow implements INodeType {
 
 					const executionData = this.helpers.constructExecutionMetaData(
 						[{ json: { success: true } }],
+						{ itemData: { item: i } },
+					);
+					returnData.push(...executionData);
+				} else if (resource === 'file' && operation === 'upload-via-url') {
+					// ----------------------------------
+					//             upload-via-url
+					// ----------------------------------
+
+					// https://api.baserow.io/api/redoc/#tag/User-files/operation/upload_via_url
+
+					const url = this.getNodeParameter('url', i) as string;
+					const endpoint = '/api/user-files/upload-via-url/';
+					const body = { url };
+					const file = await baserowApiRequest.call(this, 'POST', endpoint, jwtToken, body);
+
+					const executionData = this.helpers.constructExecutionMetaData(
+						this.helpers.returnJsonArray(file),
 						{ itemData: { item: i } },
 					);
 					returnData.push(...executionData);
