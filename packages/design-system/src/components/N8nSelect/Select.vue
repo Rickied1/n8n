@@ -8,7 +8,7 @@ type InnerSelectRef = InstanceType<typeof ElSelect>;
 
 const props = withDefaults(
 	defineProps<{
-		modelValue: string | number | boolean | string[] | null | undefined;
+		modelValue?: string | number | boolean | string[] | null;
 		size?: SelectSize;
 		placeholder?: string;
 		teleported?: boolean;
