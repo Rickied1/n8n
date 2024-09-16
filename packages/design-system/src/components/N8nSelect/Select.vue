@@ -23,6 +23,7 @@ const props = withDefaults(
 		popperAppendToBody?: boolean;
 		limitPopperWidth?: boolean;
 		noDataText?: string;
+		reserveKeyword?: boolean;
 	}>(),
 	{
 		size: 'large',
@@ -74,6 +75,12 @@ const focusOnInput = () => {
 	inputRef?.focus();
 };
 
+const emit = defineEmits<{
+	'update:modelValue': [value: string];
+}>();
+
+const onUpdateModelValue = (value: string) => emit('update:modelValue', value);
+
 defineExpose({
 	focus,
 	blur,
@@ -100,6 +107,7 @@ defineExpose({
 			:size="computedSize"
 			:popper-class="popperClass"
 			:class="$style[classes]"
+			@update:model-value="onUpdateModelValue"
 		>
 			<template v-if="$slots.prefix" #prefix>
 				<slot name="prefix" />
