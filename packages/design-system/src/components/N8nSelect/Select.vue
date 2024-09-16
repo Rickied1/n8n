@@ -16,6 +16,7 @@ const props = withDefaults(
 		filterable?: boolean;
 		defaultFirstOption?: boolean;
 		multiple?: boolean;
+		filterMethod?: (value?: string) => void;
 		loading?: boolean;
 		loadingText?: string;
 		popperClass?: string;
