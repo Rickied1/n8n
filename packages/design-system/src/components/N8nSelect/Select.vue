@@ -1,3 +1,4 @@
+<!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
 import { computed, ref, useAttrs } from 'vue';
 import { ElSelect } from 'element-plus';
@@ -8,7 +9,7 @@ type InnerSelectRef = InstanceType<typeof ElSelect>;
 
 const props = withDefaults(
 	defineProps<{
-		modelValue?: string | number | boolean | string[] | null;
+		modelValue?: any;
 		size?: SelectSize;
 		placeholder?: string;
 		teleported?: boolean;
@@ -16,7 +17,7 @@ const props = withDefaults(
 		filterable?: boolean;
 		defaultFirstOption?: boolean;
 		multiple?: boolean;
-		filterMethod?: (value?: string) => void;
+		filterMethod?: (value?: any) => void;
 		loading?: boolean;
 		loadingText?: string;
 		popperClass?: string;
@@ -76,10 +77,10 @@ const focusOnInput = () => {
 };
 
 const emit = defineEmits<{
-	'update:modelValue': [value: string];
+	'update:modelValue': [value: any];
 }>();
 
-const onUpdateModelValue = (value: string) => emit('update:modelValue', value);
+const onUpdateModelValue = (value: any) => emit('update:modelValue', value);
 
 defineExpose({
 	focus,
