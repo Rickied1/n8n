@@ -1534,6 +1534,9 @@ importers:
       '@kafkajs/confluent-schema-registry':
         specifier: 1.0.6
         version: 1.0.6
+      '@n8n/config':
+        specifier: workspace:*
+        version: link:../@n8n/config
       '@n8n/imap':
         specifier: workspace:*
         version: link:../@n8n/imap

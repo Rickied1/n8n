@@ -30,6 +30,8 @@ import { PruningService } from '@/services/pruning.service';
 import { UrlService } from '@/services/url.service';
 import { WaitTracker } from '@/wait-tracker';
 import { WorkflowRunner } from '@/workflow-runner';
+import { SingleMainTaskManager } from '@/runners/task-managers/single-main-task-manager';
+import { TaskManager } from '@/runners/task-managers/task-manager';
 
 import { BaseCommand } from './base-command';
 
@@ -219,6 +221,10 @@ export class Start extends BaseCommand {
 
 		if (!this.globalConfig.endpoints.disableUi) {
 			await this.generateStaticAssets();
+		}
+
+		if (!this.globalConfig.taskRunners.disabled) {
+			Container.set(TaskManager, new SingleMainTaskManager());
 		}
 	}
 

@@ -24,6 +24,8 @@ import type {
 	WorkflowExecuteMode,
 	ExecutionStatus,
 	ExecutionError,
+	IExecuteFunctions,
+	ITaskDataConnections,
 	ExecuteWorkflowOptions,
 	IWorkflowExecutionDataProcess,
 } from 'n8n-workflow';
@@ -64,6 +66,7 @@ import { SecretsHelper } from './secrets-helpers';
 import { OwnershipService } from './services/ownership.service';
 import { UrlService } from './services/url.service';
 import { SubworkflowPolicyChecker } from './subworkflows/subworkflow-policy-checker.service';
+import { TaskManager } from './runners/task-managers/task-manager';
 import { PermissionChecker } from './user-management/permission-checker';
 import { WorkflowExecutionService } from './workflows/workflow-execution.service';
 import { WorkflowStaticDataService } from './workflows/workflow-static-data.service';
@@ -981,6 +984,45 @@ export async function getBase(
 		setExecutionStatus,
 		variables,
 		secretsHelpers: Container.get(SecretsHelper),
+		async startAgentJob(
+			jobType: string,
+			settings: unknown,
+			executeFunctions: IExecuteFunctions,
+			inputData: ITaskDataConnections,
+			node: INode,
+			workflow: Workflow,
+			runExecutionData: IRunExecutionData,
+			runIndex: number,
+			itemIndex: number,
+			activeNodeName: string,
+			connectionInputData: INodeExecutionData[],
+			siblingParameters: INodeParameters,
+			mode: WorkflowExecuteMode,
+			executeData?: IExecuteData,
+			defaultReturnRunIndex?: number,
+			selfData?: IDataObject,
+			contextNodeName?: string,
+		) {
+			return await Container.get(TaskManager).startTask(
+				jobType,
+				settings,
+				executeFunctions,
+				inputData,
+				node,
+				workflow,
+				runExecutionData,
+				runIndex,
+				itemIndex,
+				activeNodeName,
+				connectionInputData,
+				siblingParameters,
+				mode,
+				executeData,
+				defaultReturnRunIndex,
+				selfData,
+				contextNodeName,
+			);
+		},
 		logAiEvent: (eventName: keyof AiEventMap, payload: AiEventPayload) =>
 			eventService.emit(eventName, payload),
 	};

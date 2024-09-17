@@ -66,6 +66,7 @@ import '@/license/license.controller';
 import '@/workflows/workflow-history/workflow-history.controller.ee';
 import '@/workflows/workflows.controller';
 import { EventService } from './events/event.service';
+import { setupRunnerServer, setupRunnerHandler } from './runners/runner-ws-server';
 
 const exec = promisify(callbackExec);
 
@@ -210,6 +211,10 @@ export class Server extends AbstractServer {
 
 		const { restEndpoint, app } = this;
 		setupPushHandler(restEndpoint, app);
+
+		if (!this.globalConfig.taskRunners.disabled) {
+			setupRunnerHandler(restEndpoint, app);
+		}
 
 		const push = Container.get(Push);
 		if (push.isBidirectional) {
@@ -398,5 +403,10 @@ export class Server extends AbstractServer {
 	protected setupPushServer(): void {
 		const { restEndpoint, server, app } = this;
 		setupPushServer(restEndpoint, server, app);
+	}
+
+	protected setupRunnerServer(): void {
+		const { restEndpoint, server, app } = this;
+		setupRunnerServer(restEndpoint, server, app);
 	}
 }
