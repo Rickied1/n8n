@@ -37,7 +37,6 @@ import { AddMfaColumns1690000000030 } from './1690000000040-AddMfaColumns';
 import { ExecutionSoftDelete1693491613982 } from './1693491613982-ExecutionSoftDelete';
 import { DropRoleMapping1705429061930 } from './1705429061930-DropRoleMapping';
 import { AddActivatedAtUserSetting1717498465931 } from './1717498465931-AddActivatedAtUserSetting';
-import { CreateProcessedDataTable1721319360300 } from './1721319360300-CreateProcessedDataTable';
 import { UniqueWorkflowNames1620821879465 } from '../common/1620821879465-UniqueWorkflowNames';
 import { UpdateWorkflowCredentials1630330987096 } from '../common/1630330987096-UpdateWorkflowCredentials';
 import { AddNodeIds1658930531669 } from '../common/1658930531669-AddNodeIds';
@@ -61,6 +60,7 @@ import { AddConstraintToExecutionMetadata1720101653148 } from '../common/1720101
 import { CreateInvalidAuthTokenTable1723627610222 } from '../common/1723627610222-CreateInvalidAuthTokenTable';
 import { RefactorExecutionIndices1723796243146 } from '../common/1723796243146-RefactorExecutionIndices';
 import { CreateAnnotationTables1724753530828 } from '../common/1724753530828-CreateExecutionAnnotationTables';
+import { CreateProcessedDataTable1726606152711 } from '../common/1726606152711-CreateProcessedDataTable';
 
 const sqliteMigrations: Migration[] = [
 	InitialMigration1588102412422,
@@ -79,7 +79,6 @@ const sqliteMigrations: Migration[] = [
 	CommunityNodes1652254514001,
 	AddAPIKeyColumn1652905585850,
 	IntroducePinData1654089251344,
-	CreateProcessedDataTable1721319360300,
 	AddNodeIds1658930531669,
 	AddJsonKeyPinData1659888469333,
 	CreateCredentialsUserRole1660062385367,
@@ -124,6 +123,7 @@ const sqliteMigrations: Migration[] = [
 	CreateInvalidAuthTokenTable1723627610222,
 	RefactorExecutionIndices1723796243146,
 	CreateAnnotationTables1724753530828,
+	CreateProcessedDataTable1726606152711,
 ];
 
 export { sqliteMigrations };
