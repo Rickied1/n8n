@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import { ElTooltip } from 'element-plus';
+import type { PropType } from 'vue';
+
 import type { IN8nButton } from 'n8n-design-system/types';
+
 import N8nButton from '../N8nButton';
 
 export type Justify =
@@ -43,7 +46,7 @@ defineOptions({
 		<slot />
 		<template #content>
 			<slot name="content">
-				<div v-html="props.content"></div>
+				<div v-n8n-html="props.content"></div>
 			</slot>
 			<div
 				v-if="props.buttons.length"

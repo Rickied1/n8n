@@ -19,8 +19,8 @@ catalogs:
       specifier: ^4.14.195
       version: 4.14.195
     '@types/uuid':
-      specifier: ^8.3.2
-      version: 8.3.4
+      specifier: ^10.0.0
+      version: 10.0.0
     '@types/xml2js':
       specifier: ^0.4.14
       version: 0.4.14
@@ -49,8 +49,8 @@ catalogs:
       specifier: 0.10.0
       version: 0.10.0
     uuid:
-      specifier: 8.3.2
-      version: 8.3.2
+      specifier: 10.0.0
+      version: 10.0.0
     xml2js:
       specifier: 0.6.2
       version: 0.6.2
@@ -220,6 +220,9 @@ importers:
         specifier: ^2.0.7
         version: 2.0.8
     devDependencies:
+      '@n8n/api-types':
+        specifier: workspace:*
+        version: link:../packages/@n8n/api-types
       '@types/lodash':
         specifier: 'catalog:'
         version: 4.14.195
@@ -283,7 +286,7 @@ importers:
         version: 4.0.1
       uuid:
         specifier: 'catalog:'
-        version: 8.3.2
+        version: 10.0.0
       vue:
         specifier: catalog:frontend
         version: 3.5.6(typescript@5.6.2)
@@ -922,7 +925,7 @@ importers:
         version: 0.10.0(patch_hash=sk6omkefrosihg7lmqbzh7vfxe)
       uuid:
         specifier: 'catalog:'
-        version: 8.3.2
+        version: 10.0.0
       validator:
         specifier: 13.7.0
         version: 13.7.0
@@ -1007,7 +1010,7 @@ importers:
         version: 1.1.2
       '@types/uuid':
         specifier: 'catalog:'
-        version: 8.3.4
+        version: 10.0.0
       '@types/validator':
         specifier: ^13.7.0
         version: 13.7.7
@@ -1100,7 +1103,7 @@ importers:
         version: 0.10.0(patch_hash=sk6omkefrosihg7lmqbzh7vfxe)
       uuid:
         specifier: 'catalog:'
-        version: 8.3.2
+        version: 10.0.0
       xml2js:
         specifier: 'catalog:'
         version: 0.6.2
@@ -1125,7 +1128,7 @@ importers:
         version: 2.1.1
       '@types/uuid':
         specifier: 'catalog:'
-        version: 8.3.4
+        version: 10.0.0
       '@types/xml2js':
         specifier: 'catalog:'
         version: 0.4.14
@@ -1201,13 +1204,10 @@ importers:
         version: 2.11.0
       '@vitejs/plugin-vue':
         specifier: ^5.1.3
-        version: 5.1.3(vite@5.4.6(@types/node@18.16.16)(sass@1.64.1)(terser@5.16.1))(vue@3.5.6(typescript@5.6.2))
+        version: 5.1.4(vite@5.4.6(@types/node@18.16.16)(sass@1.64.1)(terser@5.16.1))(vue@3.5.6(typescript@5.6.2))
       '@vitest/coverage-v8':
         specifier: catalog:frontend
         version: 2.1.1(vitest@2.1.1(@types/node@18.16.16)(jsdom@23.0.1)(sass@1.64.1)(terser@5.16.1))
-      '@vue/test-utils':
-        specifier: ^2.4.3
-        version: 2.4.3(@vue/server-renderer@3.5.6(vue@3.5.6(typescript@5.6.2)))(vue@3.5.6(typescript@5.6.2))
       autoprefixer:
         specifier: ^10.4.19
         version: 10.4.19(postcss@8.4.38)
@@ -1405,7 +1405,7 @@ importers:
         version: 4.0.2
       uuid:
         specifier: 'catalog:'
-        version: 8.3.2
+        version: 10.0.0
       v3-infinite-loading:
         specifier: ^1.2.2
         version: 1.2.2
@@ -1469,7 +1469,7 @@ importers:
         version: 3.2.0
       '@types/uuid':
         specifier: 'catalog:'
-        version: 8.3.4
+        version: 10.0.0
       '@vitest/coverage-v8':
         specifier: catalog:frontend
         version: 2.1.1(vitest@2.1.1(@types/node@18.16.16)(jsdom@23.0.1)(sass@1.64.1)(terser@5.16.1))
@@ -1716,7 +1716,7 @@ importers:
         version: 0.10.0(patch_hash=sk6omkefrosihg7lmqbzh7vfxe)
       uuid:
         specifier: 'catalog:'
-        version: 8.3.2
+        version: 10.0.0
       xlsx:
         specifier: https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz
         version: https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz
@@ -1789,7 +1789,7 @@ importers:
         version: 5.3.2
       '@types/uuid':
         specifier: 'catalog:'
-        version: 8.3.4
+        version: 10.0.0
       '@types/xml2js':
         specifier: 'catalog:'
         version: 0.4.14
@@ -2494,10 +2494,6 @@ packages:
 
   '@babel/runtime@7.22.6':
     resolution: {integrity: sha512-wDb5pWm4WDdF6LFUde3Jl8WzPA+3ZbxYqkC6xAXuD3irdEHN1k0NfTRrJD8ZD378SJ61miMLCqIOXYhd8x+AJQ==}
-    engines: {node: '>=6.9.0'}
-
-  '@babel/runtime@7.23.6':
-    resolution: {integrity: sha512-zHd0eUrf5GZoOWVCXp6koAKQTfZV07eit6bGPmJgnZdnSAvvZee6zniW2XMF7Cmc4ISOOnPy3QaSiIJGJkVEDQ==}
     engines: {node: '>=6.9.0'}
 
   '@babel/runtime@7.24.7':
@@ -5195,8 +5191,8 @@ packages:
   '@types/uuid@8.3.4':
     resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
 
-  '@types/uuid@9.0.7':
-    resolution: {integrity: sha512-WUtIVRUZ9i5dYXefDEAI7sh9/O7jGvHg7Df/5O/gtH3Yabe5odI3UWopVR1qbPXQtvOxWu3mM4XxlYeZtMWF4g==}
+  '@types/uuid@9.0.8':
+    resolution: {integrity: sha512-jg+97EGIcY9AGHJJRaaPVgetKDsrTgbRjQ5Msgjh/DQKEFl0DtyRr/VCOyD1T2R1MNeWPK/u7JoGhlDZnKBAfA==}
 
   '@types/validator@13.7.10':
     resolution: {integrity: sha512-t1yxFAR2n0+VO6hd/FJ9F2uezAZVWHLmpmlJzm1eX03+H7+HsuTAp7L8QJs+2pQCfWkP1+EXsGK9Z9v7o/qPVQ==}
@@ -5325,8 +5321,8 @@ packages:
   '@ungap/structured-clone@1.2.0':
     resolution: {integrity: sha512-zuVdFrMJiuCDQUMCzQaD6KL28MjnqqN8XnAqiEq9PNm/hCPTSGfrXCOfwj1ow4LFb/tNymJPwsNbVePc1xFqrQ==}
 
-  '@vitejs/plugin-vue@5.1.3':
-    resolution: {integrity: sha512-3xbWsKEKXYlmX82aOHufFQVnkbMC/v8fLpWwh6hWOUrK5fbbtBh9Q/WWse27BFgSy2/e2c0fz5Scgya9h2GLhw==}
+  '@vitejs/plugin-vue@5.1.4':
+    resolution: {integrity: sha512-N2XSI2n3sQqp5w7Y/AN/L2XDjBIRGqXko+eDp42sydYSBeJuSm5a1sLf8zakmo8u7tA8NmBgoDLA1HeOESjp9A==}
     engines: {node: ^18.0.0 || >=20.0.0}
     peerDependencies:
       vite: ^5.0.0
@@ -14149,10 +14145,6 @@ snapshots:
     dependencies:
       regenerator-runtime: 0.13.11
 
-  '@babel/runtime@7.23.6':
-    dependencies:
-      regenerator-runtime: 0.14.1
-
   '@babel/runtime@7.24.7':
     dependencies:
       regenerator-runtime: 0.14.1
@@ -16697,7 +16689,7 @@ snapshots:
   '@storybook/addon-actions@8.3.1(storybook@8.3.1)':
     dependencies:
       '@storybook/global': 5.0.0
-      '@types/uuid': 9.0.7
+      '@types/uuid': 9.0.8
       dequal: 2.0.3
       polished: 4.2.2
       storybook: 8.3.1
@@ -17501,7 +17493,7 @@ snapshots:
 
   '@types/uuid@8.3.4': {}
 
-  '@types/uuid@9.0.7': {}
+  '@types/uuid@9.0.8': {}
 
   '@types/validator@13.7.10': {}
 
@@ -17671,7 +17663,7 @@ snapshots:
 
   '@ungap/structured-clone@1.2.0': {}
 
-  '@vitejs/plugin-vue@5.1.3(vite@5.4.6(@types/node@18.16.16)(sass@1.64.1)(terser@5.16.1))(vue@3.5.6(typescript@5.6.2))':
+  '@vitejs/plugin-vue@5.1.4(vite@5.4.6(@types/node@18.16.16)(sass@1.64.1)(terser@5.16.1))(vue@3.5.6(typescript@5.6.2))':
     dependencies:
       vite: 5.4.6(@types/node@18.16.16)(sass@1.64.1)(terser@5.16.1)
       vue: 3.5.6(typescript@5.6.2)
@@ -21175,13 +21167,13 @@ snapshots:
     dependencies:
       get-intrinsic: 1.2.4
       has: 1.0.3
-      side-channel: 1.0.4
+      side-channel: 1.0.6
 
   internal-slot@1.0.7:
     dependencies:
       es-errors: 1.3.0
       hasown: 2.0.2
-      side-channel: 1.0.4
+      side-channel: 1.0.6
 
   interpret@1.4.0: {}
 
@@ -21225,7 +21217,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.7
       get-intrinsic: 1.2.4
-      is-typed-array: 1.1.10
+      is-typed-array: 1.1.13
 
   is-array-buffer@3.0.4:
     dependencies:
@@ -22178,7 +22170,7 @@ snapshots:
 
   langsmith@0.1.39(@langchain/core@0.2.31(langchain@0.2.18(svs4mugxvnip77thgyjbfeyt2a))(openai@4.58.0(encoding@0.1.13)(zod@3.23.8)))(langchain@0.2.18(svs4mugxvnip77thgyjbfeyt2a))(openai@4.58.0(encoding@0.1.13)(zod@3.23.8)):
     dependencies:
-      '@types/uuid': 9.0.7
+      '@types/uuid': 9.0.8
       commander: 10.0.1
       p-queue: 6.6.2
       p-retry: 4.6.2
@@ -22247,7 +22239,7 @@ snapshots:
     dependencies:
       '@types/asn1': 0.2.0
       '@types/node': 18.16.16
-      '@types/uuid': 9.0.7
+      '@types/uuid': 10.0.0
       asn1: 0.2.6
       debug: 4.3.4
       strict-event-emitter-types: 2.0.0
@@ -23880,7 +23872,7 @@ snapshots:
 
   polished@4.2.2:
     dependencies:
-      '@babel/runtime': 7.23.6
+      '@babel/runtime': 7.24.7
 
   possible-typed-array-names@1.0.0: {}
 
@@ -25745,7 +25737,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.7
       get-intrinsic: 1.2.4
-      is-typed-array: 1.1.10
+      is-typed-array: 1.1.13
 
   typed-array-buffer@1.0.2:
     dependencies:
@@ -25758,7 +25750,7 @@ snapshots:
       call-bind: 1.0.7
       for-each: 0.3.3
       has-proto: 1.0.3
-      is-typed-array: 1.1.10
+      is-typed-array: 1.1.13
 
   typed-array-byte-length@1.0.1:
     dependencies:
@@ -25774,7 +25766,7 @@ snapshots:
       call-bind: 1.0.7
       for-each: 0.3.3
       has-proto: 1.0.3
-      is-typed-array: 1.1.10
+      is-typed-array: 1.1.13
 
   typed-array-byte-offset@1.0.2:
     dependencies:
@@ -25789,7 +25781,7 @@ snapshots:
     dependencies:
       call-bind: 1.0.7
       for-each: 0.3.3
-      is-typed-array: 1.1.10
+      is-typed-array: 1.1.13
 
   typed-array-length@1.0.5:
     dependencies:
@@ -26549,7 +26541,7 @@ snapshots:
 
   yup@0.32.11:
     dependencies:
-      '@babel/runtime': 7.23.6
+      '@babel/runtime': 7.24.7
       '@types/lodash': 4.14.195
       lodash: 4.17.21
       lodash-es: 4.17.21

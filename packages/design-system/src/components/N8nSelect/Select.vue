@@ -1,8 +1,10 @@
 <!-- eslint-disable @typescript-eslint/no-explicit-any -->
 <script setup lang="ts">
-import { computed, ref, useAttrs } from 'vue';
 import { ElSelect } from 'element-plus';
+import { computed, ref, useAttrs } from 'vue';
+
 import type { SelectSize } from 'n8n-design-system/types';
+
 import { isEventBindingElementAttribute } from '../../utils';
 
 type InnerSelectRef = InstanceType<typeof ElSelect>;
