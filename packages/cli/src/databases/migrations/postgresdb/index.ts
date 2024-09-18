@@ -65,7 +65,6 @@ import { RefactorExecutionIndices1723796243146 } from '../common/1723796243146-R
 import { CreateAnnotationTables1724753530828 } from '../common/1724753530828-CreateExecutionAnnotationTables';
 import { CreateProcessedDataTable1726606152711 } from '../common/1726606152711-CreateProcessedDataTable';
 
-
 export const postgresMigrations: Migration[] = [
 	InitialMigration1587669153312,
 	WebhookModel1589476000887,
