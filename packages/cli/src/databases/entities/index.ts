@@ -12,6 +12,7 @@ import { ExecutionMetadata } from './execution-metadata';
 import { InstalledNodes } from './installed-nodes';
 import { InstalledPackages } from './installed-packages';
 import { InvalidAuthToken } from './invalid-auth-token';
+import { ProcessedData } from './processed-data';
 import { Project } from './project';
 import { ProjectRelation } from './project-relation';
 import { Settings } from './settings';
@@ -54,4 +55,5 @@ export const entities = {
 	WorkflowHistory,
 	Project,
 	ProjectRelation,
+	ProcessedData,
 };

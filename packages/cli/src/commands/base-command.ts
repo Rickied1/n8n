@@ -1,9 +1,14 @@
 import 'reflect-metadata';
 import { GlobalConfig } from '@n8n/config';
 import { Command, Errors } from '@oclif/core';
-import { BinaryDataService, InstanceSettings, ObjectStoreService } from 'n8n-core';
+import {
+	BinaryDataService,
+	InstanceSettings,
+	ObjectStoreService,
+	ProcessedDataManager,
+} from 'n8n-core';
 import { ApplicationError, ErrorReporterProxy as ErrorReporter, sleep } from 'n8n-workflow';
-import { Container } from 'typedi';
+import Container from 'typedi';
 
 import type { AbstractServer } from '@/abstract-server';
 import config from '@/config';
@@ -22,6 +27,7 @@ import { LoadNodesAndCredentials } from '@/load-nodes-and-credentials';
 import { Logger } from '@/logger';
 import { NodeTypes } from '@/node-types';
 import { PostHogClient } from '@/posthog';
+import { getProcessedDataManager } from '@/processed-data-managers';
 import { ShutdownService } from '@/shutdown/shutdown.service';
 import { WorkflowHistoryManager } from '@/workflows/workflow-history/workflow-history-manager.ee';
 
@@ -259,6 +265,11 @@ export abstract class BaseCommand extends Command {
 
 		const binaryDataConfig = config.getEnv('binaryDataManager');
 		await Container.get(BinaryDataService).init(binaryDataConfig);
+	}
+
+	protected async initProcessedDataManager() {
+		const processedDataManager = await getProcessedDataManager();
+		await ProcessedDataManager.init(processedDataManager);
 	}
 
 	async initExternalHooks() {
