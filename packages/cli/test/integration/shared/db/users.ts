@@ -1,8 +1,10 @@
 import { hash } from 'bcryptjs';
+import { randomString } from 'n8n-workflow';
 import Container from 'typedi';
 
 import { AuthIdentity } from '@/databases/entities/auth-identity';
 import { type GlobalRole, type User } from '@/databases/entities/user';
+import { ApiKeysRepository } from '@/databases/repositories/api-keys.repository';
 import { AuthIdentityRepository } from '@/databases/repositories/auth-identity.repository';
 import { AuthUserRepository } from '@/databases/repositories/auth-user.repository';
 import { UserRepository } from '@/databases/repositories/user.repository';
@@ -79,19 +81,36 @@ export async function createUserWithMfaEnabled(
 	};
 }
 
-export async function createOwner({ withApiKey } = { withApiKey: false }) {
-	if (withApiKey) {
-		return await addApiKey(await createUser({ role: 'global:owner' }));
-	}
+const createApiKeyEntity = (user: User) => {
+	const apiKey = randomApiKey();
+	return Container.get(ApiKeysRepository).create({
+		userId: user.id,
+		label: randomString(10),
+		apiKey,
+	});
+};
 
+export const addApiKey = async (user: User) => {
+	return await Container.get(ApiKeysRepository).save(createApiKeyEntity(user));
+};
+
+export async function createOwnerWithApiKey() {
+	const owner = await createUser({ role: 'global:owner' });
+	const { apiKey } = await addApiKey(owner);
+	return { owner, apiKey };
+}
+
+export async function createMemberWithApiKey() {
+	const member = await createUser({ role: 'global:member' });
+	const { apiKey } = await addApiKey(member);
+	return { member, apiKey };
+}
+
+export async function createOwner() {
 	return await createUser({ role: 'global:owner' });
 }
 
-export async function createMember({ withApiKey } = { withApiKey: false }) {
-	if (withApiKey) {
-		return await addApiKey(await createUser({ role: 'global:member' }));
-	}
-
+export async function createMember() {
 	return await createUser({ role: 'global:member' });
 }
 
@@ -126,11 +145,6 @@ export async function createManyUsers(
 			}),
 	);
 	return result.map((result) => result.user);
-}
-
-export async function addApiKey(user: User): Promise<User> {
-	user.apiKey = randomApiKey();
-	return await Container.get(UserRepository).save(user);
 }
 
 export const getAllUsers = async () =>

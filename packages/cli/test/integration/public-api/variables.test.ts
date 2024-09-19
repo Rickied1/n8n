@@ -1,5 +1,5 @@
 import { FeatureNotLicensedError } from '@/errors/feature-not-licensed.error';
-import { createOwner } from '@test-integration/db/users';
+import { createOwnerWithApiKey } from '@test-integration/db/users';
 import { createVariable, getVariableOrFail } from '@test-integration/db/variables';
 import { setupTestServer } from '@test-integration/utils';
 
@@ -13,7 +13,7 @@ describe('Variables in Public API', () => {
 	});
 
 	beforeEach(async () => {
-		await testDb.truncate(['Variables', 'User']);
+		await testDb.truncate(['ApiKeys', 'Variables', 'User']);
 	});
 
 	describe('GET /variables', () => {
@@ -22,13 +22,12 @@ describe('Variables in Public API', () => {
 			 * Arrange
 			 */
 			testServer.license.enable('feat:variables');
-			const owner = await createOwner({ withApiKey: true });
 			const variables = await Promise.all([createVariable(), createVariable(), createVariable()]);
 
 			/**
 			 * Act
 			 */
-			const response = await testServer.publicApiAgentFor(owner).get('/variables');
+			const response = await testServer.publicApiAgentWithApiKey(apiKey).get('/variables');
 
 			/**
 			 * Assert
@@ -48,12 +47,11 @@ describe('Variables in Public API', () => {
 			/**
 			 * Arrange
 			 */
-			const owner = await createOwner({ withApiKey: true });
 
 			/**
 			 * Act
 			 */
-			const response = await testServer.publicApiAgentFor(owner).get('/variables');
+			const response = await testServer.publicApiAgentWithApiKey(apiKey).get('/variables');
 
 			/**
 			 * Assert
@@ -72,14 +70,13 @@ describe('Variables in Public API', () => {
 			 * Arrange
 			 */
 			testServer.license.enable('feat:variables');
-			const owner = await createOwner({ withApiKey: true });
 			const variablePayload = { key: 'key', value: 'value' };
 
 			/**
 			 * Act
 			 */
 			const response = await testServer
-				.publicApiAgentFor(owner)
+				.publicApiAgentWithApiKey(apiKey)
 				.post('/variables')
 				.send(variablePayload);
 
@@ -96,14 +93,14 @@ describe('Variables in Public API', () => {
 			/**
 			 * Arrange
 			 */
-			const owner = await createOwner({ withApiKey: true });
+			const { apiKey } = await createOwnerWithApiKey();
 			const variablePayload = { key: 'key', value: 'value' };
 
 			/**
 			 * Act
 			 */
 			const response = await testServer
-				.publicApiAgentFor(owner)
+				.publicApiAgentWithApiKey(apiKey)
 				.post('/variables')
 				.send(variablePayload);
 
@@ -124,14 +121,14 @@ describe('Variables in Public API', () => {
 			 * Arrange
 			 */
 			testServer.license.enable('feat:variables');
-			const owner = await createOwner({ withApiKey: true });
+			const { apiKey } = await createOwnerWithApiKey();
 			const variable = await createVariable();
 
 			/**
 			 * Act
 			 */
 			const response = await testServer
-				.publicApiAgentFor(owner)
+				.publicApiAgentWithApiKey(apiKey)
 				.delete(`/variables/${variable.id}`);
 
 			/**
@@ -145,14 +142,14 @@ describe('Variables in Public API', () => {
 			/**
 			 * Arrange
 			 */
-			const owner = await createOwner({ withApiKey: true });
+			const { apiKey } = await createOwnerWithApiKey();
 			const variable = await createVariable();
 
 			/**
 			 * Act
 			 */
 			const response = await testServer
-				.publicApiAgentFor(owner)
+				.publicApiAgentWithApiKey(apiKey)
 				.delete(`/variables/${variable.id}`);
 
 			/**

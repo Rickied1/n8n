@@ -10,7 +10,7 @@ import { Container } from 'typedi';
 import validator from 'validator';
 import YAML from 'yamljs';
 
-import { UserRepository } from '@/databases/repositories/user.repository';
+import { ApiKeysRepository } from '@/databases/repositories/api-keys.repository';
 import { EventService } from '@/events/event.service';
 import { License } from '@/license';
 import type { AuthenticatedRequest } from '@/requests';
@@ -90,10 +90,13 @@ async function createApiRouter(
 						_scopes: unknown,
 						schema: OpenAPIV3.ApiKeySecurityScheme,
 					): Promise<boolean> => {
-						const apiKey = req.headers[schema.name.toLowerCase()] as string;
-						const user = await Container.get(UserRepository).findOne({
-							where: { apiKey },
+						const providedApiKey = req.headers[schema.name.toLowerCase()] as string;
+						const apiKey = await Container.get(ApiKeysRepository).findOne({
+							where: { apiKey: providedApiKey },
+							relations: ['user'],
 						});
+
+						const user = apiKey?.user;
 
 						if (!user) return false;
 

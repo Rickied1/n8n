@@ -12,13 +12,12 @@ import {
 	createSuccessfulExecution,
 	createWaitingExecution,
 } from '../shared/db/executions';
-import { createUser } from '../shared/db/users';
+import { createMemberWithApiKey, createOwnerWithApiKey } from '../shared/db/users';
 import {
 	createManyWorkflows,
 	createWorkflow,
 	shareWorkflowWithUsers,
 } from '../shared/db/workflows';
-import { randomApiKey } from '../shared/random';
 import * as testDb from '../shared/test-db';
 import type { SuperAgentTest } from '../shared/types';
 import * as utils from '../shared/utils/';
@@ -26,6 +25,9 @@ import * as utils from '../shared/utils/';
 let owner: User;
 let user1: User;
 let user2: User;
+let ownerApiKey: string;
+let member1ApiKey: string;
+let member2ApiKey: string;
 let authOwnerAgent: SuperAgentTest;
 let authUser1Agent: SuperAgentTest;
 let authUser2Agent: SuperAgentTest;
@@ -36,9 +38,9 @@ mockInstance(Telemetry);
 const testServer = utils.setupTestServer({ endpointGroups: ['publicApi'] });
 
 beforeAll(async () => {
-	owner = await createUser({ role: 'global:owner', apiKey: randomApiKey() });
-	user1 = await createUser({ role: 'global:member', apiKey: randomApiKey() });
-	user2 = await createUser({ role: 'global:member', apiKey: randomApiKey() });
+	({ owner, apiKey: ownerApiKey } = await createOwnerWithApiKey());
+	({ member: user1, apiKey: member1ApiKey } = await createMemberWithApiKey());
+	({ member: user2, apiKey: member2ApiKey } = await createMemberWithApiKey());
 
 	// TODO: mock BinaryDataService instead
 	await utils.initBinaryDataService();
@@ -57,9 +59,9 @@ beforeEach(async () => {
 		'Settings',
 	]);
 
-	authOwnerAgent = testServer.publicApiAgentFor(owner);
-	authUser1Agent = testServer.publicApiAgentFor(user1);
-	authUser2Agent = testServer.publicApiAgentFor(user2);
+	authOwnerAgent = testServer.publicApiAgentWithApiKey(ownerApiKey);
+	authUser1Agent = testServer.publicApiAgentWithApiKey(member1ApiKey);
+	authUser2Agent = testServer.publicApiAgentWithApiKey(member2ApiKey);
 });
 
 afterEach(async () => {

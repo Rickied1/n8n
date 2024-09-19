@@ -1,5 +1,6 @@
 import { AnnotationTagEntity } from './annotation-tag-entity';
 import { AnnotationTagMapping } from './annotation-tag-mapping';
+import { ApiKeys } from './api-keys';
 import { AuthIdentity } from './auth-identity';
 import { AuthProviderSyncHistory } from './auth-provider-sync-history';
 import { AuthUser } from './auth-user';
@@ -54,4 +55,5 @@ export const entities = {
 	WorkflowHistory,
 	Project,
 	ProjectRelation,
+	ApiKeys,
 };

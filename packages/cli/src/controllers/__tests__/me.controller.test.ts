@@ -1,11 +1,14 @@
 import type { Response } from 'express';
 import { mock, anyObject } from 'jest-mock-extended';
 import jwt from 'jsonwebtoken';
+import { randomString } from 'n8n-workflow';
 import { Container } from 'typedi';
 
 import { AUTH_COOKIE_NAME } from '@/constants';
 import { API_KEY_PREFIX, MeController } from '@/controllers/me.controller';
+import type { ApiKeys } from '@/databases/entities/api-keys';
 import type { User } from '@/databases/entities/user';
+import { ApiKeysRepository } from '@/databases/repositories/api-keys.repository';
 import { AuthUserRepository } from '@/databases/repositories/auth-user.repository';
 import { InvalidAuthTokenRepository } from '@/databases/repositories/invalid-auth-token.repository';
 import { UserRepository } from '@/databases/repositories/user.repository';
@@ -29,6 +32,7 @@ describe('MeController', () => {
 	const userService = mockInstance(UserService);
 	const userRepository = mockInstance(UserRepository);
 	const mockMfaService = mockInstance(MfaService);
+	const apiKeysRepository = mockInstance(ApiKeysRepository);
 	mockInstance(AuthUserRepository);
 	mockInstance(InvalidAuthTokenRepository);
 	mockInstance(License).isWithinUsersLimit.mockReturnValue(true);
@@ -426,27 +430,61 @@ describe('MeController', () => {
 	describe('API Key methods', () => {
 		let req: AuthenticatedRequest;
 		beforeAll(() => {
-			req = mock({ user: mock<Partial<User>>({ id: '123', apiKey: `${API_KEY_PREFIX}test-key` }) });
+			req = mock<AuthenticatedRequest>({ user: mock<User>({ id: '123' }) });
 		});
 
 		describe('createAPIKey', () => {
 			it('should create and save an API key', async () => {
-				const { apiKey } = await controller.createAPIKey(req);
-				expect(userService.update).toHaveBeenCalledWith(req.user.id, { apiKey });
+				const apiKeyData = {
+					id: '123',
+					userId: '123',
+					label: 'My API Key',
+					apiKey: `${API_KEY_PREFIX}${randomString(42)}`,
+					createdAt: new Date(),
+				} as ApiKeys;
+
+				apiKeysRepository.save.mockResolvedValue(apiKeyData);
+
+				const newApiKey = await controller.createAPIKey(req);
+
+				expect(apiKeysRepository.save).toHaveBeenCalled();
+				expect(apiKeyData).toEqual(newApiKey);
 			});
 		});
 
-		describe('getAPIKey', () => {
-			it('should return the users api key redacted', async () => {
-				const { apiKey } = await controller.getAPIKey(req);
-				expect(apiKey).not.toEqual(req.user.apiKey);
+		describe('getAPIKeys', () => {
+			it('should return the users api keys redacted', async () => {
+				const apiKeyData = {
+					id: '123',
+					userId: '123',
+					label: 'My API Key',
+					apiKey: `${API_KEY_PREFIX}${randomString(42)}`,
+					createdAt: new Date(),
+				} as ApiKeys;
+
+				apiKeysRepository.findBy.mockResolvedValue([apiKeyData]);
+
+				const { apiKeys } = await controller.getAPIKeys(req);
+				expect(apiKeys[0].apiKey).not.toEqual(apiKeyData.apiKey);
+				expect(apiKeysRepository.findBy).toHaveBeenCalledWith({ userId: req.user.id });
 			});
 		});
 
 		describe('deleteAPIKey', () => {
 			it('should delete the API key', async () => {
+				const user = mock<User>({
+					id: '123',
+					password: 'password',
+					authIdentities: [],
+					role: 'global:member',
+					mfaEnabled: false,
+				});
+				const req = mock<MeRequest.DeleteAPIKey>({ user, params: { id: user.id } });
 				await controller.deleteAPIKey(req);
-				expect(userService.update).toHaveBeenCalledWith(req.user.id, { apiKey: null });
+				expect(apiKeysRepository.delete).toHaveBeenCalledWith({
+					userId: req.user.id,
+					id: req.params.id,
+				});
 			});
 		});
 	});

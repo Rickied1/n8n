@@ -23,6 +23,7 @@ import { NoUrl } from '@/validators/no-url.validator';
 import { NoXss } from '@/validators/no-xss.validator';
 
 import { WithTimestamps, jsonColumnType } from './abstract-entity';
+import type { ApiKeys } from './api-keys';
 import type { AuthIdentity } from './auth-identity';
 import type { ProjectRelation } from './project-relation';
 import type { SharedCredentials } from './shared-credentials';
@@ -89,6 +90,9 @@ export class User extends WithTimestamps implements IUser {
 	@OneToMany('AuthIdentity', 'user')
 	authIdentities: AuthIdentity[];
 
+	@OneToMany('ApiKeys', 'user')
+	apiKeys: ApiKeys[];
+
 	@OneToMany('SharedWorkflow', 'user')
 	sharedWorkflows: SharedWorkflow[];
 
@@ -106,10 +110,6 @@ export class User extends WithTimestamps implements IUser {
 	preUpsertHook(): void {
 		this.email = this.email?.toLowerCase() ?? null;
 	}
-
-	@Column({ type: String, nullable: true })
-	@Index({ unique: true })
-	apiKey: string | null;
 
 	@Column({ type: Boolean, default: false })
 	mfaEnabled: boolean;
@@ -151,7 +151,7 @@ export class User extends WithTimestamps implements IUser {
 	}
 
 	toJSON() {
-		const { password, apiKey, ...rest } = this;
+		const { password, ...rest } = this;
 		return rest;
 	}
 
