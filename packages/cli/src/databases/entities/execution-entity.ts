@@ -47,6 +47,13 @@ export class ExecutionEntity {
 	status: ExecutionStatus;
 
 	@Column(datetimeColumnType)
+	createdAt: Date;
+
+	/**
+	 * Time when the processing of the execution actually started. This column
+	 * is `null` when an execution is enqueued but has not started yet.
+	 */
+	@Column({ type: datetimeColumnType, nullable: true })
 	startedAt: Date;
 
 	@Index()
