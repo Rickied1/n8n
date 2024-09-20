@@ -28,7 +28,7 @@ export class WaitingWebhooks implements IWebhookManager {
 
 	constructor(
 		protected readonly logger: Logger,
-		private readonly nodeTypes: NodeTypes,
+		protected readonly nodeTypes: NodeTypes,
 		private readonly executionRepository: ExecutionRepository,
 	) {}
 
@@ -42,36 +42,21 @@ export class WaitingWebhooks implements IWebhookManager {
 		execution.data.executionData!.nodeExecutionStack[0].node.disabled = true;
 	}
 
-	async executeWebhook(
-		req: WaitingWebhookRequest,
-		res: express.Response,
-	): Promise<IWebhookResponseCallbackData> {
-		const { path: executionId, suffix } = req.params;
-
-		this.logReceivedWebhook(req.method, executionId);
-
-		// Reset request parameters
-		req.params = {} as WaitingWebhookRequest['params'];
-
-		const execution = await this.executionRepository.findSingleExecution(executionId, {
-			includeData: true,
-			unflattenData: true,
-		});
-
-		if (!execution) {
-			throw new NotFoundError(`The execution "${executionId} does not exist.`);
-		}
-
-		if (execution.status === 'running') {
-			throw new ConflictError(`The execution "${executionId} is running already.`);
-		}
-
-		if (execution.finished || execution.data.resultData.error) {
-			throw new ConflictError(`The execution "${executionId} has finished already.`);
-		}
-
-		const lastNodeExecuted = execution.data.resultData.lastNodeExecuted as string;
-
+	protected async getWebhookExecutionData({
+		execution,
+		req,
+		res,
+		lastNodeExecuted,
+		executionId,
+		suffix,
+	}: {
+		execution: IExecutionResponse;
+		req: WaitingWebhookRequest;
+		res: express.Response;
+		lastNodeExecuted: string;
+		executionId: string;
+		suffix?: string;
+	}): Promise<IWebhookResponseCallbackData> {
 		// Set the node as disabled so that the data does not get executed again as it would result
 		// in starting the wait all over again
 		this.disableNode(execution, req.method);
@@ -143,6 +128,50 @@ export class WaitingWebhooks implements IWebhookManager {
 					resolve(data);
 				},
 			);
+		});
+	}
+
+	protected async getExecution(executionId: string) {
+		return await this.executionRepository.findSingleExecution(executionId, {
+			includeData: true,
+			unflattenData: true,
+		});
+	}
+
+	async executeWebhook(
+		req: WaitingWebhookRequest,
+		res: express.Response,
+	): Promise<IWebhookResponseCallbackData> {
+		const { path: executionId, suffix } = req.params;
+
+		this.logReceivedWebhook(req.method, executionId);
+
+		// Reset request parameters
+		req.params = {} as WaitingWebhookRequest['params'];
+
+		const execution = await this.getExecution(executionId);
+
+		if (!execution) {
+			throw new NotFoundError(`The execution "${executionId}" does not exist.`);
+		}
+
+		if (execution.status === 'running') {
+			throw new ConflictError(`The execution "${executionId}" is running already.`);
+		}
+
+		if (execution.finished || execution.data.resultData.error) {
+			throw new ConflictError(`The execution "${executionId}" has finished already.`);
+		}
+
+		const lastNodeExecuted = execution.data.resultData.lastNodeExecuted as string;
+
+		return await this.getWebhookExecutionData({
+			execution,
+			req,
+			res,
+			lastNodeExecuted,
+			executionId,
+			suffix,
 		});
 	}
 }
