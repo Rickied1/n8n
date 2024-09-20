@@ -172,7 +172,7 @@ export async function executeWebhook(
 		executionMode,
 		additionalKeys,
 		undefined,
-		'firstEntryJson',
+		'',
 	);
 
 	if (!['onReceived', 'lastNode', 'responseNode'].includes(responseMode)) {

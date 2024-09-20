@@ -8,9 +8,9 @@ import type {
 	INodeTypeBaseDescription,
 	INodeTypeDescription,
 } from 'n8n-workflow';
-import { NodeConnectionType, NodeOperationError } from 'n8n-workflow';
+import { NodeConnectionType, NodeOperationError, WAIT_TIME_UNLIMITED } from 'n8n-workflow';
 
-import type { IEmail } from '../GenericFunctions';
+import type { IEmail } from '../../../../utils/interfaces';
 import {
 	encodeEmail,
 	googleApiRequest,
@@ -32,6 +32,12 @@ import { labelFields, labelOperations } from './LabelDescription';
 import { draftFields, draftOperations } from './DraftDescription';
 
 import { threadFields, threadOperations } from './ThreadDescription';
+
+import {
+	getSendAndWaitProperties,
+	createEmail,
+	sendAndWaitWebhook,
+} from '../../../../utils/sendAndWait.utils';
 
 const versionDescription: INodeTypeDescription = {
 	displayName: 'Gmail',
@@ -64,6 +70,16 @@ const versionDescription: INodeTypeDescription = {
 					authentication: ['oAuth2'],
 				},
 			},
+		},
+	],
+	webhooks: [
+		{
+			name: 'default',
+			httpMethod: 'GET',
+			responseMode: 'onReceived',
+			path: '={{ $nodeId }}',
+			restartWebhook: true,
+			isFullPath: true,
 		},
 	],
 	properties: [
@@ -124,6 +140,16 @@ const versionDescription: INodeTypeDescription = {
 		//-------------------------------
 		...messageOperations,
 		...messageFields,
+		...getSendAndWaitProperties([
+			{
+				displayName: 'To',
+				name: 'sendTo',
+				type: 'string',
+				default: '',
+				required: true,
+				placeholder: 'e.g. info@example.com',
+			},
+		]),
 		//-------------------------------
 		// Thread Operations
 		//-------------------------------
@@ -220,6 +246,8 @@ export class GmailV2 implements INodeType {
 		},
 	};
 
+	webhook = sendAndWaitWebhook;
+
 	async execute(this: IExecuteFunctions): Promise<INodeExecutionData[][]> {
 		const items = this.getInputData();
 		const returnData: INodeExecutionData[] = [];
@@ -227,6 +255,17 @@ export class GmailV2 implements INodeType {
 		const operation = this.getNodeParameter('operation', 0);
 		const nodeVersion = this.getNode().typeVersion;
 		const instanceId = this.getInstanceId();
+
+		if (resource === 'message' && operation === 'sendAndWait') {
+			const email: IEmail = createEmail(this);
+
+			await googleApiRequest.call(this, 'POST', '/gmail/v1/users/me/messages/send', {
+				raw: await encodeEmail(email),
+			});
+
+			await this.putExecutionToWait(new Date(WAIT_TIME_UNLIMITED));
+			return [this.getInputData()];
+		}
 
 		let responseData;
 
