@@ -210,6 +210,16 @@ const canPinData = computed(() => {
 
 // Methods
 
+const waitingNodeMessage = (resume: string) => {
+	if (resume === 'form') {
+		return i18n.baseText('ndv.output.waitNodeWaitingForFormSubmission');
+	}
+	if (resume === 'webhook') {
+		return i18n.baseText('ndv.output.waitNodeWaitingForWebhook');
+	}
+	return i18n.baseText('ndv.output.waitNodeWaiting');
+};
+
 const insertTestData = () => {
 	if (!runDataRef.value) return;
 
@@ -345,6 +355,13 @@ const activatePane = () => {
 						</n8n-text>
 					</span>
 				</template>
+			</n8n-text>
+		</template>
+
+		<template #node-waiting>
+			<n8n-text :bold="true" color="text-dark" size="large">Waiting for input</n8n-text>
+			<n8n-text>
+				{{ waitingNodeMessage(node?.parameters?.resume as string) }}
 			</n8n-text>
 		</template>
 

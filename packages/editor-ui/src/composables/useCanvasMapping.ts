@@ -231,7 +231,8 @@ export function useCanvasMapping({
 	const nodeExecutionStatusById = computed(() =>
 		nodes.value.reduce<Record<string, ExecutionStatus>>((acc, node) => {
 			acc[node.id] =
-				workflowsStore.getWorkflowRunData?.[node.name]?.filter(Boolean)[0].executionStatus ?? 'new';
+				workflowsStore.getWorkflowRunData?.[node.name]?.filter(Boolean)[0]?.executionStatus ??
+				'new';
 			return acc;
 		}, {}),
 	);
@@ -325,7 +326,8 @@ export function useCanvasMapping({
 			if (workflowExecution && lastNodeExecuted && isExecutionSummary(workflowExecution)) {
 				if (
 					node.name === workflowExecution.data?.resultData?.lastNodeExecuted &&
-					workflowExecution.waitTill
+					workflowExecution?.waitTill &&
+					!workflowExecution?.finished
 				) {
 					const waitDate = new Date(workflowExecution.waitTill);
 
