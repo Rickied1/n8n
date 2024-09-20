@@ -20,6 +20,7 @@ import {
 } from './GenericFunctions';
 
 import { entryFields, entryOperations } from './EntryDescription';
+import type { StrapiApiCredential } from '@credentials/StrapiApi.credentials';
 
 export class Strapi implements INodeType {
 	description: INodeTypeDescription = {
@@ -143,14 +144,14 @@ export class Strapi implements INodeType {
 
 		const authenticationMethod = this.getNodeParameter('authentication', 0);
 
-		let apiVersion: string;
+		let apiVersion: StrapiApiCredential['apiVersion'];
 
 		if (authenticationMethod === 'password') {
 			const { jwt } = await getToken.call(this);
-			apiVersion = (await this.getCredentials('strapiApi')).apiVersion as string;
+			apiVersion = (await this.getCredentials('strapiApi')).apiVersion;
 			headers.Authorization = `Bearer ${jwt}`;
 		} else {
-			apiVersion = (await this.getCredentials('strapiTokenApi')).apiVersion as string;
+			apiVersion = (await this.getCredentials('strapiTokenApi')).apiVersion;
 		}
 
 		for (let i = 0; i < length; i++) {

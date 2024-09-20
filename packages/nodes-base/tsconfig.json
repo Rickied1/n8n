@@ -3,14 +3,22 @@
 	"compilerOptions": {
 		"paths": {
 			"@test/*": ["./test/*"],
-			"@utils/*": ["./utils/*"]
+			"@utils/*": ["./utils/*"],
+			"@nodes/*": ["./nodes/*"],
+			"@credentials/*": ["./credentials/*"]
 		},
 		"tsBuildInfoFile": "dist/typecheck.tsbuildinfo",
 		// TODO: remove all options below this line
 		"noImplicitReturns": false,
 		"useUnknownInCatchVariables": false
 	},
-	"include": ["credentials/**/*.ts", "nodes/**/*.ts", "test/**/*.ts", "utils/**/*.ts"],
+	"include": [
+		"types.d.ts",
+		"credentials/**/*.ts",
+		"nodes/**/*.ts",
+		"test/**/*.ts",
+		"utils/**/*.ts"
+	],
 	"references": [
 		{ "path": "../@n8n/imap/tsconfig.build.json" },
 		{ "path": "../workflow/tsconfig.build.json" },
