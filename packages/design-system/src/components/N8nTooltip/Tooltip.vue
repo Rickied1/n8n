@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { ElTooltip } from 'element-plus';
-import type { PropType } from 'vue';
 
 import type { IN8nButton } from 'n8n-design-system/types';
 
