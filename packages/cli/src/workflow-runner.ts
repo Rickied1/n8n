@@ -325,18 +325,30 @@ export class WorkflowRunner {
 			if (workflowTimeout > 0) {
 				const timeout = Math.min(workflowTimeout, config.getEnv('executions.maxTimeout')) * 1000; // as seconds
 				executionTimeout = setTimeout(() => {
-					void this.activeExecutions.stopExecution(executionId);
+					void this.activeExecutions.cancelExecution(executionId);
 				}, timeout);
 			}
 
 			workflowExecution
 				.then((fullRunData) => {
 					clearTimeout(executionTimeout);
+					// NOTE: old code
 					if (workflowExecution.isCanceled) {
 						fullRunData.finished = false;
 					}
 					fullRunData.status = this.activeExecutions.getStatus(executionId);
 					this.activeExecutions.remove(executionId, fullRunData);
+
+					// NOTE: new code
+					// FIXME: Option 1: Don't call `getStatus` if the execution was
+					// already cancelled.
+					//if (workflowExecution.isCanceled) {
+					//	fullRunData.finished = false;
+					//	this.activeExecutions.remove(executionId, fullRunData);
+					//} else {
+					//	// if the execution was canceled it was already removed from the active executions
+					//	fullRunData.status = this.activeExecutions.getStatus(executionId);
+					//}
 				})
 				.catch(
 					async (error) =>

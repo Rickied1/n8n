@@ -146,6 +146,18 @@ export class ActiveExecutions {
 		this.postExecuteCleanup(executionId);
 	}
 
+	cancelExecution(executionId: string): void {
+		const execution = this.activeExecutions[executionId];
+		if (execution === undefined) {
+			// There is no execution running with that id
+			return;
+		}
+
+		console.log(new Date().toISOString(), 'cancel execution');
+		execution.workflowExecution!.cancel();
+		console.log(new Date().toISOString(), 'cancelled execution');
+	}
+
 	/**
 	 * Forces an execution to stop
 	 */
@@ -164,6 +176,12 @@ export class ActiveExecutions {
 			promise.reject(reason);
 		}
 
+		// FIXME: Option 2: Don't clean up the execution. Because we cancelled it
+		// above, which means the time a node finishes the execution will stop and
+		// the WorkflowRunner will remove it from the active executions.
+		// Given that this function is called from many places this is probably not
+		// a good fix.
+		//
 		this.postExecuteCleanup(executionId);
 	}
 
@@ -235,7 +253,7 @@ export class ActiveExecutions {
 				await this.concurrencyControl.removeAll(this.activeExecutions);
 			}
 
-			executionIds.forEach((executionId) => this.stopExecution(executionId));
+			executionIds.forEach((executionId) => this.cancelExecution(executionId));
 		}
 
 		let count = 0;
